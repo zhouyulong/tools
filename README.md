@@ -35,8 +35,14 @@ claudemodel -h
 
 ```json
 {
-  "ANTHROPIC_BASE_URL": "https://your-api-endpoint.com/v1",
-  "model": "kimi-model-name"
+  "env": {
+    "ANTHROPIC_AUTH_TOKEN": "sk-kimi-xxxxx",
+    "ANTHROPIC_BASE_URL": "https://api.kimi.com/coding",
+    "API_TIMEOUT_MS": "3000000",
+    "ANTHROPIC_DEFAULT_OPUS_MODEL": "kimi-2.5"
+  },
+  "model": "opus[1m]",
+  "alwaysThinkingEnabled": false
 }
 ```
 
@@ -49,10 +55,6 @@ git clone <repo-url> ~/personaltools
 echo 'export PATH="$HOME/personaltools/claude:$PATH"' >> ~/.bashrc
 source ~/.bashrc
 ```
-
-## 贡献
-
-欢迎提交 Issue 和 PR 添加新工具或改进现有工具。
 
 ## License
 
