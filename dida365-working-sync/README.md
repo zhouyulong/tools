@@ -97,4 +97,3 @@ python dida365_sync.py /path/to/tasks.md 2026-03-26
 
 ---
 
-*本 skill 为 OpenClaw 项目定制开发*
