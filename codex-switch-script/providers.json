@@ -1,0 +1,16 @@
+﻿{
+    "sharedchat":  {
+                       "name":  "sharedchat",
+                       "base_url":  "<base_url>",
+                       "wire_api":  "responses",
+                       "default_model":  "gpt-5.6-terra",
+                       "api_key":  "<api_key>"
+                   },
+    "kuaipao":  {
+                    "name":  "kuaipao",
+                    "base_url":  "<base_url>",
+                    "wire_api":  "responses",
+                    "default_model":  "gpt-5.6-luna",
+                    "api_key":  "<api_key>"
+                }
+}
