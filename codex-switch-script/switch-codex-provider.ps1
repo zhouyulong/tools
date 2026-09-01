@@ -10,6 +10,8 @@
 #   .\switch-codex-provider.ps1 -Add myrelay -BaseUrl "https://xxx.com/v1" -ApiKey "sk-xxx" -Model "gpt-5.6-sol" -WireApi responses
 #   删除供应商：
 #   .\switch-codex-provider.ps1 -Remove myrelay
+#   按关键词搜索会话（首条消息/标题/工作目录），拿到 session id 后配合 -Se 使用：
+#   .\switch-codex-provider.ps1 -Find "关键词"
 #   把指定会话（旧对话）钉死的供应商改为当前供应商，使其恢复/继续时走新供应商：
 #   .\switch-codex-provider.ps1 -Session <rollout文件路径 或 session id 或 文件名关键字> [-Provider id] [-Model 模型名]
 #
@@ -34,10 +36,15 @@ param(
     [Alias('R')]
     [string]$Remove,
     [Alias('Se')]
-    [string]$Session
+    [string]$Session,
+    [Alias('F')]
+    [string]$Find
 )
 
 $ErrorActionPreference = "Stop"
+# 统一 UTF-8：避免中文输出乱码（python 子进程 + 控制台双端都要设）
+$env:PYTHONIOENCODING = "utf-8"
+try { [Console]::OutputEncoding = [System.Text.Encoding]::UTF8 } catch {}
 $CodexDir    = "$env:USERPROFILE\.codex"
 $CodexConfig = "$CodexDir\config.toml"
 $ProvFile    = "$CodexDir\providers.json"
@@ -248,6 +255,52 @@ if ($Provider) {
     return
 }
 
+# ---------- 会话搜索：按关键词（首条消息/标题/预览/工作目录）在 threads 注册表中找 session id ----------
+if ($Find) {
+    $db = "$CodexDir\state_5.sqlite"
+    if (-not (Test-Path $db)) { Write-Err2 "未找到 $db"; return }
+    $tmpPy = Join-Path $env:TEMP "codex-find-threads.py"
+    @'
+import sqlite3, sys
+kw = "%" + sys.argv[1] + "%"
+con = sqlite3.connect(sys.argv[2], timeout=10)
+rows = con.execute("""
+    SELECT id, model_provider, model, archived, cwd,
+           substr(COALESCE(first_user_message,''),1,60), substr(COALESCE(title,''),1,40),
+           datetime(recency_at, 'unixepoch', 'localtime')
+    FROM threads
+    WHERE first_user_message LIKE ? OR title LIKE ? OR preview LIKE ? OR cwd LIKE ?
+    ORDER BY recency_at DESC LIMIT 20
+""", (kw, kw, kw, kw)).fetchall()
+for r in rows:
+    print("ID:", r[0])
+    print("   provider:", r[1], "| model:", r[2], "| archived:", r[3], "| 最近活跃:", r[7])
+    print("   cwd:", r[4])
+    print("   首条消息:", r[5].replace(chr(10), " "))
+con.close()
+'@ | Set-Content -Path $tmpPy -Encoding UTF8
+    $eap = $ErrorActionPreference
+    $ErrorActionPreference = "Continue"
+    $found = $false
+    try {
+        foreach ($cand in @(@('python', @()), @('py', @('-3')), @('python3', @()))) {
+            if (-not (Get-Command $cand[0] -ErrorAction SilentlyContinue)) { continue }
+            $r = (& $cand[0] @($cand[1]) $tmpPy $Find $db 2>&1 | Out-String)
+            if ($LASTEXITCODE -eq 0) {
+                $found = $true
+                if ($r.Trim()) { Write-Host $r.Trim() }
+                else { Write-Warn2 "没有匹配关键词的会话：$Find" }
+                break
+            }
+        }
+    } finally {
+        $ErrorActionPreference = $eap
+        Remove-Item $tmpPy -ErrorAction SilentlyContinue
+    }
+    if (-not $found) { Write-Err2 "查询失败（python 不可用？），输出：$r" }
+    return
+}
+
 # ---------- 会话供应商改写：把 rollout 会话文件里钉死的 model_provider 改为目标供应商 ----------
 if ($Session) {
     # 目标供应商：-Provider 指定，否则取 config.toml 当前值
@@ -261,12 +314,14 @@ if ($Session) {
     if (-not $targetId) { Write-Err2 "无法确定目标供应商"; return }
 
     # 解析会话文件：直接路径 / session id / 文件名关键字
+    # 注意：必须用 @() 强制数组化——管道只有1个结果时 PS 会退化成标量字符串，
+    #       导致 $files[0] 取到字符串首字符 "C" 而不是完整路径
     $files = @()
     if (Test-Path $Session) {
         $files += (Resolve-Path $Session).Path
     } else {
-        $files = Get-ChildItem "$CodexDir\sessions", "$CodexDir\archived_sessions" -Recurse -Filter "*.jsonl" -ErrorAction SilentlyContinue |
-            Where-Object { $_.Name -like "*$Session*" } | Select-Object -ExpandProperty FullName
+        $files = @(Get-ChildItem "$CodexDir\sessions", "$CodexDir\archived_sessions" -Recurse -Filter "*.jsonl" -ErrorAction SilentlyContinue |
+            Where-Object { $_.Name -like "*$Session*" } | Select-Object -ExpandProperty FullName)
     }
     if (-not $files) { Write-Err2 "未找到匹配的会话文件：$Session"; return }
     if ($files.Count -gt 1) {
@@ -299,16 +354,83 @@ if ($Session) {
     }
 
     if ($oldIds.Count -eq 0 -or ($oldIds.Count -eq 1 -and $oldIds.Contains($targetId))) {
-        Write-Warn2 "会话中没有需要改写的供应商记录（或已是指定供应商），文件未修改"
+        Write-Warn2 "会话 rollout 中没有需要改写的供应商记录（或已是指定供应商）"
         Remove-Item "$path.bak-switch-$stamp" -ErrorAction SilentlyContinue
-        return
+    } else {
+        [System.IO.File]::WriteAllLines($path, [string[]]$out.ToArray(), [System.Text.UTF8Encoding]::new($false))
+        Write-Ok "会话 rollout 已改写：$($oldIds -join ',') -> $targetId$(if ($Model) { "，模型 -> $Model" })"
+        Write-Info "文件：$path"
+        Write-Info "已备份：$path.bak-switch-$stamp"
     }
 
-    [System.IO.File]::WriteAllLines($path, [string[]]$out.ToArray(), [System.Text.UTF8Encoding]::new($false))
-    Write-Ok "会话供应商已改写：$($oldIds -join ',') -> $targetId$(if ($Model) { "，模型 -> $Model" })"
-    Write-Info "文件：$path"
-    Write-Info "已备份：$path.bak-switch-$stamp"
-    Write-Warn2 "改写前请彻底退出 ChatGPT 桌面端（托盘退出），重开后恢复该会话即走新供应商"
+    # 同步桌面端会话注册表 state_5.sqlite 的 threads 表：
+    # 桌面端恢复会话时读的是这里的 model_provider / model 列，不是 rollout 文件
+    # 双条件匹配：桌面端运行中可能改写 rollout_path 的表示，按文件名中提取的线程 id 兜底
+    $db = "$CodexDir\state_5.sqlite"
+    if (Test-Path $db) {
+        $leaf = Split-Path $path -Leaf
+        $threadId = ""
+        if ($leaf -match '([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})\.jsonl$') {
+            $threadId = $Matches[1]
+        }
+        $pyCode = @'
+import sqlite3, sys
+db, path, tid, provider, model = sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4], sys.argv[5]
+if model == "-":
+    model = ""
+con = sqlite3.connect(db, timeout=10)
+try:
+    cur = con.cursor()
+    sets, args = ["model_provider = ?"], [provider]
+    if model:
+        sets.append("model = ?")
+        args.append(model)
+    args += [tid, path]
+    cur.execute("UPDATE threads SET " + ", ".join(sets) + " WHERE id = ? OR rollout_path = ?", args)
+    con.commit()
+    print("updated=" + str(cur.rowcount))
+finally:
+    con.close()
+'@
+        # 解析可用的 python：依次尝试 python / py -3 / python3
+        # （Windows 上 python 可能是微软商店假别名：存在但只往 stderr 打印提示，需换下一个候选）
+        # python 代码写入临时 .py 文件执行：-c 传多行代码在 PS5.1 下有引号/换行转义风险
+        $tmpPy = Join-Path $env:TEMP "codex-sync-threads.py"
+        Set-Content -Path $tmpPy -Value $pyCode -Encoding ASCII
+        $eap = $ErrorActionPreference
+        $ErrorActionPreference = "Continue"
+        $syncOk = $false; $lastOut = ""; $lastCode = $null
+        try {
+            foreach ($cand in @(@('python', @()), @('py', @('-3')), @('python3', @()))) {
+                if (-not (Get-Command $cand[0] -ErrorAction SilentlyContinue)) { continue }
+                # PS5.1 会丢弃空字符串参数导致 sys.argv 越界，空 Model 用 "-" 占位
+                $modelArg = if ($Model) { $Model } else { "-" }
+                $allArgs = @($cand[1]) + @($tmpPy, $db, $path, $threadId, $targetId, $modelArg)
+                $r = (& $cand[0] @allArgs 2>&1 | Out-String)
+                $code = $LASTEXITCODE
+                if ($code -eq 0 -and "$r" -match 'updated=(\d+)') {
+                    $syncOk = $true
+                    if ($Matches[1] -eq '0') { Write-Warn2 "threads 表中未找到该会话记录（可能从未在桌面端打开过）" }
+                    else { Write-Ok "桌面端会话注册表已同步：threads.model_provider -> $targetId（$($Matches[1]) 条）" }
+                    break
+                }
+                $lastOut = $r; $lastCode = $code
+            }
+        } finally {
+            $ErrorActionPreference = $eap
+            Remove-Item $tmpPy -ErrorAction SilentlyContinue
+        }
+        if (-not $syncOk) {
+            if (-not $lastOut -and $lastCode -eq $null) {
+                Write-Err2 "未找到可用的 python，无法同步 sqlite 会话注册表（rollout 已改写；可安装 python 后重跑本命令）"
+            } else {
+                Write-Err2 "sqlite 同步失败（python 退出码 $lastCode），完整输出如下："
+                Write-Host ($lastOut.Trim())
+                Write-Info "排查提示：若报 database is locked，请托盘彻底退出 ChatGPT 后重试"
+            }
+        }
+    }
+    Write-Warn2 "改写后请彻底退出 ChatGPT 桌面端（托盘退出）再重开，恢复该会话即走新供应商"
     return
 }
 
@@ -321,5 +443,6 @@ Write-Host "  -Provider <id> / -P       切换到指定供应商（可加 -Model
 Write-Host "  -Add <id> / -A            添加供应商（需 -BaseUrl -ApiKey，可选 -Model -WireApi）"
 Write-Host "  -Remove <id> / -R         删除供应商"
 Write-Host "  -Session <id|路径> / -Se  改写指定会话钉死的供应商为当前供应商（可选 -Model 同步改模型）"
+Write-Host "  -Find <关键词> / -F       按关键词搜索会话，拿到 session id 后配合 -Se 使用"
 Write-Host ""
 Write-Host "供应商清单文件：$ProvFile（可直接手动编辑）"
