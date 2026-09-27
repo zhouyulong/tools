@@ -20,4 +20,8 @@ Thumbs.db
 *.temp
 
 #SKILL FILES
-get-news/reports/
+skills/get-news/reports/
+**/__pycache__/
+
+#env files
+codex-switch-script/providers-real.json

@@ -1,16 +1,23 @@
 ﻿{
     "sharedchat":  {
                        "name":  "sharedchat",
-                       "base_url":  "<base_url>",
+                       "base_url":  "\u003cbase_url\u003e",
                        "wire_api":  "responses",
                        "default_model":  "gpt-5.6-terra",
-                       "api_key":  "<api_key>"
+                       "api_key":  "\u003capi_key\u003e"
                    },
     "kuaipao":  {
                     "name":  "kuaipao",
-                    "base_url":  "<base_url>",
+                    "base_url":  "\u003cbase_url\u003e",
                     "wire_api":  "responses",
                     "default_model":  "gpt-5.6-luna",
-                    "api_key":  "<api_key>"
-                }
+                    "api_key":  "\u003capi_key\u003e"
+                },
+    "official":  {
+                     "name":  "OpenAI官方",
+                     "base_url":  "",
+                     "wire_api":  "responses",
+                     "default_model":  "gpt-5.6-terra",
+                     "api_key":  ""
+                 }
 }
