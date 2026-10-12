@@ -1,0 +1,18 @@
+{
+  "package_format": "directory-skill-bundle",
+  "package_version": 1,
+  "skill_directory": "ccf-prioritized-literature-search",
+  "entrypoint": "ccf-prioritized-literature-search/SKILL.md",
+  "portable_components": [
+    "skill instructions",
+    "CCF 2026 A/B venue data",
+    "EasyScholar-verified CCF B SCI Q1 cache",
+    "Python standard-library query and refresh scripts"
+  ],
+  "requirements": {
+    "python": ">=3.9",
+    "environment_variable": "EASY_SCHOLAR_KEY",
+    "network": "Required only for live EasyScholar queries or cache refresh"
+  },
+  "secrets_included": false
+}

@@ -1,0 +1,7 @@
+interface:
+  display_name: "CCF 优先论文检索"
+  short_description: "优先推荐近一年 CCF A 与 SCI 一区论文"
+  default_prompt: "Use $ccf-prioritized-literature-search to find recent high-quality papers on my topic."
+
+policy:
+  allow_implicit_invocation: true

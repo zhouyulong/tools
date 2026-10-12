@@ -1,0 +1,406 @@
+{
+  "schema_version": 1,
+  "catalog": "第七版中国计算机学会推荐国际学术会议和期刊目录（正式版）",
+  "catalog_year": 2026,
+  "purpose": "Required supplementary CCF B conference pool for high-quality recent-paper searches in the listed areas.",
+  "areas": [
+    "人工智能",
+    "人机交互与普适计算",
+    "交叉/综合/新兴"
+  ],
+  "conference_count": 28,
+  "conferences": [
+    {
+      "kind": "conference",
+      "ccf_rank": "B",
+      "short_name": "COLT",
+      "full_name": "AnnualConferenceonComputationalLearningTheory",
+      "publisher": "Springer",
+      "url": "http://dblp.uni-trier.de/db/conf/colt/",
+      "areas": [
+        "人工智能"
+      ],
+      "source_pages": [
+        58
+      ]
+    },
+    {
+      "kind": "conference",
+      "ccf_rank": "B",
+      "short_name": "EMNLP",
+      "full_name": "ConferenceonEmpirical MethodsinNaturalLanguage Processing",
+      "publisher": "ACL",
+      "url": "http://dblp.uni-trier.de/db/conf/emnlp/",
+      "areas": [
+        "人工智能"
+      ],
+      "source_pages": [
+        58
+      ]
+    },
+    {
+      "kind": "conference",
+      "ccf_rank": "B",
+      "short_name": "ECAI",
+      "full_name": "EuropeanConferenceonArtificialIntelligence",
+      "publisher": "IOSPress",
+      "url": "http://dblp.uni-trier.de/db/conf/ecai/",
+      "areas": [
+        "人工智能"
+      ],
+      "source_pages": [
+        58
+      ]
+    },
+    {
+      "kind": "conference",
+      "ccf_rank": "B",
+      "short_name": "ECCV",
+      "full_name": "EuropeanConferenceonComputerVision",
+      "publisher": "Springer",
+      "url": "http://dblp.uni-trier.de/db/conf/eccv/",
+      "areas": [
+        "人工智能"
+      ],
+      "source_pages": [
+        58
+      ]
+    },
+    {
+      "kind": "conference",
+      "ccf_rank": "B",
+      "short_name": "ICRA",
+      "full_name": "IEEEInternationalConferenceonRoboticsand Automation",
+      "publisher": "IEEE",
+      "url": "http://dblp.uni-trier.de/db/conf/icra/",
+      "areas": [
+        "人工智能"
+      ],
+      "source_pages": [
+        58
+      ]
+    },
+    {
+      "kind": "conference",
+      "ccf_rank": "B",
+      "short_name": "ICAPS",
+      "full_name": "InternationalConferenceonAutomatedPlanningand Scheduling",
+      "publisher": "AAAI",
+      "url": "https://dblp.uni- trier.de/db/conf/icaps/index.html",
+      "areas": [
+        "人工智能"
+      ],
+      "source_pages": [
+        58
+      ]
+    },
+    {
+      "kind": "conference",
+      "ccf_rank": "B",
+      "short_name": "ICCBR",
+      "full_name": "InternationalConferenceonCase-BasedReasoning",
+      "publisher": "Springer",
+      "url": "http://dblp.uni-trier.de/db/conf/iccbr/",
+      "areas": [
+        "人工智能"
+      ],
+      "source_pages": [
+        58
+      ]
+    },
+    {
+      "kind": "conference",
+      "ccf_rank": "B",
+      "short_name": "COLING",
+      "full_name": "InternationalConferenceonComputationalLinguistics",
+      "publisher": "InternationalCommittee onComputational Linguistics",
+      "url": "http://dblp.uni-trier.de/db/conf/coling/",
+      "areas": [
+        "人工智能"
+      ],
+      "source_pages": [
+        58
+      ]
+    },
+    {
+      "kind": "conference",
+      "ccf_rank": "B",
+      "short_name": "KR",
+      "full_name": "InternationalConferenceonPrinciplesofKnowledge RepresentationandReasoning",
+      "publisher": "MorganKaufmann",
+      "url": "http://dblp.uni-trier.de/db/conf/kr/",
+      "areas": [
+        "人工智能"
+      ],
+      "source_pages": [
+        58
+      ]
+    },
+    {
+      "kind": "conference",
+      "ccf_rank": "B",
+      "short_name": "UAI",
+      "full_name": "ConferenceonUncertaintyinArtificialIntelligence",
+      "publisher": "AUAI",
+      "url": "http://dblp.uni-trier.de/db/conf/uai/",
+      "areas": [
+        "人工智能"
+      ],
+      "source_pages": [
+        58
+      ]
+    },
+    {
+      "kind": "conference",
+      "ccf_rank": "B",
+      "short_name": "AAMAS",
+      "full_name": "InternationalJointConferenceonAutonomousAgentsand Multi-agentSystems",
+      "publisher": "Springer",
+      "url": "https://dblp.uni- trier.de/db/conf/ifaamas/index.html",
+      "areas": [
+        "人工智能"
+      ],
+      "source_pages": [
+        58
+      ]
+    },
+    {
+      "kind": "conference",
+      "ccf_rank": "B",
+      "short_name": "PPSN",
+      "full_name": "ParallelProblemSolvingfrom Nature",
+      "publisher": "Springer",
+      "url": "http://dblp.uni-trier.de/db/conf/ppsn/",
+      "areas": [
+        "人工智能"
+      ],
+      "source_pages": [
+        58
+      ]
+    },
+    {
+      "kind": "conference",
+      "ccf_rank": "B",
+      "short_name": "NAACL",
+      "full_name": "NorthAmericanChapteroftheAssociationfor ComputationalLinguistics",
+      "publisher": "Associationfor ComputationalLinguistics",
+      "url": "http://dblp.uni-trier.de/db/conf/naacl/",
+      "areas": [
+        "人工智能"
+      ],
+      "source_pages": [
+        58
+      ]
+    },
+    {
+      "kind": "conference",
+      "ccf_rank": "B",
+      "short_name": "IJCAI",
+      "full_name": "InternationalJointConferenceonArtificialIntelligence",
+      "publisher": "MorganKaufmann",
+      "url": "http://dblp.uni-trier.de/db/conf/ijcai/",
+      "areas": [
+        "人工智能"
+      ],
+      "source_pages": [
+        58
+      ]
+    },
+    {
+      "kind": "conference",
+      "ccf_rank": "B",
+      "short_name": "GROUP",
+      "full_name": "ACMInternationalConferenceonSupportingGroup Work",
+      "publisher": "ACM",
+      "url": "http://dblp.uni-trier.de/db/conf/group/",
+      "areas": [
+        "人机交互与普适计算"
+      ],
+      "source_pages": [
+        65
+      ]
+    },
+    {
+      "kind": "conference",
+      "ccf_rank": "B",
+      "short_name": "IUI",
+      "full_name": "ACMInternationalConferenceonIntelligentUser Interfaces",
+      "publisher": "ACM",
+      "url": "http://dblp.uni-trier.de/db/conf/iui/",
+      "areas": [
+        "人机交互与普适计算"
+      ],
+      "source_pages": [
+        65
+      ]
+    },
+    {
+      "kind": "conference",
+      "ccf_rank": "B",
+      "short_name": "ISS",
+      "full_name": "ACMInternationalConferenceonInteractiveSurfacesand Spaces",
+      "publisher": "ACM",
+      "url": "http://dblp.uni-trier.de/db/conf/tabletop/",
+      "areas": [
+        "人机交互与普适计算"
+      ],
+      "source_pages": [
+        65
+      ]
+    },
+    {
+      "kind": "conference",
+      "ccf_rank": "B",
+      "short_name": "ECSCW",
+      "full_name": "EuropeanConferenceonComputerSupportedCooperative Work",
+      "publisher": "Springer",
+      "url": "http://dblp.uni-trier.de/db/conf/ecscw/",
+      "areas": [
+        "人机交互与普适计算"
+      ],
+      "source_pages": [
+        65
+      ]
+    },
+    {
+      "kind": "conference",
+      "ccf_rank": "B",
+      "short_name": "PERCOM",
+      "full_name": "IEEEInternationalConferenceonPervasiveComputing andCommunications",
+      "publisher": "IEEE",
+      "url": "http://dblp.uni-trier.de/db/conf/percom/",
+      "areas": [
+        "人机交互与普适计算"
+      ],
+      "source_pages": [
+        65
+      ]
+    },
+    {
+      "kind": "conference",
+      "ccf_rank": "B",
+      "short_name": "MobileHCI",
+      "full_name": "ACMInternationalConferenceonMobileHuman- ComputerInteraction",
+      "publisher": "ACM",
+      "url": "http://dblp.uni-trier.de/db/conf/mhci/",
+      "areas": [
+        "人机交互与普适计算"
+      ],
+      "source_pages": [
+        65
+      ]
+    },
+    {
+      "kind": "conference",
+      "ccf_rank": "B",
+      "short_name": "ICWSM",
+      "full_name": "TheInternationalAAAIConferenceonWebandSocial Media",
+      "publisher": "AAAI",
+      "url": "https://dblp.org/db/conf/icwsm/index.html",
+      "areas": [
+        "人机交互与普适计算"
+      ],
+      "source_pages": [
+        65
+      ]
+    },
+    {
+      "kind": "conference",
+      "ccf_rank": "B",
+      "short_name": "CogSci",
+      "full_name": "AnnualMeetingoftheCognitiveScienceSociety",
+      "publisher": "Psychology Press",
+      "url": "https://dblp.uni-trier.de/db/conf/cogsci/",
+      "areas": [
+        "交叉/综合/新兴"
+      ],
+      "source_pages": [
+        71
+      ]
+    },
+    {
+      "kind": "conference",
+      "ccf_rank": "B",
+      "short_name": "BIBM",
+      "full_name": "IEEEInternationalConferenceonBioinformaticsand Biomedicine",
+      "publisher": "IEEE",
+      "url": "http://dblp.uni-trier.de/db/conf/bibm/",
+      "areas": [
+        "交叉/综合/新兴"
+      ],
+      "source_pages": [
+        71
+      ]
+    },
+    {
+      "kind": "conference",
+      "ccf_rank": "B",
+      "short_name": "EMSOFT",
+      "full_name": "InternationalConferenceonEmbeddedSoftware",
+      "publisher": "IEEE/ACM /IFIP",
+      "url": "http://dblp.uni-trier.de/db/conf/emsoft/",
+      "areas": [
+        "交叉/综合/新兴"
+      ],
+      "source_pages": [
+        71
+      ]
+    },
+    {
+      "kind": "conference",
+      "ccf_rank": "B",
+      "short_name": "ISMB",
+      "full_name": "InternationalconferenceonIntelligentSystemsfor MolecularBiology",
+      "publisher": "Oxford Journals",
+      "url": "https://dblp.org/db/conf/ismb/index.html",
+      "areas": [
+        "交叉/综合/新兴"
+      ],
+      "source_pages": [
+        71
+      ]
+    },
+    {
+      "kind": "conference",
+      "ccf_rank": "B",
+      "short_name": "RECOMB",
+      "full_name": "AnnualInternationalConferenceonResearchin ComputationalMolecularBiology",
+      "publisher": "Springer",
+      "url": "http://dblp.uni-trier.de/db/conf/recomb/",
+      "areas": [
+        "交叉/综合/新兴"
+      ],
+      "source_pages": [
+        71
+      ]
+    },
+    {
+      "kind": "conference",
+      "ccf_rank": "B",
+      "short_name": "MICCAI",
+      "full_name": "InternationalConferenceonMedicalImageComputing andComputer-AssistedIntervention",
+      "publisher": "Springer",
+      "url": "https://dblp.org/db/conf/miccai/index.html",
+      "areas": [
+        "交叉/综合/新兴"
+      ],
+      "source_pages": [
+        71
+      ]
+    },
+    {
+      "kind": "conference",
+      "ccf_rank": "B",
+      "short_name": "WINE",
+      "full_name": "ConferenceonWebandInternet Economics",
+      "publisher": "Springer",
+      "url": "https://dblp.org/db/conf/wine/index.html",
+      "areas": [
+        "交叉/综合/新兴"
+      ],
+      "source_pages": [
+        71
+      ]
+    }
+  ]
+}

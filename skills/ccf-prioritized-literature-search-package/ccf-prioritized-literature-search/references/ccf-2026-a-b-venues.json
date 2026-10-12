@@ -1,0 +1,4745 @@
+{
+  "schema_version": 1,
+  "catalog": "第七版中国计算机学会推荐国际学术会议和期刊目录（正式版）",
+  "catalog_year": 2026,
+  "source_pdf_pages": 72,
+  "extraction_note": "Entries are extracted from the supplied official PDF. The skill matches both abbreviation and full title; source pages support later review.",
+  "venues": [
+    {
+      "kind": "journal",
+      "ccf_rank": "A",
+      "short_name": "TOCS",
+      "full_name": "ACMTransactionsonComputerSystems",
+      "publisher": "ACM",
+      "url": "http://dblp.uni-trier.de/db/journals/tocs/",
+      "areas": [
+        "计算机体系结构/并行与分布计算/存储系统"
+      ],
+      "source_pages": [
+        2
+      ]
+    },
+    {
+      "kind": "journal",
+      "ccf_rank": "A",
+      "short_name": "TOS",
+      "full_name": "ACMTransactionsonStorage",
+      "publisher": "ACM",
+      "url": "http://dblp.uni-trier.de/db/journals/tos/",
+      "areas": [
+        "计算机体系结构/并行与分布计算/存储系统"
+      ],
+      "source_pages": [
+        2
+      ]
+    },
+    {
+      "kind": "journal",
+      "ccf_rank": "A",
+      "short_name": "TCAD",
+      "full_name": "IEEETransactionsonComputer-AidedDesignofIntegrated CircuitsandSystems",
+      "publisher": "IEEE",
+      "url": "http://dblp.uni-trier.de/db/journals/tcad/",
+      "areas": [
+        "计算机体系结构/并行与分布计算/存储系统"
+      ],
+      "source_pages": [
+        2
+      ]
+    },
+    {
+      "kind": "journal",
+      "ccf_rank": "A",
+      "short_name": "TC",
+      "full_name": "IEEETransactionsonComputers",
+      "publisher": "IEEE",
+      "url": "http://dblp.uni-trier.de/db/journals/tc/index.html",
+      "areas": [
+        "计算机体系结构/并行与分布计算/存储系统"
+      ],
+      "source_pages": [
+        2
+      ]
+    },
+    {
+      "kind": "journal",
+      "ccf_rank": "A",
+      "short_name": "TPDS",
+      "full_name": "IEEETransactionsonParallelandDistributedSystems",
+      "publisher": "IEEE",
+      "url": "http://dblp.uni-trier.de/db/journals/tpds/",
+      "areas": [
+        "计算机体系结构/并行与分布计算/存储系统"
+      ],
+      "source_pages": [
+        2
+      ]
+    },
+    {
+      "kind": "journal",
+      "ccf_rank": "A",
+      "short_name": "TACO",
+      "full_name": "ACMTransactionsonArchitectureandCodeOptimization",
+      "publisher": "ACM",
+      "url": "http://dblp.uni-trier.de/db/journals/taco/",
+      "areas": [
+        "计算机体系结构/并行与分布计算/存储系统"
+      ],
+      "source_pages": [
+        2
+      ]
+    },
+    {
+      "kind": "journal",
+      "ccf_rank": "B",
+      "short_name": "TAAS",
+      "full_name": "ACMTransactionsonAutonomousandAdaptiveSystems",
+      "publisher": "ACM",
+      "url": "http://dblp.uni-trier.de/db/journals/taas/",
+      "areas": [
+        "计算机体系结构/并行与分布计算/存储系统"
+      ],
+      "source_pages": [
+        3
+      ]
+    },
+    {
+      "kind": "journal",
+      "ccf_rank": "B",
+      "short_name": "TODAES",
+      "full_name": "ACMTransactionsonDesignAutomationofElectronicSystems",
+      "publisher": "ACM",
+      "url": "http://dblp.uni-trier.de/db/journals/todaes/",
+      "areas": [
+        "计算机体系结构/并行与分布计算/存储系统"
+      ],
+      "source_pages": [
+        3
+      ]
+    },
+    {
+      "kind": "journal",
+      "ccf_rank": "B",
+      "short_name": "TECS",
+      "full_name": "ACMTransactionsonEmbeddedComputingSystems",
+      "publisher": "ACM",
+      "url": "http://dblp.uni-trier.de/db/journals/tecs/",
+      "areas": [
+        "计算机体系结构/并行与分布计算/存储系统"
+      ],
+      "source_pages": [
+        3
+      ]
+    },
+    {
+      "kind": "journal",
+      "ccf_rank": "B",
+      "short_name": "TRETS",
+      "full_name": "ACMTransactionsonReconfigurableTechnologyandSystems",
+      "publisher": "ACM",
+      "url": "http://dblp.uni-trier.de/db/journals/trets/",
+      "areas": [
+        "计算机体系结构/并行与分布计算/存储系统"
+      ],
+      "source_pages": [
+        3
+      ]
+    },
+    {
+      "kind": "journal",
+      "ccf_rank": "B",
+      "short_name": "TVLSI",
+      "full_name": "IEEETransactionsonVeryLargeScaleIntegration(VLSI) Systems",
+      "publisher": "IEEE",
+      "url": "http://dblp.uni-trier.de/db/journals/tvlsi/",
+      "areas": [
+        "计算机体系结构/并行与分布计算/存储系统"
+      ],
+      "source_pages": [
+        3
+      ]
+    },
+    {
+      "kind": "journal",
+      "ccf_rank": "B",
+      "short_name": "JPDC",
+      "full_name": "JournalofParallelandDistributedComputing",
+      "publisher": "Elsevier",
+      "url": "http://dblp.uni-trier.de/db/journals/jpdc/",
+      "areas": [
+        "计算机体系结构/并行与分布计算/存储系统"
+      ],
+      "source_pages": [
+        3
+      ]
+    },
+    {
+      "kind": "journal",
+      "ccf_rank": "B",
+      "short_name": "JSA",
+      "full_name": "JournalofSystemsArchitecture:EmbeddedSoftwareDesign",
+      "publisher": "Elsevier",
+      "url": "http://dblp.uni-trier.de/db/journals/jsa/",
+      "areas": [
+        "计算机体系结构/并行与分布计算/存储系统"
+      ],
+      "source_pages": [
+        3
+      ]
+    },
+    {
+      "kind": "journal",
+      "ccf_rank": "B",
+      "short_name": "",
+      "full_name": "ParallelComputing",
+      "publisher": "Elsevier",
+      "url": "https://dblp.org/db/journals/pc/index.html",
+      "areas": [
+        "计算机体系结构/并行与分布计算/存储系统"
+      ],
+      "source_pages": [
+        3
+      ]
+    },
+    {
+      "kind": "journal",
+      "ccf_rank": "B",
+      "short_name": "",
+      "full_name": "PerformanceEvaluation:AnInternationalJournal",
+      "publisher": "Elsevier",
+      "url": "https://dblp.org/db/journals/pe/index.html",
+      "areas": [
+        "计算机体系结构/并行与分布计算/存储系统"
+      ],
+      "source_pages": [
+        3
+      ]
+    },
+    {
+      "kind": "journal",
+      "ccf_rank": "B",
+      "short_name": "TCC",
+      "full_name": "IEEETransactionsonCloudComputing",
+      "publisher": "IEEE",
+      "url": "https://dblp.uni-trier.de/db/journals/tcc/",
+      "areas": [
+        "计算机体系结构/并行与分布计算/存储系统"
+      ],
+      "source_pages": [
+        3
+      ]
+    },
+    {
+      "kind": "conference",
+      "ccf_rank": "A",
+      "short_name": "PPoPP",
+      "full_name": "ACMSIGPLANSymposiumonPrinciples&Practiceof ParallelProgramming",
+      "publisher": "ACM",
+      "url": "http://dblp.uni-trier.de/db/conf/ppopp/",
+      "areas": [
+        "计算机体系结构/并行与分布计算/存储系统"
+      ],
+      "source_pages": [
+        5
+      ]
+    },
+    {
+      "kind": "conference",
+      "ccf_rank": "A",
+      "short_name": "FAST",
+      "full_name": "USENIXConferenceonFileandStorageTechnologies",
+      "publisher": "USENIX",
+      "url": "http://dblp.uni-trier.de/db/conf/fast/",
+      "areas": [
+        "计算机体系结构/并行与分布计算/存储系统"
+      ],
+      "source_pages": [
+        5
+      ]
+    },
+    {
+      "kind": "conference",
+      "ccf_rank": "A",
+      "short_name": "DAC",
+      "full_name": "DesignAutomationConference",
+      "publisher": "ACM",
+      "url": "https://dblp.uni-trier.de/db/conf/dac/",
+      "areas": [
+        "计算机体系结构/并行与分布计算/存储系统"
+      ],
+      "source_pages": [
+        5
+      ]
+    },
+    {
+      "kind": "conference",
+      "ccf_rank": "A",
+      "short_name": "HPCA",
+      "full_name": "IEEEInternationalSymposiumonHighPerformance ComputerArchitecture",
+      "publisher": "IEEE",
+      "url": "http://dblp.uni-trier.de/db/conf/hpca/",
+      "areas": [
+        "计算机体系结构/并行与分布计算/存储系统"
+      ],
+      "source_pages": [
+        5
+      ]
+    },
+    {
+      "kind": "conference",
+      "ccf_rank": "A",
+      "short_name": "MICRO",
+      "full_name": "IEEE/ACMInternationalSymposiumonMicroarchitecture",
+      "publisher": "IEEE/ ACM",
+      "url": "https://dblp.uni-trier.de/db/conf/micro/index.html",
+      "areas": [
+        "计算机体系结构/并行与分布计算/存储系统"
+      ],
+      "source_pages": [
+        5
+      ]
+    },
+    {
+      "kind": "conference",
+      "ccf_rank": "A",
+      "short_name": "SC",
+      "full_name": "InternationalConferenceforHighPerformance Computing,Networking,Storage,andAnalysis",
+      "publisher": "IEEE",
+      "url": "http://dblp.uni-trier.de/db/conf/sc/",
+      "areas": [
+        "计算机体系结构/并行与分布计算/存储系统"
+      ],
+      "source_pages": [
+        5
+      ]
+    },
+    {
+      "kind": "conference",
+      "ccf_rank": "A",
+      "short_name": "ASPLOS",
+      "full_name": "InternationalConferenceonArchitecturalSupportfor ProgrammingLanguagesandOperatingSystems",
+      "publisher": "ACM",
+      "url": "http://dblp.uni-trier.de/db/conf/asplos/",
+      "areas": [
+        "计算机体系结构/并行与分布计算/存储系统"
+      ],
+      "source_pages": [
+        5
+      ]
+    },
+    {
+      "kind": "conference",
+      "ccf_rank": "A",
+      "short_name": "ISCA",
+      "full_name": "InternationalSymposiumonComputerArchitecture",
+      "publisher": "IEEE/ ACM",
+      "url": "http://dblp.uni-trier.de/db/conf/isca/",
+      "areas": [
+        "计算机体系结构/并行与分布计算/存储系统"
+      ],
+      "source_pages": [
+        5
+      ]
+    },
+    {
+      "kind": "conference",
+      "ccf_rank": "A",
+      "short_name": "ACMSIGOPSATC （原USENIXATC）",
+      "full_name": "ACMSIGOPSAnnualTechnicalConference",
+      "publisher": "ACM",
+      "url": "http://dblp.uni-trier.de/db/conf/usenix/index.html",
+      "areas": [
+        "计算机体系结构/并行与分布计算/存储系统"
+      ],
+      "source_pages": [
+        5
+      ]
+    },
+    {
+      "kind": "conference",
+      "ccf_rank": "A",
+      "short_name": "EuroSys",
+      "full_name": "EuropeanConferenceonComputerSystems",
+      "publisher": "ACM",
+      "url": "http://dblp.uni-trier.de/db/conf/eurosys/",
+      "areas": [
+        "计算机体系结构/并行与分布计算/存储系统"
+      ],
+      "source_pages": [
+        5
+      ]
+    },
+    {
+      "kind": "conference",
+      "ccf_rank": "A",
+      "short_name": "HPDC",
+      "full_name": "TheInternationalACMSymposiumonHigh-Performance ParallelandDistributedComputing",
+      "publisher": "IEEE",
+      "url": "http://dblp.uni-trier.de/db/conf/hpdc/",
+      "areas": [
+        "计算机体系结构/并行与分布计算/存储系统"
+      ],
+      "source_pages": [
+        5
+      ]
+    },
+    {
+      "kind": "conference",
+      "ccf_rank": "B",
+      "short_name": "SoCC",
+      "full_name": "ACMSymposiumonCloudComputing",
+      "publisher": "ACM",
+      "url": "http://dblp.uni-trier.de/db/conf/cloud/",
+      "areas": [
+        "计算机体系结构/并行与分布计算/存储系统"
+      ],
+      "source_pages": [
+        6
+      ]
+    },
+    {
+      "kind": "conference",
+      "ccf_rank": "B",
+      "short_name": "SPAA",
+      "full_name": "ACMSymposiumonParallelisminAlgorithmsand Architectures",
+      "publisher": "ACM",
+      "url": "http://dblp.uni-trier.de/db/conf/spaa/",
+      "areas": [
+        "计算机体系结构/并行与分布计算/存储系统"
+      ],
+      "source_pages": [
+        6
+      ]
+    },
+    {
+      "kind": "conference",
+      "ccf_rank": "B",
+      "short_name": "PODC",
+      "full_name": "ACMSymposiumonPrinciplesofDistributedComputing",
+      "publisher": "ACM",
+      "url": "http://dblp.uni-trier.de/db/conf/podc/",
+      "areas": [
+        "计算机体系结构/并行与分布计算/存储系统"
+      ],
+      "source_pages": [
+        6
+      ]
+    },
+    {
+      "kind": "conference",
+      "ccf_rank": "B",
+      "short_name": "FPGA",
+      "full_name": "ACM/SIGDAInternationalSymposiumonField-Programmable GateArrays",
+      "publisher": "ACM",
+      "url": "http://dblp.uni-trier.de/db/conf/fpga/",
+      "areas": [
+        "计算机体系结构/并行与分布计算/存储系统"
+      ],
+      "source_pages": [
+        6
+      ]
+    },
+    {
+      "kind": "conference",
+      "ccf_rank": "B",
+      "short_name": "CGO",
+      "full_name": "TheInternationalSymposiumonCodeGenerationand Optimization",
+      "publisher": "IEEE/ ACM",
+      "url": "http://dblp.uni-trier.de/db/conf/cgo/",
+      "areas": [
+        "计算机体系结构/并行与分布计算/存储系统"
+      ],
+      "source_pages": [
+        6
+      ]
+    },
+    {
+      "kind": "conference",
+      "ccf_rank": "B",
+      "short_name": "DATE",
+      "full_name": "Design,Automation&TestinEurope",
+      "publisher": "IEEE/ ACM",
+      "url": "http://dblp.uni-trier.de/db/conf/date/",
+      "areas": [
+        "计算机体系结构/并行与分布计算/存储系统"
+      ],
+      "source_pages": [
+        6
+      ]
+    },
+    {
+      "kind": "conference",
+      "ccf_rank": "B",
+      "short_name": "HOT CHIPS",
+      "full_name": "HotChips:ASymposiumonHighPerformanceChips",
+      "publisher": "IEEE",
+      "url": "https://dblp.org/db/conf/hotchips/index.html",
+      "areas": [
+        "计算机体系结构/并行与分布计算/存储系统"
+      ],
+      "source_pages": [
+        6
+      ]
+    },
+    {
+      "kind": "conference",
+      "ccf_rank": "B",
+      "short_name": "CLUSTER",
+      "full_name": "IEEEInternationalConferenceonClusterComputing",
+      "publisher": "IEEE",
+      "url": "https://dblp.uni-trier.de/db/conf/cluster/",
+      "areas": [
+        "计算机体系结构/并行与分布计算/存储系统"
+      ],
+      "source_pages": [
+        6
+      ]
+    },
+    {
+      "kind": "conference",
+      "ccf_rank": "B",
+      "short_name": "ICCD",
+      "full_name": "InternationalConferenceonComputerDesign",
+      "publisher": "IEEE",
+      "url": "http://dblp.uni-trier.de/db/conf/iccd/",
+      "areas": [
+        "计算机体系结构/并行与分布计算/存储系统"
+      ],
+      "source_pages": [
+        6
+      ]
+    },
+    {
+      "kind": "conference",
+      "ccf_rank": "B",
+      "short_name": "ICCAD",
+      "full_name": "InternationalConferenceonComputer-AidedDesign",
+      "publisher": "IEEE/ ACM",
+      "url": "http://dblp.uni-trier.de/db/conf/iccad/",
+      "areas": [
+        "计算机体系结构/并行与分布计算/存储系统"
+      ],
+      "source_pages": [
+        6
+      ]
+    },
+    {
+      "kind": "conference",
+      "ccf_rank": "B",
+      "short_name": "ICDCS",
+      "full_name": "IEEEInternationalConferenceonDistributedComputing Systems",
+      "publisher": "IEEE",
+      "url": "http://dblp.uni-trier.de/db/conf/icdcs/",
+      "areas": [
+        "计算机体系结构/并行与分布计算/存储系统"
+      ],
+      "source_pages": [
+        6
+      ]
+    },
+    {
+      "kind": "conference",
+      "ccf_rank": "B",
+      "short_name": "CODES+ ISSS",
+      "full_name": "InternationalConferenceonHardware/SoftwareCo-designand SystemSynthesis",
+      "publisher": "IEEE/ ACM",
+      "url": "https://dblp.uni-trier.de/db/conf/codesisss/index.html",
+      "areas": [
+        "计算机体系结构/并行与分布计算/存储系统"
+      ],
+      "source_pages": [
+        6
+      ]
+    },
+    {
+      "kind": "conference",
+      "ccf_rank": "B",
+      "short_name": "HiPEAC",
+      "full_name": "InternationalConferenceonHighPerformanceandEmbedded ArchitecturesandCompilers",
+      "publisher": "ACM",
+      "url": "http://dblp.uni-trier.de/db/conf/hipeac/",
+      "areas": [
+        "计算机体系结构/并行与分布计算/存储系统"
+      ],
+      "source_pages": [
+        6
+      ]
+    },
+    {
+      "kind": "conference",
+      "ccf_rank": "B",
+      "short_name": "SIG- METRICS",
+      "full_name": "InternationalConferenceonMeasurementandModelingof ComputerSystems",
+      "publisher": "ACM",
+      "url": "http://dblp.uni-trier.de/db/conf/sigmetrics/",
+      "areas": [
+        "计算机体系结构/并行与分布计算/存储系统"
+      ],
+      "source_pages": [
+        7
+      ]
+    },
+    {
+      "kind": "conference",
+      "ccf_rank": "B",
+      "short_name": "PACT",
+      "full_name": "InternationalConferenceonParallelArchitecturesand CompilationTechniques",
+      "publisher": "IEEE/ ACM",
+      "url": "http://dblp.uni-trier.de/db/conf/IEEEpact/",
+      "areas": [
+        "计算机体系结构/并行与分布计算/存储系统"
+      ],
+      "source_pages": [
+        7
+      ]
+    },
+    {
+      "kind": "conference",
+      "ccf_rank": "B",
+      "short_name": "ICPP",
+      "full_name": "InternationalConferenceonParallelProcessing",
+      "publisher": "ACM",
+      "url": "http://dblp.uni-trier.de/db/conf/icpp/",
+      "areas": [
+        "计算机体系结构/并行与分布计算/存储系统"
+      ],
+      "source_pages": [
+        7
+      ]
+    },
+    {
+      "kind": "conference",
+      "ccf_rank": "B",
+      "short_name": "ICS",
+      "full_name": "InternationalConferenceonSupercomputing",
+      "publisher": "ACM",
+      "url": "http://dblp.uni-trier.de/db/conf/ics/",
+      "areas": [
+        "计算机体系结构/并行与分布计算/存储系统"
+      ],
+      "source_pages": [
+        7
+      ]
+    },
+    {
+      "kind": "conference",
+      "ccf_rank": "B",
+      "short_name": "VEE",
+      "full_name": "InternationalConferenceonVirtualExecutionEnvironments",
+      "publisher": "ACM",
+      "url": "http://dblp.uni-trier.de/db/conf/vee/",
+      "areas": [
+        "计算机体系结构/并行与分布计算/存储系统"
+      ],
+      "source_pages": [
+        7
+      ]
+    },
+    {
+      "kind": "conference",
+      "ccf_rank": "B",
+      "short_name": "IPDPS",
+      "full_name": "IEEEInternationalParallel&DistributedProcessing Symposium",
+      "publisher": "IEEE",
+      "url": "http://dblp.uni-trier.de/db/conf/ipps/",
+      "areas": [
+        "计算机体系结构/并行与分布计算/存储系统"
+      ],
+      "source_pages": [
+        7
+      ]
+    },
+    {
+      "kind": "conference",
+      "ccf_rank": "B",
+      "short_name": "Performance",
+      "full_name": "InternationalSymposiumonComputerPerformance,Modeling, MeasurementsandEvaluation",
+      "publisher": "ACM",
+      "url": "http://dblp.uni-trier.de/db/conf/performance/",
+      "areas": [
+        "计算机体系结构/并行与分布计算/存储系统"
+      ],
+      "source_pages": [
+        7
+      ]
+    },
+    {
+      "kind": "conference",
+      "ccf_rank": "B",
+      "short_name": "ITC",
+      "full_name": "InternationalTestConference",
+      "publisher": "IEEE",
+      "url": "http://dblp.uni-trier.de/db/conf/itc/",
+      "areas": [
+        "计算机体系结构/并行与分布计算/存储系统"
+      ],
+      "source_pages": [
+        7
+      ]
+    },
+    {
+      "kind": "conference",
+      "ccf_rank": "B",
+      "short_name": "LISA",
+      "full_name": "LargeInstallationSystemAdministrationConference",
+      "publisher": "USENIX",
+      "url": "http://dblp.uni-trier.de/db/conf/lisa/",
+      "areas": [
+        "计算机体系结构/并行与分布计算/存储系统"
+      ],
+      "source_pages": [
+        7
+      ]
+    },
+    {
+      "kind": "conference",
+      "ccf_rank": "B",
+      "short_name": "MSST",
+      "full_name": "MassStorageSystemsandTechnologies",
+      "publisher": "IEEE",
+      "url": "http://dblp.uni-trier.de/db/conf/mss/",
+      "areas": [
+        "计算机体系结构/并行与分布计算/存储系统"
+      ],
+      "source_pages": [
+        7
+      ]
+    },
+    {
+      "kind": "conference",
+      "ccf_rank": "B",
+      "short_name": "RTAS",
+      "full_name": "IEEEReal-TimeandEmbeddedTechnologyandApplications Symposium",
+      "publisher": "IEEE",
+      "url": "http://dblp.uni-trier.de/db/conf/rtas/",
+      "areas": [
+        "计算机体系结构/并行与分布计算/存储系统"
+      ],
+      "source_pages": [
+        7
+      ]
+    },
+    {
+      "kind": "conference",
+      "ccf_rank": "B",
+      "short_name": "Euro-Par",
+      "full_name": "EuropeanConferenceonParallelandDistributedComputing Springer",
+      "publisher": "Springer",
+      "url": "http://dblp.uni-trier.de/db/conf/europar/",
+      "areas": [
+        "计算机体系结构/并行与分布计算/存储系统"
+      ],
+      "source_pages": [
+        7
+      ]
+    },
+    {
+      "kind": "conference",
+      "ccf_rank": "B",
+      "short_name": "ISCAS",
+      "full_name": "IEEEInternationalSymposiumonCircuitsandSystems",
+      "publisher": "IEEE",
+      "url": "http://dblp.uni-trier.de/db/conf/iscas/",
+      "areas": [
+        "计算机体系结构/并行与分布计算/存储系统"
+      ],
+      "source_pages": [
+        7
+      ]
+    },
+    {
+      "kind": "journal",
+      "ccf_rank": "A",
+      "short_name": "JSAC",
+      "full_name": "IEEEJournalonSelectedAreasinCommunications",
+      "publisher": "IEEE",
+      "url": "http://dblp.uni-trier.de/db/journals/jsac/",
+      "areas": [
+        "计算机网络"
+      ],
+      "source_pages": [
+        10
+      ]
+    },
+    {
+      "kind": "journal",
+      "ccf_rank": "A",
+      "short_name": "TMC",
+      "full_name": "IEEETransactionsonMobileComputing",
+      "publisher": "IEEE",
+      "url": "http://dblp.uni-trier.de/db/journals/tmc/",
+      "areas": [
+        "计算机网络"
+      ],
+      "source_pages": [
+        10
+      ]
+    },
+    {
+      "kind": "journal",
+      "ccf_rank": "A",
+      "short_name": "TON",
+      "full_name": "IEEETransactionsonNetworking （原IEEE/ACMTransactionsonNetworking）",
+      "publisher": "IEEE",
+      "url": "http://dblp.uni-trier.de/db/journals/ton/",
+      "areas": [
+        "计算机网络"
+      ],
+      "source_pages": [
+        10
+      ]
+    },
+    {
+      "kind": "journal",
+      "ccf_rank": "B",
+      "short_name": "TOIT",
+      "full_name": "ACMTransactionsonInternetTechnology",
+      "publisher": "ACM",
+      "url": "http://dblp.uni-trier.de/db/journals/toit/",
+      "areas": [
+        "计算机网络"
+      ],
+      "source_pages": [
+        11
+      ]
+    },
+    {
+      "kind": "journal",
+      "ccf_rank": "B",
+      "short_name": "TOMM",
+      "full_name": "ACMTransactionsonMultimediaComputing,Communications andApplications",
+      "publisher": "ACM",
+      "url": "http://dblp.uni-trier.de/db/journals/tomccap/",
+      "areas": [
+        "计算机网络",
+        "计算机图形学与多媒体"
+      ],
+      "source_pages": [
+        11,
+        45
+      ]
+    },
+    {
+      "kind": "journal",
+      "ccf_rank": "B",
+      "short_name": "TOSN",
+      "full_name": "ACMTransactionsonSensorNetworks",
+      "publisher": "ACM",
+      "url": "http://dblp.uni-trier.de/db/journals/tosn/",
+      "areas": [
+        "计算机网络"
+      ],
+      "source_pages": [
+        11
+      ]
+    },
+    {
+      "kind": "journal",
+      "ccf_rank": "B",
+      "short_name": "CN",
+      "full_name": "ComputerNetworks",
+      "publisher": "Elsevier",
+      "url": "http://dblp.uni-trier.de/db/journals/cn/",
+      "areas": [
+        "计算机网络"
+      ],
+      "source_pages": [
+        11
+      ]
+    },
+    {
+      "kind": "journal",
+      "ccf_rank": "B",
+      "short_name": "TCOM",
+      "full_name": "IEEETransactionsonCommunications",
+      "publisher": "IEEE",
+      "url": "http://dblp.uni-trier.de/db/journals/tcom/",
+      "areas": [
+        "计算机网络"
+      ],
+      "source_pages": [
+        11
+      ]
+    },
+    {
+      "kind": "journal",
+      "ccf_rank": "B",
+      "short_name": "TWC",
+      "full_name": "IEEETransactionsonWirelessCommunications",
+      "publisher": "IEEE",
+      "url": "http://dblp.uni-trier.de/db/journals/twc/",
+      "areas": [
+        "计算机网络"
+      ],
+      "source_pages": [
+        11
+      ]
+    },
+    {
+      "kind": "conference",
+      "ccf_rank": "A",
+      "short_name": "SIGCOMM",
+      "full_name": "ACMInternationalConferenceonApplications,Technologies, Architectures,andProtocolsforComputerCommunication",
+      "publisher": "ACM",
+      "url": "http://dblp.uni-trier.de/db/conf/sigcomm/index.html",
+      "areas": [
+        "计算机网络"
+      ],
+      "source_pages": [
+        13
+      ]
+    },
+    {
+      "kind": "conference",
+      "ccf_rank": "A",
+      "short_name": "MobiCom",
+      "full_name": "ACMInternationalConferenceonMobileComputingand Networking",
+      "publisher": "ACM",
+      "url": "http://dblp.uni-trier.de/db/conf/mobicom/",
+      "areas": [
+        "计算机网络"
+      ],
+      "source_pages": [
+        13
+      ]
+    },
+    {
+      "kind": "conference",
+      "ccf_rank": "A",
+      "short_name": "INFOCOM",
+      "full_name": "IEEEInternationalConferenceonComputerCommunications",
+      "publisher": "IEEE",
+      "url": "http://dblp.uni-trier.de/db/conf/infocom/",
+      "areas": [
+        "计算机网络"
+      ],
+      "source_pages": [
+        13
+      ]
+    },
+    {
+      "kind": "conference",
+      "ccf_rank": "A",
+      "short_name": "NSDI",
+      "full_name": "SymposiumonNetworkSystemDesignandImplementation",
+      "publisher": "USENIX",
+      "url": "http://dblp.uni-trier.de/db/conf/nsdi/",
+      "areas": [
+        "计算机网络"
+      ],
+      "source_pages": [
+        13
+      ]
+    },
+    {
+      "kind": "conference",
+      "ccf_rank": "B",
+      "short_name": "SenSys",
+      "full_name": "ACMConferenceonEmbeddedNetworkedSensorSystems",
+      "publisher": "ACM",
+      "url": "http://dblp.uni-trier.de/db/conf/sensys/",
+      "areas": [
+        "计算机网络"
+      ],
+      "source_pages": [
+        14
+      ]
+    },
+    {
+      "kind": "conference",
+      "ccf_rank": "B",
+      "short_name": "CoNEXT",
+      "full_name": "ACMInternationalConferenceonEmergingNetworking ExperimentsandTechnologies",
+      "publisher": "ACM",
+      "url": "http://dblp.uni-trier.de/db/conf/conext/",
+      "areas": [
+        "计算机网络"
+      ],
+      "source_pages": [
+        14
+      ]
+    },
+    {
+      "kind": "conference",
+      "ccf_rank": "B",
+      "short_name": "SECON",
+      "full_name": "IEEEInternationalConferenceonSensing,Communication,and Networking",
+      "publisher": "IEEE",
+      "url": "http://dblp.uni-trier.de/db/conf/secon/",
+      "areas": [
+        "计算机网络"
+      ],
+      "source_pages": [
+        14
+      ]
+    },
+    {
+      "kind": "conference",
+      "ccf_rank": "B",
+      "short_name": "IPSN",
+      "full_name": "InternationalConferenceonInformationProcessinginSensor Networks",
+      "publisher": "IEEE/ ACM",
+      "url": "http://dblp.uni-trier.de/db/conf/ipsn/",
+      "areas": [
+        "计算机网络"
+      ],
+      "source_pages": [
+        14
+      ]
+    },
+    {
+      "kind": "conference",
+      "ccf_rank": "B",
+      "short_name": "MobiSys",
+      "full_name": "ACMInternationalConferenceonMobileSystems, Applications, andServices",
+      "publisher": "ACM",
+      "url": "http://dblp.uni-trier.de/db/conf/mobisys/",
+      "areas": [
+        "计算机网络"
+      ],
+      "source_pages": [
+        14
+      ]
+    },
+    {
+      "kind": "conference",
+      "ccf_rank": "B",
+      "short_name": "ICNP",
+      "full_name": "IEEEInternationalConferenceonNetworkProtocols",
+      "publisher": "IEEE",
+      "url": "http://dblp.uni-trier.de/db/conf/icnp/",
+      "areas": [
+        "计算机网络"
+      ],
+      "source_pages": [
+        14
+      ]
+    },
+    {
+      "kind": "conference",
+      "ccf_rank": "B",
+      "short_name": "MobiHoc",
+      "full_name": "InternationalSymposiumonTheory,AlgorithmicFoundations, andProtocolDesignforMobileNetworksandMobile Computing",
+      "publisher": "IEEE/ ACM",
+      "url": "http://dblp.uni-trier.de/db/conf/mobihoc/",
+      "areas": [
+        "计算机网络"
+      ],
+      "source_pages": [
+        14
+      ]
+    },
+    {
+      "kind": "conference",
+      "ccf_rank": "B",
+      "short_name": "NOSSDAV",
+      "full_name": "InternationalWorkshoponNetworkandOperatingSystem SupportforDigitalAudioandVideo",
+      "publisher": "ACM",
+      "url": "http://dblp.uni-trier.de/db/conf/nossdav/",
+      "areas": [
+        "计算机网络"
+      ],
+      "source_pages": [
+        14
+      ]
+    },
+    {
+      "kind": "conference",
+      "ccf_rank": "B",
+      "short_name": "IWQoS",
+      "full_name": "IEEE/ACMInternationalWorkshoponQualityofService",
+      "publisher": "IEEE",
+      "url": "http://dblp.uni-trier.de/db/conf/iwqos/",
+      "areas": [
+        "计算机网络"
+      ],
+      "source_pages": [
+        14
+      ]
+    },
+    {
+      "kind": "conference",
+      "ccf_rank": "B",
+      "short_name": "IMC",
+      "full_name": "ACMInternetMeasurementConference",
+      "publisher": "ACM/ USENIX",
+      "url": "http://dblp.uni-trier.de/db/conf/imc/",
+      "areas": [
+        "计算机网络"
+      ],
+      "source_pages": [
+        14
+      ]
+    },
+    {
+      "kind": "journal",
+      "ccf_rank": "A",
+      "short_name": "TDSC",
+      "full_name": "IEEETransactionsonDependableandSecureComputing",
+      "publisher": "IEEE",
+      "url": "http://dblp.uni-trier.de/db/journals/tdsc/",
+      "areas": [
+        "网络与信息安全"
+      ],
+      "source_pages": [
+        17
+      ]
+    },
+    {
+      "kind": "journal",
+      "ccf_rank": "A",
+      "short_name": "TIFS",
+      "full_name": "IEEETransactionsonInformationForensicsandSecurity",
+      "publisher": "IEEE",
+      "url": "http://dblp.uni-trier.de/db/journals/tifs/",
+      "areas": [
+        "网络与信息安全"
+      ],
+      "source_pages": [
+        17
+      ]
+    },
+    {
+      "kind": "journal",
+      "ccf_rank": "A",
+      "short_name": "",
+      "full_name": "JournalofCryptology",
+      "publisher": "Springer",
+      "url": "http://dblp.uni-trier.de/db/journals/joc/",
+      "areas": [
+        "网络与信息安全"
+      ],
+      "source_pages": [
+        17
+      ]
+    },
+    {
+      "kind": "journal",
+      "ccf_rank": "B",
+      "short_name": "TOPS",
+      "full_name": "ACMTransactionsonPrivacyandSecurity",
+      "publisher": "ACM",
+      "url": "https://dblp.org/db/journals/tissec/index.html",
+      "areas": [
+        "网络与信息安全"
+      ],
+      "source_pages": [
+        18
+      ]
+    },
+    {
+      "kind": "journal",
+      "ccf_rank": "B",
+      "short_name": "",
+      "full_name": "Computers&Security",
+      "publisher": "Elsevier",
+      "url": "http://dblp.uni-trier.de/db/journals/compsec/",
+      "areas": [
+        "网络与信息安全"
+      ],
+      "source_pages": [
+        18
+      ]
+    },
+    {
+      "kind": "journal",
+      "ccf_rank": "B",
+      "short_name": "",
+      "full_name": "Designs,CodesandCryptography",
+      "publisher": "Springer",
+      "url": "http://dblp.uni-trier.de/db/journals/dcc/",
+      "areas": [
+        "网络与信息安全"
+      ],
+      "source_pages": [
+        18
+      ]
+    },
+    {
+      "kind": "journal",
+      "ccf_rank": "B",
+      "short_name": "JCS",
+      "full_name": "JournalofComputerSecurity",
+      "publisher": "IOSPress",
+      "url": "http://dblp.uni-trier.de/db/journals/jcs/",
+      "areas": [
+        "网络与信息安全"
+      ],
+      "source_pages": [
+        18
+      ]
+    },
+    {
+      "kind": "journal",
+      "ccf_rank": "B",
+      "short_name": "Cybersecurity",
+      "full_name": "Cybersecurity",
+      "publisher": "Springer （原中国科学院信息工程研 究所/科学出版社）",
+      "url": "https://dblp.uni- trier.de/db/journals/cybersec/index.html",
+      "areas": [
+        "网络与信息安全"
+      ],
+      "source_pages": [
+        18
+      ]
+    },
+    {
+      "kind": "conference",
+      "ccf_rank": "A",
+      "short_name": "CCS",
+      "full_name": "ACMConferenceonComputerandCommunications Security",
+      "publisher": "ACM",
+      "url": "http://dblp.uni-trier.de/db/conf/ccs/",
+      "areas": [
+        "网络与信息安全"
+      ],
+      "source_pages": [
+        20
+      ]
+    },
+    {
+      "kind": "conference",
+      "ccf_rank": "A",
+      "short_name": "EUROCRYPT",
+      "full_name": "InternationalConferenceontheTheoryandApplications of CryptographicTechniques",
+      "publisher": "Springer",
+      "url": "http://dblp.uni-trier.de/db/conf/eurocrypt/",
+      "areas": [
+        "网络与信息安全"
+      ],
+      "source_pages": [
+        20
+      ]
+    },
+    {
+      "kind": "conference",
+      "ccf_rank": "A",
+      "short_name": "S&P",
+      "full_name": "IEEESymposiumonSecurityandPrivacy",
+      "publisher": "IEEE",
+      "url": "http://dblp.uni-trier.de/db/conf/sp/",
+      "areas": [
+        "网络与信息安全"
+      ],
+      "source_pages": [
+        20
+      ]
+    },
+    {
+      "kind": "conference",
+      "ccf_rank": "A",
+      "short_name": "CRYPTO",
+      "full_name": "InternationalCryptologyConference",
+      "publisher": "Springer",
+      "url": "http://dblp.uni-trier.de/db/conf/crypto/",
+      "areas": [
+        "网络与信息安全"
+      ],
+      "source_pages": [
+        20
+      ]
+    },
+    {
+      "kind": "conference",
+      "ccf_rank": "A",
+      "short_name": "USENIXSecurity",
+      "full_name": "USENIXSecuritySymposium",
+      "publisher": "USENIX Association",
+      "url": "http://dblp.uni-trier.de/db/conf/uss/",
+      "areas": [
+        "网络与信息安全"
+      ],
+      "source_pages": [
+        20
+      ]
+    },
+    {
+      "kind": "conference",
+      "ccf_rank": "A",
+      "short_name": "NDSS",
+      "full_name": "NetworkandDistributedSystemSecuritySymposium",
+      "publisher": "ISOC",
+      "url": "http://dblp.uni-trier.de/db/conf/ndss/",
+      "areas": [
+        "网络与信息安全"
+      ],
+      "source_pages": [
+        20
+      ]
+    },
+    {
+      "kind": "conference",
+      "ccf_rank": "B",
+      "short_name": "ACSAC",
+      "full_name": "AnnualComputerSecurityApplicationsConference",
+      "publisher": "IEEE",
+      "url": "https://dblp.uni-trier.de/db/conf/acsac/index.html",
+      "areas": [
+        "网络与信息安全"
+      ],
+      "source_pages": [
+        21
+      ]
+    },
+    {
+      "kind": "conference",
+      "ccf_rank": "B",
+      "short_name": "ASIACRYPT",
+      "full_name": "AnnualInternationalConferenceontheTheoryand ApplicationofCryptologyandInformationSecurity",
+      "publisher": "Springer",
+      "url": "https://dblp.uni-trier.de/db/conf/asiacrypt/index.html",
+      "areas": [
+        "网络与信息安全"
+      ],
+      "source_pages": [
+        21
+      ]
+    },
+    {
+      "kind": "conference",
+      "ccf_rank": "B",
+      "short_name": "ESORICS",
+      "full_name": "EuropeanSymposiumonResearchinComputerSecurity",
+      "publisher": "Springer",
+      "url": "https://dblp.uni-trier.de/db/conf/esorics/index.html",
+      "areas": [
+        "网络与信息安全"
+      ],
+      "source_pages": [
+        21
+      ]
+    },
+    {
+      "kind": "conference",
+      "ccf_rank": "B",
+      "short_name": "FSE",
+      "full_name": "FastSoftwareEncryption",
+      "publisher": "Springer",
+      "url": "https://dblp.uni-trier.de/db/conf/fse/index.html",
+      "areas": [
+        "网络与信息安全"
+      ],
+      "source_pages": [
+        21
+      ]
+    },
+    {
+      "kind": "conference",
+      "ccf_rank": "B",
+      "short_name": "CSFW",
+      "full_name": "IEEEComputerSecurityFoundationsWorkshop",
+      "publisher": "IEEE",
+      "url": "https://dblp.uni-trier.de/db/conf/csfw/index.html",
+      "areas": [
+        "网络与信息安全"
+      ],
+      "source_pages": [
+        21
+      ]
+    },
+    {
+      "kind": "conference",
+      "ccf_rank": "B",
+      "short_name": "SRDS",
+      "full_name": "IEEEInternationalSymposiumonReliableDistributed Systems",
+      "publisher": "IEEE",
+      "url": "https://dblp.uni-trier.de/db/conf/srds/index.html",
+      "areas": [
+        "网络与信息安全"
+      ],
+      "source_pages": [
+        21
+      ]
+    },
+    {
+      "kind": "conference",
+      "ccf_rank": "B",
+      "short_name": "CHES",
+      "full_name": "InternationalConferenceonCryptographicHardwareand EmbeddedSystems",
+      "publisher": "Springer",
+      "url": "https://dblp.uni-trier.de/db/conf/ches/index.html",
+      "areas": [
+        "网络与信息安全"
+      ],
+      "source_pages": [
+        21
+      ]
+    },
+    {
+      "kind": "conference",
+      "ccf_rank": "B",
+      "short_name": "DSN",
+      "full_name": "InternationalConferenceonDependableSystemsand Networks",
+      "publisher": "IEEE/ IFIP",
+      "url": "https://dblp.uni-trier.de/db/conf/dsn/index.html",
+      "areas": [
+        "网络与信息安全"
+      ],
+      "source_pages": [
+        21
+      ]
+    },
+    {
+      "kind": "conference",
+      "ccf_rank": "B",
+      "short_name": "RAID",
+      "full_name": "InternationalSymposiumonRecentAdvancesinIntrusion Detection",
+      "publisher": "Springer",
+      "url": "https://dblp.uni-trier.de/db/conf/raid/index.html",
+      "areas": [
+        "网络与信息安全"
+      ],
+      "source_pages": [
+        21
+      ]
+    },
+    {
+      "kind": "conference",
+      "ccf_rank": "B",
+      "short_name": "PKC",
+      "full_name": "InternationalWorkshoponPracticeandTheoryinPublicKey Cryptography",
+      "publisher": "Springer",
+      "url": "https://dblp.uni-trier.de/db/conf/pkc/index.html",
+      "areas": [
+        "网络与信息安全"
+      ],
+      "source_pages": [
+        21
+      ]
+    },
+    {
+      "kind": "conference",
+      "ccf_rank": "B",
+      "short_name": "TCC",
+      "full_name": "TheoryofCryptographyConference",
+      "publisher": "Springer",
+      "url": "https://dblp.uni-trier.de/db/conf/tcc/index.html",
+      "areas": [
+        "网络与信息安全"
+      ],
+      "source_pages": [
+        21
+      ]
+    },
+    {
+      "kind": "journal",
+      "ccf_rank": "A",
+      "short_name": "TOPLAS",
+      "full_name": "ACMTransactionsonProgrammingLanguagesand Systems",
+      "publisher": "ACM",
+      "url": "http://dblp.uni-trier.de/db/journals/toplas/",
+      "areas": [
+        "软件工程/系统软件/程序设计语言"
+      ],
+      "source_pages": [
+        24
+      ]
+    },
+    {
+      "kind": "journal",
+      "ccf_rank": "A",
+      "short_name": "TOSEM",
+      "full_name": "ACMTransactionsonSoftwareEngineeringand Methodology",
+      "publisher": "ACM",
+      "url": "http://dblp.uni-trier.de/db/journals/tosem/",
+      "areas": [
+        "软件工程/系统软件/程序设计语言"
+      ],
+      "source_pages": [
+        24
+      ]
+    },
+    {
+      "kind": "journal",
+      "ccf_rank": "A",
+      "short_name": "TSE",
+      "full_name": "IEEETransactionsonSoftwareEngineering",
+      "publisher": "IEEE",
+      "url": "http://dblp.uni-trier.de/db/journals/tse/",
+      "areas": [
+        "软件工程/系统软件/程序设计语言"
+      ],
+      "source_pages": [
+        24
+      ]
+    },
+    {
+      "kind": "journal",
+      "ccf_rank": "A",
+      "short_name": "TSC",
+      "full_name": "IEEETransactionsonServicesComputing",
+      "publisher": "IEEE",
+      "url": "http://dblp.uni-trier.de/db/journals/tsc/",
+      "areas": [
+        "软件工程/系统软件/程序设计语言"
+      ],
+      "source_pages": [
+        24
+      ]
+    },
+    {
+      "kind": "journal",
+      "ccf_rank": "B",
+      "short_name": "ASE",
+      "full_name": "AutomatedSoftwareEngineering",
+      "publisher": "Springer",
+      "url": "http://dblp.uni-trier.de/db/journals/ase/",
+      "areas": [
+        "软件工程/系统软件/程序设计语言"
+      ],
+      "source_pages": [
+        25
+      ]
+    },
+    {
+      "kind": "journal",
+      "ccf_rank": "B",
+      "short_name": "ESE",
+      "full_name": "EmpiricalSoftwareEngineering",
+      "publisher": "Springer",
+      "url": "http://dblp.uni-trier.de/db/journals/ese/",
+      "areas": [
+        "软件工程/系统软件/程序设计语言"
+      ],
+      "source_pages": [
+        25
+      ]
+    },
+    {
+      "kind": "journal",
+      "ccf_rank": "B",
+      "short_name": "IETS",
+      "full_name": "IETSoftware",
+      "publisher": "IET",
+      "url": "https://dblp.uni-trier.de/db/journals/iet-sen/",
+      "areas": [
+        "软件工程/系统软件/程序设计语言"
+      ],
+      "source_pages": [
+        25
+      ]
+    },
+    {
+      "kind": "journal",
+      "ccf_rank": "B",
+      "short_name": "IST",
+      "full_name": "InformationandSoftwareTechnology",
+      "publisher": "Elsevier",
+      "url": "http://dblp.uni-trier.de/db/journals/infsof/index.html",
+      "areas": [
+        "软件工程/系统软件/程序设计语言"
+      ],
+      "source_pages": [
+        25
+      ]
+    },
+    {
+      "kind": "journal",
+      "ccf_rank": "B",
+      "short_name": "JFP",
+      "full_name": "JournalofFunctionalProgramming",
+      "publisher": "Cambridge University Press",
+      "url": "http://dblp.uni-trier.de/db/journals/jfp/",
+      "areas": [
+        "软件工程/系统软件/程序设计语言"
+      ],
+      "source_pages": [
+        25
+      ]
+    },
+    {
+      "kind": "journal",
+      "ccf_rank": "B",
+      "short_name": "",
+      "full_name": "JournalofSoftware:EvolutionandProcess",
+      "publisher": "Wiley",
+      "url": "http://dblp.uni-trier.de/db/journals/smr/",
+      "areas": [
+        "软件工程/系统软件/程序设计语言"
+      ],
+      "source_pages": [
+        25
+      ]
+    },
+    {
+      "kind": "journal",
+      "ccf_rank": "B",
+      "short_name": "JSS",
+      "full_name": "JournalofSystemsandSoftware",
+      "publisher": "Elsevier",
+      "url": "http://dblp.uni-trier.de/db/journals/jss/",
+      "areas": [
+        "软件工程/系统软件/程序设计语言"
+      ],
+      "source_pages": [
+        25
+      ]
+    },
+    {
+      "kind": "journal",
+      "ccf_rank": "B",
+      "short_name": "RE",
+      "full_name": "RequirementsEngineering",
+      "publisher": "Springer",
+      "url": "http://dblp.uni-trier.de/db/journals/re/",
+      "areas": [
+        "软件工程/系统软件/程序设计语言"
+      ],
+      "source_pages": [
+        25
+      ]
+    },
+    {
+      "kind": "journal",
+      "ccf_rank": "B",
+      "short_name": "SCP",
+      "full_name": "ScienceofComputerProgramming",
+      "publisher": "Elsevier",
+      "url": "http://dblp.uni-trier.de/db/journals/scp/",
+      "areas": [
+        "软件工程/系统软件/程序设计语言"
+      ],
+      "source_pages": [
+        25
+      ]
+    },
+    {
+      "kind": "journal",
+      "ccf_rank": "B",
+      "short_name": "SoSyM",
+      "full_name": "SoftwareandSystemsModeling",
+      "publisher": "Springer",
+      "url": "http://dblp.uni-trier.de/db/journals/sosym/",
+      "areas": [
+        "软件工程/系统软件/程序设计语言"
+      ],
+      "source_pages": [
+        25
+      ]
+    },
+    {
+      "kind": "journal",
+      "ccf_rank": "B",
+      "short_name": "STVR",
+      "full_name": "SoftwareTesting,VerificationandReliability",
+      "publisher": "Wiley",
+      "url": "http://dblp.uni-trier.de/db/journals/stvr/index.html",
+      "areas": [
+        "软件工程/系统软件/程序设计语言"
+      ],
+      "source_pages": [
+        25
+      ]
+    },
+    {
+      "kind": "journal",
+      "ccf_rank": "B",
+      "short_name": "SPE",
+      "full_name": "Software:PracticeandExperience",
+      "publisher": "Wiley",
+      "url": "http://dblp.uni-trier.de/db/journals/spe/",
+      "areas": [
+        "软件工程/系统软件/程序设计语言"
+      ],
+      "source_pages": [
+        25
+      ]
+    },
+    {
+      "kind": "conference",
+      "ccf_rank": "A",
+      "short_name": "PLDI",
+      "full_name": "ACMSIGPLANConferenceonProgrammingLanguage DesignandImplementation",
+      "publisher": "ACM",
+      "url": "http://dblp.uni-trier.de/db/conf/pldi/",
+      "areas": [
+        "软件工程/系统软件/程序设计语言"
+      ],
+      "source_pages": [
+        27
+      ]
+    },
+    {
+      "kind": "conference",
+      "ccf_rank": "A",
+      "short_name": "POPL",
+      "full_name": "ACMSIGPLAN-SIGACTSymposiumonPrinciplesof ProgrammingLanguages",
+      "publisher": "ACM",
+      "url": "http://dblp.uni-trier.de/db/conf/popl/",
+      "areas": [
+        "软件工程/系统软件/程序设计语言"
+      ],
+      "source_pages": [
+        27
+      ]
+    },
+    {
+      "kind": "conference",
+      "ccf_rank": "A",
+      "short_name": "FSE",
+      "full_name": "ACMInternationalConferenceontheFoundationsof SoftwareEngineering",
+      "publisher": "ACM",
+      "url": "http://dblp.uni-trier.de/db/conf/sigsoft/",
+      "areas": [
+        "软件工程/系统软件/程序设计语言"
+      ],
+      "source_pages": [
+        27
+      ]
+    },
+    {
+      "kind": "conference",
+      "ccf_rank": "A",
+      "short_name": "SOSP",
+      "full_name": "ACMSymposiumonOperatingSystemsPrinciples",
+      "publisher": "ACM",
+      "url": "http://dblp.uni-trier.de/db/conf/sosp/",
+      "areas": [
+        "软件工程/系统软件/程序设计语言"
+      ],
+      "source_pages": [
+        27
+      ]
+    },
+    {
+      "kind": "conference",
+      "ccf_rank": "A",
+      "short_name": "OOPSLA",
+      "full_name": "ConferenceonObject-OrientedProgrammingSystems, Languages,andApplications",
+      "publisher": "ACM",
+      "url": "http://dblp.uni-trier.de/db/conf/oopsla/",
+      "areas": [
+        "软件工程/系统软件/程序设计语言"
+      ],
+      "source_pages": [
+        27
+      ]
+    },
+    {
+      "kind": "conference",
+      "ccf_rank": "A",
+      "short_name": "ASE",
+      "full_name": "InternationalConferenceonAutomatedSoftwareEngineering",
+      "publisher": "IEEE/ ACM",
+      "url": "http://dblp.uni-trier.de/db/conf/kbse/",
+      "areas": [
+        "软件工程/系统软件/程序设计语言"
+      ],
+      "source_pages": [
+        27
+      ]
+    },
+    {
+      "kind": "conference",
+      "ccf_rank": "A",
+      "short_name": "ICSE",
+      "full_name": "InternationalConferenceonSoftwareEngineering",
+      "publisher": "IEEE/ ACM",
+      "url": "http://dblp.uni-trier.de/db/conf/icse/",
+      "areas": [
+        "软件工程/系统软件/程序设计语言"
+      ],
+      "source_pages": [
+        27
+      ]
+    },
+    {
+      "kind": "conference",
+      "ccf_rank": "A",
+      "short_name": "ISSTA",
+      "full_name": "InternationalSymposiumonSoftwareTestingandAnalysis",
+      "publisher": "ACM",
+      "url": "http://dblp.uni-trier.de/db/conf/issta/",
+      "areas": [
+        "软件工程/系统软件/程序设计语言"
+      ],
+      "source_pages": [
+        27
+      ]
+    },
+    {
+      "kind": "conference",
+      "ccf_rank": "A",
+      "short_name": "OSDI",
+      "full_name": "USENIXSymposiumonOperatingSystemsDesignand Implementation",
+      "publisher": "USENIX",
+      "url": "http://dblp.uni-trier.de/db/conf/osdi/",
+      "areas": [
+        "软件工程/系统软件/程序设计语言"
+      ],
+      "source_pages": [
+        27
+      ]
+    },
+    {
+      "kind": "conference",
+      "ccf_rank": "A",
+      "short_name": "FM",
+      "full_name": "InternationalSymposiumonFormalMethods",
+      "publisher": "FME",
+      "url": "http://dblp.uni-trier.de/db/conf/fm/",
+      "areas": [
+        "软件工程/系统软件/程序设计语言"
+      ],
+      "source_pages": [
+        27
+      ]
+    },
+    {
+      "kind": "conference",
+      "ccf_rank": "B",
+      "short_name": "ECOOP",
+      "full_name": "EuropeanConferenceonObject-OrientedProgramming",
+      "publisher": "AITO",
+      "url": "http://dblp.uni-trier.de/db/conf/ecoop/",
+      "areas": [
+        "软件工程/系统软件/程序设计语言"
+      ],
+      "source_pages": [
+        28
+      ]
+    },
+    {
+      "kind": "conference",
+      "ccf_rank": "B",
+      "short_name": "ETAPS",
+      "full_name": "EuropeanJointConferencesonTheoryandPracticeof Software",
+      "publisher": "Springer",
+      "url": "http://dblp.uni-trier.de/db/conf/etaps/",
+      "areas": [
+        "软件工程/系统软件/程序设计语言"
+      ],
+      "source_pages": [
+        28
+      ]
+    },
+    {
+      "kind": "conference",
+      "ccf_rank": "B",
+      "short_name": "ICPC",
+      "full_name": "IEEEInternationalConferenceonProgramComprehension",
+      "publisher": "IEEE",
+      "url": "http://dblp.uni-trier.de/db/conf/iwpc/",
+      "areas": [
+        "软件工程/系统软件/程序设计语言"
+      ],
+      "source_pages": [
+        28
+      ]
+    },
+    {
+      "kind": "conference",
+      "ccf_rank": "B",
+      "short_name": "RE",
+      "full_name": "IEEEInternationalRequirementsEngineeringConference",
+      "publisher": "IEEE",
+      "url": "http://dblp.uni-trier.de/db/conf/re/",
+      "areas": [
+        "软件工程/系统软件/程序设计语言"
+      ],
+      "source_pages": [
+        28
+      ]
+    },
+    {
+      "kind": "conference",
+      "ccf_rank": "B",
+      "short_name": "CAiSE",
+      "full_name": "InternationalConferenceonAdvancedInformationSystems Engineering",
+      "publisher": "Springer",
+      "url": "http://dblp.uni-trier.de/db/conf/caise/",
+      "areas": [
+        "软件工程/系统软件/程序设计语言"
+      ],
+      "source_pages": [
+        28
+      ]
+    },
+    {
+      "kind": "conference",
+      "ccf_rank": "B",
+      "short_name": "ICFP",
+      "full_name": "ACMSIGPLANInternationalConferenceonFunction Programming",
+      "publisher": "ACM",
+      "url": "http://dblp.uni-trier.de/db/conf/icfp/",
+      "areas": [
+        "软件工程/系统软件/程序设计语言"
+      ],
+      "source_pages": [
+        28
+      ]
+    },
+    {
+      "kind": "conference",
+      "ccf_rank": "B",
+      "short_name": "LCTES",
+      "full_name": "ACMSIGPLAN/SIGBEDInternationalConferenceon Languages,CompilersandToolsforEmbeddedSystems",
+      "publisher": "ACM",
+      "url": "http://dblp.uni-trier.de/db/conf/lctrts/",
+      "areas": [
+        "软件工程/系统软件/程序设计语言"
+      ],
+      "source_pages": [
+        28
+      ]
+    },
+    {
+      "kind": "conference",
+      "ccf_rank": "B",
+      "short_name": "MoDELS",
+      "full_name": "ACM/IEEEInternationalConferenceonModelDriven EngineeringLanguagesandSystems",
+      "publisher": "IEEE/ ACM",
+      "url": "http://dblp.uni-trier.de/db/conf/models/",
+      "areas": [
+        "软件工程/系统软件/程序设计语言"
+      ],
+      "source_pages": [
+        28
+      ]
+    },
+    {
+      "kind": "conference",
+      "ccf_rank": "B",
+      "short_name": "CP",
+      "full_name": "InternationalConferenceonPrinciplesandPracticeof ConstraintProgramming",
+      "publisher": "Springer",
+      "url": "http://dblp.uni-trier.de/db/conf/cp/",
+      "areas": [
+        "软件工程/系统软件/程序设计语言"
+      ],
+      "source_pages": [
+        28
+      ]
+    },
+    {
+      "kind": "conference",
+      "ccf_rank": "B",
+      "short_name": "ICSOC",
+      "full_name": "InternationalConferenceonServiceOrientedComputing",
+      "publisher": "Springer",
+      "url": "http://dblp.uni-trier.de/db/conf/icsoc/",
+      "areas": [
+        "软件工程/系统软件/程序设计语言"
+      ],
+      "source_pages": [
+        28
+      ]
+    },
+    {
+      "kind": "conference",
+      "ccf_rank": "B",
+      "short_name": "SANER",
+      "full_name": "IEEEInternationalConferenceonSoftwareAnalysis, Evolution, andReengineering",
+      "publisher": "IEEE",
+      "url": "http://dblp.uni-trier.de/db/conf/wcre/",
+      "areas": [
+        "软件工程/系统软件/程序设计语言"
+      ],
+      "source_pages": [
+        29
+      ]
+    },
+    {
+      "kind": "conference",
+      "ccf_rank": "B",
+      "short_name": "ICSME",
+      "full_name": "InternationalConferenceonSoftwareMaintenanceand Evolution",
+      "publisher": "IEEE",
+      "url": "http://dblp.uni-trier.de/db/conf/icsm/",
+      "areas": [
+        "软件工程/系统软件/程序设计语言"
+      ],
+      "source_pages": [
+        29
+      ]
+    },
+    {
+      "kind": "conference",
+      "ccf_rank": "B",
+      "short_name": "VMCAI",
+      "full_name": "InternationalConferenceonVerification,ModelChecking andAbstractInterpretation",
+      "publisher": "Springer",
+      "url": "http://dblp.uni-trier.de/db/conf/vmcai/",
+      "areas": [
+        "软件工程/系统软件/程序设计语言"
+      ],
+      "source_pages": [
+        29
+      ]
+    },
+    {
+      "kind": "conference",
+      "ccf_rank": "B",
+      "short_name": "ICWS",
+      "full_name": "IEEEInternationalConferenceonWebServices",
+      "publisher": "IEEE",
+      "url": "http://dblp.uni-trier.de/db/conf/icws/",
+      "areas": [
+        "软件工程/系统软件/程序设计语言"
+      ],
+      "source_pages": [
+        29
+      ]
+    },
+    {
+      "kind": "conference",
+      "ccf_rank": "B",
+      "short_name": "Middleware",
+      "full_name": "InternationalMiddlewareConference",
+      "publisher": "ACM/IFIP/ USENIX",
+      "url": "http://dblp.uni-trier.de/db/conf/middleware/",
+      "areas": [
+        "软件工程/系统软件/程序设计语言"
+      ],
+      "source_pages": [
+        29
+      ]
+    },
+    {
+      "kind": "conference",
+      "ccf_rank": "B",
+      "short_name": "SAS",
+      "full_name": "InternationalStaticAnalysisSymposium",
+      "publisher": "Springer",
+      "url": "http://dblp.uni-trier.de/db/conf/sas/",
+      "areas": [
+        "软件工程/系统软件/程序设计语言"
+      ],
+      "source_pages": [
+        29
+      ]
+    },
+    {
+      "kind": "conference",
+      "ccf_rank": "B",
+      "short_name": "ESEM",
+      "full_name": "InternationalSymposiumonEmpiricalSoftwareEngineering andMeasurement",
+      "publisher": "IEEE/ ACM",
+      "url": "http://dblp.uni-trier.de/db/conf/esem/",
+      "areas": [
+        "软件工程/系统软件/程序设计语言"
+      ],
+      "source_pages": [
+        29
+      ]
+    },
+    {
+      "kind": "conference",
+      "ccf_rank": "B",
+      "short_name": "ISSRE",
+      "full_name": "IEEEInternationalSymposiumonSoftwareReliability Engineering",
+      "publisher": "IEEE",
+      "url": "http://dblp.uni-trier.de/db/conf/issre/",
+      "areas": [
+        "软件工程/系统软件/程序设计语言"
+      ],
+      "source_pages": [
+        29
+      ]
+    },
+    {
+      "kind": "conference",
+      "ccf_rank": "B",
+      "short_name": "HotOS",
+      "full_name": "USENIXWorkshoponHotTopicsinOperatingSystems",
+      "publisher": "USENIX",
+      "url": "http://dblp.uni-trier.de/db/conf/hotos/",
+      "areas": [
+        "软件工程/系统软件/程序设计语言"
+      ],
+      "source_pages": [
+        29
+      ]
+    },
+    {
+      "kind": "conference",
+      "ccf_rank": "B",
+      "short_name": "CC",
+      "full_name": "InternationalConferenceonCompilerConstruction",
+      "publisher": "ACM",
+      "url": "https://dblp.uni-trier.de/db/conf/cc/index.html",
+      "areas": [
+        "软件工程/系统软件/程序设计语言"
+      ],
+      "source_pages": [
+        29
+      ]
+    },
+    {
+      "kind": "journal",
+      "ccf_rank": "A",
+      "short_name": "TODS",
+      "full_name": "ACMTransactionsonDatabaseSystems",
+      "publisher": "ACM",
+      "url": "http://dblp.uni-trier.de/db/journals/tods/",
+      "areas": [
+        "数据库/数据挖掘/内容检索"
+      ],
+      "source_pages": [
+        32
+      ]
+    },
+    {
+      "kind": "journal",
+      "ccf_rank": "A",
+      "short_name": "TOIS",
+      "full_name": "ACMTransactionsonInformationSystems",
+      "publisher": "ACM",
+      "url": "http://dblp.uni-trier.de/db/journals/tois/",
+      "areas": [
+        "数据库/数据挖掘/内容检索"
+      ],
+      "source_pages": [
+        32
+      ]
+    },
+    {
+      "kind": "journal",
+      "ccf_rank": "A",
+      "short_name": "TKDE",
+      "full_name": "IEEETransactionsonKnowledgeandDataEngineering",
+      "publisher": "IEEE",
+      "url": "http://dblp.uni-trier.de/db/journals/tkde/",
+      "areas": [
+        "数据库/数据挖掘/内容检索"
+      ],
+      "source_pages": [
+        32
+      ]
+    },
+    {
+      "kind": "journal",
+      "ccf_rank": "A",
+      "short_name": "VLDBJ",
+      "full_name": "TheVLDBJournal",
+      "publisher": "Springer",
+      "url": "http://dblp.uni-trier.de/db/journals/vldb/",
+      "areas": [
+        "数据库/数据挖掘/内容检索"
+      ],
+      "source_pages": [
+        32
+      ]
+    },
+    {
+      "kind": "journal",
+      "ccf_rank": "B",
+      "short_name": "TKDD",
+      "full_name": "ACMTransactionsonKnowledgeDiscoveryfromData",
+      "publisher": "ACM",
+      "url": "http://dblp.uni-trier.de/db/journals/tkdd/",
+      "areas": [
+        "数据库/数据挖掘/内容检索"
+      ],
+      "source_pages": [
+        33
+      ]
+    },
+    {
+      "kind": "journal",
+      "ccf_rank": "B",
+      "short_name": "TWEB",
+      "full_name": "ACMTransactionsontheWeb",
+      "publisher": "ACM",
+      "url": "http://dblp.uni-trier.de/db/journals/tweb/",
+      "areas": [
+        "数据库/数据挖掘/内容检索"
+      ],
+      "source_pages": [
+        33
+      ]
+    },
+    {
+      "kind": "journal",
+      "ccf_rank": "B",
+      "short_name": "AEI",
+      "full_name": "AdvancedEngineeringInformatics",
+      "publisher": "Elsevier",
+      "url": "http://dblp.uni-trier.de/db/journals/aei/",
+      "areas": [
+        "数据库/数据挖掘/内容检索"
+      ],
+      "source_pages": [
+        33
+      ]
+    },
+    {
+      "kind": "journal",
+      "ccf_rank": "B",
+      "short_name": "DKE",
+      "full_name": "Data&KnowledgeEngineering",
+      "publisher": "Elsevier",
+      "url": "http://dblp.uni-trier.de/db/journals/dke/",
+      "areas": [
+        "数据库/数据挖掘/内容检索",
+        "人工智能"
+      ],
+      "source_pages": [
+        33,
+        52
+      ]
+    },
+    {
+      "kind": "journal",
+      "ccf_rank": "B",
+      "short_name": "DMKD",
+      "full_name": "DataMiningandKnowledgeDiscovery",
+      "publisher": "Springer",
+      "url": "http://dblp.uni-trier.de/db/journals/datamine/",
+      "areas": [
+        "数据库/数据挖掘/内容检索"
+      ],
+      "source_pages": [
+        33
+      ]
+    },
+    {
+      "kind": "journal",
+      "ccf_rank": "B",
+      "short_name": "EJIS",
+      "full_name": "EuropeanJournalofInformationSystems",
+      "publisher": "Springer",
+      "url": "http://dblp.uni-trier.de/db/journals/ejis/",
+      "areas": [
+        "数据库/数据挖掘/内容检索"
+      ],
+      "source_pages": [
+        33
+      ]
+    },
+    {
+      "kind": "journal",
+      "ccf_rank": "B",
+      "short_name": "",
+      "full_name": "GeoInformatica",
+      "publisher": "Springer",
+      "url": "http://dblp.uni-trier.de/db/journals/geoinformatica/",
+      "areas": [
+        "数据库/数据挖掘/内容检索"
+      ],
+      "source_pages": [
+        33
+      ]
+    },
+    {
+      "kind": "journal",
+      "ccf_rank": "B",
+      "short_name": "IPM",
+      "full_name": "InformationProcessingandManagement",
+      "publisher": "Elsevier",
+      "url": "http://dblp.uni-trier.de/db/journals/ipm/",
+      "areas": [
+        "数据库/数据挖掘/内容检索"
+      ],
+      "source_pages": [
+        33
+      ]
+    },
+    {
+      "kind": "journal",
+      "ccf_rank": "B",
+      "short_name": "",
+      "full_name": "InformationSciences",
+      "publisher": "Elsevier",
+      "url": "http://dblp.uni-trier.de/db/journals/isci/",
+      "areas": [
+        "数据库/数据挖掘/内容检索"
+      ],
+      "source_pages": [
+        33
+      ]
+    },
+    {
+      "kind": "journal",
+      "ccf_rank": "B",
+      "short_name": "IS",
+      "full_name": "InformationSystems",
+      "publisher": "Elsevier",
+      "url": "http://dblp.uni-trier.de/db/journals/is/",
+      "areas": [
+        "数据库/数据挖掘/内容检索"
+      ],
+      "source_pages": [
+        33
+      ]
+    },
+    {
+      "kind": "journal",
+      "ccf_rank": "B",
+      "short_name": "JASIST",
+      "full_name": "JournaloftheAssociationforInformationScienceand Technology",
+      "publisher": "Wiley",
+      "url": "http://dblp.uni-trier.de/db/journals/jasis/",
+      "areas": [
+        "数据库/数据挖掘/内容检索"
+      ],
+      "source_pages": [
+        33
+      ]
+    },
+    {
+      "kind": "journal",
+      "ccf_rank": "B",
+      "short_name": "JWS",
+      "full_name": "JournalofWebSemantics",
+      "publisher": "Elsevier",
+      "url": "http://dblp.uni-trier.de/db/journals/ws/",
+      "areas": [
+        "数据库/数据挖掘/内容检索"
+      ],
+      "source_pages": [
+        33
+      ]
+    },
+    {
+      "kind": "journal",
+      "ccf_rank": "B",
+      "short_name": "KAIS",
+      "full_name": "KnowledgeandInformationSystems",
+      "publisher": "Springer",
+      "url": "http://dblp.uni-trier.de/db/journals/kais/",
+      "areas": [
+        "数据库/数据挖掘/内容检索"
+      ],
+      "source_pages": [
+        33
+      ]
+    },
+    {
+      "kind": "journal",
+      "ccf_rank": "B",
+      "short_name": "DSE",
+      "full_name": "DataScienceandEngineering",
+      "publisher": "CCF/ SpringerNature",
+      "url": "https://dblp.org/db/journals/dase/index.html",
+      "areas": [
+        "数据库/数据挖掘/内容检索"
+      ],
+      "source_pages": [
+        33
+      ]
+    },
+    {
+      "kind": "conference",
+      "ccf_rank": "A",
+      "short_name": "SIGMOD",
+      "full_name": "ACMSIGMODConference",
+      "publisher": "ACM",
+      "url": "http://dblp.uni-trier.de/db/conf/sigmod/",
+      "areas": [
+        "数据库/数据挖掘/内容检索"
+      ],
+      "source_pages": [
+        35
+      ]
+    },
+    {
+      "kind": "conference",
+      "ccf_rank": "A",
+      "short_name": "SIGKDD",
+      "full_name": "ACMSIGKDDConferenceonKnowledgeDiscoveryand DataMining",
+      "publisher": "ACM",
+      "url": "http://dblp.uni-trier.de/db/conf/kdd/",
+      "areas": [
+        "数据库/数据挖掘/内容检索"
+      ],
+      "source_pages": [
+        35
+      ]
+    },
+    {
+      "kind": "conference",
+      "ccf_rank": "A",
+      "short_name": "ICDE",
+      "full_name": "IEEEInternationalConferenceonDataEngineering",
+      "publisher": "IEEE",
+      "url": "http://dblp.uni-trier.de/db/conf/icde/",
+      "areas": [
+        "数据库/数据挖掘/内容检索"
+      ],
+      "source_pages": [
+        35
+      ]
+    },
+    {
+      "kind": "conference",
+      "ccf_rank": "A",
+      "short_name": "SIGIR",
+      "full_name": "InternationalACMSIGIRConferenceonResearchand DevelopmentinInformationRetrieval",
+      "publisher": "ACM",
+      "url": "http://dblp.uni-trier.de/db/conf/sigir/",
+      "areas": [
+        "数据库/数据挖掘/内容检索"
+      ],
+      "source_pages": [
+        35
+      ]
+    },
+    {
+      "kind": "conference",
+      "ccf_rank": "A",
+      "short_name": "VLDB",
+      "full_name": "InternationalConferenceonVeryLargeDataBases",
+      "publisher": "Morgan Kaufmann/ ACM",
+      "url": "http://dblp.uni-trier.de/db/conf/vldb/",
+      "areas": [
+        "数据库/数据挖掘/内容检索"
+      ],
+      "source_pages": [
+        35
+      ]
+    },
+    {
+      "kind": "conference",
+      "ccf_rank": "B",
+      "short_name": "CIKM",
+      "full_name": "ACMInternationalConferenceonInformationand KnowledgeManagement",
+      "publisher": "ACM",
+      "url": "http://dblp.uni-trier.de/db/conf/cikm/",
+      "areas": [
+        "数据库/数据挖掘/内容检索"
+      ],
+      "source_pages": [
+        36
+      ]
+    },
+    {
+      "kind": "conference",
+      "ccf_rank": "B",
+      "short_name": "WSDM",
+      "full_name": "ACMInternationalConferenceonWebSearchandData Mining",
+      "publisher": "ACM",
+      "url": "http://dblp.uni-trier.de/db/conf/wsdm/",
+      "areas": [
+        "数据库/数据挖掘/内容检索"
+      ],
+      "source_pages": [
+        36
+      ]
+    },
+    {
+      "kind": "conference",
+      "ccf_rank": "B",
+      "short_name": "PODS",
+      "full_name": "ACMSIGMOD-SIGACT-SIGAISymposiumonPrinciplesof DatabaseSystems",
+      "publisher": "ACM",
+      "url": "http://dblp.uni-trier.de/db/conf/pods/",
+      "areas": [
+        "数据库/数据挖掘/内容检索"
+      ],
+      "source_pages": [
+        36
+      ]
+    },
+    {
+      "kind": "conference",
+      "ccf_rank": "B",
+      "short_name": "DASFAA",
+      "full_name": "InternationalConferenceonDatabaseSystemsforAdvanced Applications",
+      "publisher": "Springer",
+      "url": "http://dblp.uni-trier.de/db/conf/dasfaa/",
+      "areas": [
+        "数据库/数据挖掘/内容检索"
+      ],
+      "source_pages": [
+        36
+      ]
+    },
+    {
+      "kind": "conference",
+      "ccf_rank": "B",
+      "short_name": "ECML-PKDD",
+      "full_name": "EuropeanConferenceonMachineLearning andPrinciples andPracticeofKnowledgeDiscoveryinDatabases",
+      "publisher": "Springer",
+      "url": "http://dblp.uni-trier.de/db/conf/ecml/ http://dblp.uni-trier.de/db/conf/pkdd/",
+      "areas": [
+        "数据库/数据挖掘/内容检索"
+      ],
+      "source_pages": [
+        36
+      ]
+    },
+    {
+      "kind": "conference",
+      "ccf_rank": "B",
+      "short_name": "ISWC",
+      "full_name": "IEEEInternationalSemanticWebConference",
+      "publisher": "IEEE",
+      "url": "http://dblp.uni-trier.de/db/conf/semweb/",
+      "areas": [
+        "数据库/数据挖掘/内容检索"
+      ],
+      "source_pages": [
+        36
+      ]
+    },
+    {
+      "kind": "conference",
+      "ccf_rank": "B",
+      "short_name": "ICDM",
+      "full_name": "IEEEInternationalConferenceonDataMining",
+      "publisher": "IEEE",
+      "url": "http://dblp.uni-trier.de/db/conf/icdm/",
+      "areas": [
+        "数据库/数据挖掘/内容检索"
+      ],
+      "source_pages": [
+        36
+      ]
+    },
+    {
+      "kind": "conference",
+      "ccf_rank": "B",
+      "short_name": "ICDT",
+      "full_name": "InternationalConferenceonDatabaseTheory",
+      "publisher": "Springer",
+      "url": "http://dblp.uni-trier.de/db/conf/icdt/",
+      "areas": [
+        "数据库/数据挖掘/内容检索"
+      ],
+      "source_pages": [
+        36
+      ]
+    },
+    {
+      "kind": "conference",
+      "ccf_rank": "B",
+      "short_name": "EDBT",
+      "full_name": "InternationalConferenceonExtendingDatabaseTechnology",
+      "publisher": "Springer",
+      "url": "http://dblp.uni-trier.de/db/conf/edbt/",
+      "areas": [
+        "数据库/数据挖掘/内容检索"
+      ],
+      "source_pages": [
+        36
+      ]
+    },
+    {
+      "kind": "conference",
+      "ccf_rank": "B",
+      "short_name": "CIDR",
+      "full_name": "ConferenceonInnovativeDataSystemsResearch",
+      "publisher": "Online Proceeding",
+      "url": "http://dblp.uni-trier.de/db/conf/cidr/",
+      "areas": [
+        "数据库/数据挖掘/内容检索"
+      ],
+      "source_pages": [
+        36
+      ]
+    },
+    {
+      "kind": "conference",
+      "ccf_rank": "B",
+      "short_name": "SDM",
+      "full_name": "SIAMInternationalConferenceonDataMining",
+      "publisher": "SIAM",
+      "url": "http://dblp.uni-trier.de/db/conf/sdm/",
+      "areas": [
+        "数据库/数据挖掘/内容检索"
+      ],
+      "source_pages": [
+        36
+      ]
+    },
+    {
+      "kind": "conference",
+      "ccf_rank": "B",
+      "short_name": "RecSys",
+      "full_name": "ACMConferenceonRecommenderSystems",
+      "publisher": "ACM",
+      "url": "https://dblp.org/db/conf/recsys/index.html",
+      "areas": [
+        "数据库/数据挖掘/内容检索"
+      ],
+      "source_pages": [
+        36
+      ]
+    },
+    {
+      "kind": "conference",
+      "ccf_rank": "B",
+      "short_name": "WISE",
+      "full_name": "WebInformationSystemsEngineeringConference",
+      "publisher": "Springer",
+      "url": "http://dblp.uni-trier.de/db/conf/wise/",
+      "areas": [
+        "数据库/数据挖掘/内容检索"
+      ],
+      "source_pages": [
+        36
+      ]
+    },
+    {
+      "kind": "journal",
+      "ccf_rank": "A",
+      "short_name": "TIT",
+      "full_name": "IEEETransactionsonInformationTheory",
+      "publisher": "IEEE",
+      "url": "http://dblp.uni-trier.de/db/journals/tit/",
+      "areas": [
+        "计算机科学理论"
+      ],
+      "source_pages": [
+        38
+      ]
+    },
+    {
+      "kind": "journal",
+      "ccf_rank": "A",
+      "short_name": "IANDC",
+      "full_name": "InformationandComputation",
+      "publisher": "Elsevier",
+      "url": "http://dblp.uni-trier.de/db/journals/iandc/",
+      "areas": [
+        "计算机科学理论"
+      ],
+      "source_pages": [
+        38
+      ]
+    },
+    {
+      "kind": "journal",
+      "ccf_rank": "A",
+      "short_name": "SICOMP",
+      "full_name": "SIAMJournalonComputing",
+      "publisher": "SIAM",
+      "url": "http://dblp.uni-trier.de/db/journals/siamcomp/",
+      "areas": [
+        "计算机科学理论"
+      ],
+      "source_pages": [
+        38
+      ]
+    },
+    {
+      "kind": "journal",
+      "ccf_rank": "B",
+      "short_name": "TALG",
+      "full_name": "ACMTransactionsonAlgorithms",
+      "publisher": "ACM",
+      "url": "http://dblp.uni-trier.de/db/journals/talg/",
+      "areas": [
+        "计算机科学理论"
+      ],
+      "source_pages": [
+        39
+      ]
+    },
+    {
+      "kind": "journal",
+      "ccf_rank": "B",
+      "short_name": "TOCL",
+      "full_name": "ACMTransactionsonComputationalLogic",
+      "publisher": "ACM",
+      "url": "http://dblp.uni-trier.de/db/journals/tocl/",
+      "areas": [
+        "计算机科学理论"
+      ],
+      "source_pages": [
+        39
+      ]
+    },
+    {
+      "kind": "journal",
+      "ccf_rank": "B",
+      "short_name": "TOMS",
+      "full_name": "ACMTransactionsonMathematicalSoftware",
+      "publisher": "ACM",
+      "url": "http://dblp.uni-trier.de/db/journals/toms/",
+      "areas": [
+        "计算机科学理论"
+      ],
+      "source_pages": [
+        39
+      ]
+    },
+    {
+      "kind": "journal",
+      "ccf_rank": "B",
+      "short_name": "Algorithmica",
+      "full_name": "Algorithmica",
+      "publisher": "Springer",
+      "url": "http://dblp.uni-trier.de/db/journals/algorithmica/",
+      "areas": [
+        "计算机科学理论"
+      ],
+      "source_pages": [
+        39
+      ]
+    },
+    {
+      "kind": "journal",
+      "ccf_rank": "B",
+      "short_name": "CC",
+      "full_name": "ComputationalComplexity",
+      "publisher": "Springer",
+      "url": "http://dblp.uni-trier.de/db/journals/cc/",
+      "areas": [
+        "计算机科学理论"
+      ],
+      "source_pages": [
+        39
+      ]
+    },
+    {
+      "kind": "journal",
+      "ccf_rank": "B",
+      "short_name": "FAC",
+      "full_name": "FormalAspectsofComputing",
+      "publisher": "Springer",
+      "url": "http://dblp.uni-trier.de/db/journals/fac/",
+      "areas": [
+        "计算机科学理论"
+      ],
+      "source_pages": [
+        39
+      ]
+    },
+    {
+      "kind": "journal",
+      "ccf_rank": "B",
+      "short_name": "FMSD",
+      "full_name": "FormalMethodsinSystemDesign",
+      "publisher": "Springer",
+      "url": "http://dblp.uni-trier.de/db/journals/fmsd/",
+      "areas": [
+        "计算机科学理论"
+      ],
+      "source_pages": [
+        39
+      ]
+    },
+    {
+      "kind": "journal",
+      "ccf_rank": "B",
+      "short_name": "INFORMS",
+      "full_name": "INFORMSJournalonComputing",
+      "publisher": "INFORMS",
+      "url": "http://dblp.uni-trier.de/db/journals/informs/",
+      "areas": [
+        "计算机科学理论"
+      ],
+      "source_pages": [
+        39
+      ]
+    },
+    {
+      "kind": "journal",
+      "ccf_rank": "B",
+      "short_name": "JCSS",
+      "full_name": "JournalofComputerandSystemSciences",
+      "publisher": "Elsevier",
+      "url": "http://dblp.uni-trier.de/db/journals/jcss/",
+      "areas": [
+        "计算机科学理论"
+      ],
+      "source_pages": [
+        39
+      ]
+    },
+    {
+      "kind": "journal",
+      "ccf_rank": "B",
+      "short_name": "JGO",
+      "full_name": "JournalofGlobalOptimization",
+      "publisher": "Springer",
+      "url": "http://dblp.uni-trier.de/db/journals/jgo/",
+      "areas": [
+        "计算机科学理论"
+      ],
+      "source_pages": [
+        39
+      ]
+    },
+    {
+      "kind": "journal",
+      "ccf_rank": "B",
+      "short_name": "JSC",
+      "full_name": "JournalofSymbolicComputation",
+      "publisher": "Elsevier",
+      "url": "http://dblp.uni-trier.de/db/journals/jsc/",
+      "areas": [
+        "计算机科学理论"
+      ],
+      "source_pages": [
+        39
+      ]
+    },
+    {
+      "kind": "journal",
+      "ccf_rank": "B",
+      "short_name": "MSCS",
+      "full_name": "MathematicalStructuresinComputerScience",
+      "publisher": "Cambridge University Press",
+      "url": "http://dblp.uni-trier.de/db/journals/mscs/",
+      "areas": [
+        "计算机科学理论"
+      ],
+      "source_pages": [
+        39
+      ]
+    },
+    {
+      "kind": "journal",
+      "ccf_rank": "B",
+      "short_name": "TCS",
+      "full_name": "TheoreticalComputerScience",
+      "publisher": "Elsevier",
+      "url": "http://dblp.uni-trier.de/db/journals/tcs/",
+      "areas": [
+        "计算机科学理论"
+      ],
+      "source_pages": [
+        39
+      ]
+    },
+    {
+      "kind": "conference",
+      "ccf_rank": "A",
+      "short_name": "STOC",
+      "full_name": "ACMSymposiumontheTheoryofComputing",
+      "publisher": "ACM",
+      "url": "http://dblp.uni-trier.de/db/conf/stoc/",
+      "areas": [
+        "计算机科学理论"
+      ],
+      "source_pages": [
+        41
+      ]
+    },
+    {
+      "kind": "conference",
+      "ccf_rank": "A",
+      "short_name": "SODA",
+      "full_name": "ACM-SIAMSymposiumonDiscreteAlgorithms",
+      "publisher": "SIAM",
+      "url": "http://dblp.uni-trier.de/db/conf/soda/",
+      "areas": [
+        "计算机科学理论"
+      ],
+      "source_pages": [
+        41
+      ]
+    },
+    {
+      "kind": "conference",
+      "ccf_rank": "A",
+      "short_name": "CAV",
+      "full_name": "InternationalConferenceonComputerAidedVerification",
+      "publisher": "Springer",
+      "url": "http://dblp.uni-trier.de/db/conf/cav/",
+      "areas": [
+        "计算机科学理论"
+      ],
+      "source_pages": [
+        41
+      ]
+    },
+    {
+      "kind": "conference",
+      "ccf_rank": "A",
+      "short_name": "FOCS",
+      "full_name": "IEEEAnnualSymposiumonFoundationsofComputer Science",
+      "publisher": "IEEE",
+      "url": "http://dblp.uni-trier.de/db/conf/focs/",
+      "areas": [
+        "计算机科学理论"
+      ],
+      "source_pages": [
+        41
+      ]
+    },
+    {
+      "kind": "conference",
+      "ccf_rank": "A",
+      "short_name": "LICS",
+      "full_name": "ACM/IEEESymposiumonLogicinComputerScience",
+      "publisher": "IEEE",
+      "url": "http://dblp.uni-trier.de/db/conf/lics/",
+      "areas": [
+        "计算机科学理论"
+      ],
+      "source_pages": [
+        41
+      ]
+    },
+    {
+      "kind": "conference",
+      "ccf_rank": "B",
+      "short_name": "SoCG",
+      "full_name": "InternationalSymposiumonComputationalGeometry",
+      "publisher": "ACM",
+      "url": "https://dblp.uni-trier.de/db/conf/compgeom/index.html",
+      "areas": [
+        "计算机科学理论"
+      ],
+      "source_pages": [
+        42
+      ]
+    },
+    {
+      "kind": "conference",
+      "ccf_rank": "B",
+      "short_name": "ESA",
+      "full_name": "EuropeanSymposiumonAlgorithms",
+      "publisher": "Springer",
+      "url": "http://dblp.uni-trier.de/db/conf/esa/",
+      "areas": [
+        "计算机科学理论"
+      ],
+      "source_pages": [
+        42
+      ]
+    },
+    {
+      "kind": "conference",
+      "ccf_rank": "B",
+      "short_name": "CCC",
+      "full_name": "ConferenceonComputationalComplexity",
+      "publisher": "IEEE",
+      "url": "http://dblp.uni-trier.de/db/conf/coco/",
+      "areas": [
+        "计算机科学理论"
+      ],
+      "source_pages": [
+        42
+      ]
+    },
+    {
+      "kind": "conference",
+      "ccf_rank": "B",
+      "short_name": "ICALP",
+      "full_name": "InternationalColloquiumonAutomata,Languagesand Programming",
+      "publisher": "Springer",
+      "url": "http://dblp.uni-trier.de/db/conf/icalp/",
+      "areas": [
+        "计算机科学理论"
+      ],
+      "source_pages": [
+        42
+      ]
+    },
+    {
+      "kind": "conference",
+      "ccf_rank": "B",
+      "short_name": "CADE",
+      "full_name": "ConferenceonAutomatedDeduction",
+      "publisher": "Springer",
+      "url": "http://dblp.uni-trier.de/db/conf/cade/",
+      "areas": [
+        "计算机科学理论"
+      ],
+      "source_pages": [
+        42
+      ]
+    },
+    {
+      "kind": "conference",
+      "ccf_rank": "B",
+      "short_name": "CONCUR",
+      "full_name": "InternationalConferenceonConcurrencyTheory",
+      "publisher": "Springer",
+      "url": "http://dblp.uni-trier.de/db/conf/concur/",
+      "areas": [
+        "计算机科学理论"
+      ],
+      "source_pages": [
+        42
+      ]
+    },
+    {
+      "kind": "conference",
+      "ccf_rank": "B",
+      "short_name": "HSCC",
+      "full_name": "InternationalConferenceonHybridSystems:Computation andControl",
+      "publisher": "Springer/ ACM",
+      "url": "http://dblp.uni-trier.de/db/conf/hybrid/",
+      "areas": [
+        "计算机科学理论"
+      ],
+      "source_pages": [
+        42
+      ]
+    },
+    {
+      "kind": "conference",
+      "ccf_rank": "B",
+      "short_name": "SAT",
+      "full_name": "InternationalConferenceonTheoryandApplicationsof SatisfiabilityTesting",
+      "publisher": "Springer",
+      "url": "http://dblp.uni-trier.de/db/conf/sat/",
+      "areas": [
+        "计算机科学理论"
+      ],
+      "source_pages": [
+        42
+      ]
+    },
+    {
+      "kind": "conference",
+      "ccf_rank": "B",
+      "short_name": "COCOON",
+      "full_name": "InternationalComputingandCombinatoricsConference",
+      "publisher": "Springer",
+      "url": "https://dblp.org/db/conf/cocoon/index.html",
+      "areas": [
+        "计算机科学理论"
+      ],
+      "source_pages": [
+        42
+      ]
+    },
+    {
+      "kind": "conference",
+      "ccf_rank": "B",
+      "short_name": "FMCAD",
+      "full_name": "FormalMethodsinComputer-AidedDesign",
+      "publisher": "ACM",
+      "url": "http://dblp.uni-trier.de/db/conf/fmcad/",
+      "areas": [
+        "计算机科学理论"
+      ],
+      "source_pages": [
+        42
+      ]
+    },
+    {
+      "kind": "journal",
+      "ccf_rank": "A",
+      "short_name": "TOG",
+      "full_name": "ACMTransactionsonGraphics",
+      "publisher": "ACM",
+      "url": "http://dblp.uni-trier.de/db/journals/tog/",
+      "areas": [
+        "计算机图形学与多媒体"
+      ],
+      "source_pages": [
+        44
+      ]
+    },
+    {
+      "kind": "journal",
+      "ccf_rank": "A",
+      "short_name": "TIP",
+      "full_name": "IEEETransactionsonImageProcessing",
+      "publisher": "IEEE",
+      "url": "http://dblp.uni-trier.de/db/journals/tip/",
+      "areas": [
+        "计算机图形学与多媒体"
+      ],
+      "source_pages": [
+        44
+      ]
+    },
+    {
+      "kind": "journal",
+      "ccf_rank": "A",
+      "short_name": "TVCG",
+      "full_name": "IEEETransactionsonVisualizationandComputer Graphics",
+      "publisher": "IEEE",
+      "url": "http://dblp.uni-trier.de/db/journals/tvcg/",
+      "areas": [
+        "计算机图形学与多媒体"
+      ],
+      "source_pages": [
+        44
+      ]
+    },
+    {
+      "kind": "journal",
+      "ccf_rank": "A",
+      "short_name": "TMM",
+      "full_name": "IEEETransactionsonMultimedia",
+      "publisher": "IEEE",
+      "url": "http://dblp.uni-trier.de/db/journals/tmm/",
+      "areas": [
+        "计算机图形学与多媒体"
+      ],
+      "source_pages": [
+        44
+      ]
+    },
+    {
+      "kind": "journal",
+      "ccf_rank": "B",
+      "short_name": "CAGD",
+      "full_name": "ComputerAidedGeometricDesign",
+      "publisher": "Elsevier",
+      "url": "http://dblp.uni- trier.de/db/journals/cagd/",
+      "areas": [
+        "计算机图形学与多媒体"
+      ],
+      "source_pages": [
+        45
+      ]
+    },
+    {
+      "kind": "journal",
+      "ccf_rank": "B",
+      "short_name": "CGF",
+      "full_name": "ComputerGraphicsForum",
+      "publisher": "Wiley",
+      "url": "http://dblp.uni- trier.de/db/journals/cgf/",
+      "areas": [
+        "计算机图形学与多媒体"
+      ],
+      "source_pages": [
+        45
+      ]
+    },
+    {
+      "kind": "journal",
+      "ccf_rank": "B",
+      "short_name": "CAD",
+      "full_name": "Computer-AidedDesign",
+      "publisher": "Elsevier",
+      "url": "http://dblp.uni- trier.de/db/journals/cad/",
+      "areas": [
+        "计算机图形学与多媒体"
+      ],
+      "source_pages": [
+        45
+      ]
+    },
+    {
+      "kind": "journal",
+      "ccf_rank": "B",
+      "short_name": "TCSVT",
+      "full_name": "IEEETransactionsonCircuitsandSystemsforVideo Technology",
+      "publisher": "IEEE",
+      "url": "http://dblp.uni- trier.de/db/journals/tcsv/",
+      "areas": [
+        "计算机图形学与多媒体"
+      ],
+      "source_pages": [
+        45
+      ]
+    },
+    {
+      "kind": "journal",
+      "ccf_rank": "B",
+      "short_name": "JASA",
+      "full_name": "TheJournaloftheAcousticalSocietyofAmerica",
+      "publisher": "AIP",
+      "url": "http://scitation.aip.org/content/asa/jo urnal/jasa",
+      "areas": [
+        "计算机图形学与多媒体"
+      ],
+      "source_pages": [
+        45
+      ]
+    },
+    {
+      "kind": "journal",
+      "ccf_rank": "B",
+      "short_name": "SIIMS",
+      "full_name": "SIAMJournalonImagingSciences",
+      "publisher": "SIAM",
+      "url": "http://dblp.uni- trier.de/db/journals/siamis/",
+      "areas": [
+        "计算机图形学与多媒体"
+      ],
+      "source_pages": [
+        45
+      ]
+    },
+    {
+      "kind": "journal",
+      "ccf_rank": "B",
+      "short_name": "SPECOM",
+      "full_name": "SpeechCommunication",
+      "publisher": "Elsevier",
+      "url": "http://dblp.uni- trier.de/db/journals/speech/",
+      "areas": [
+        "计算机图形学与多媒体"
+      ],
+      "source_pages": [
+        45
+      ]
+    },
+    {
+      "kind": "journal",
+      "ccf_rank": "B",
+      "short_name": "CVMJ",
+      "full_name": "ComputationalVisualMedia",
+      "publisher": "清华大学出版社/IEEE （原TsinghuaUniversity/Springer）",
+      "url": "https://dblp.org/db/journals/cvm/inde x.html",
+      "areas": [
+        "计算机图形学与多媒体"
+      ],
+      "source_pages": [
+        45
+      ]
+    },
+    {
+      "kind": "conference",
+      "ccf_rank": "A",
+      "short_name": "ACMMM",
+      "full_name": "ACMInternationalConferenceonMultimedia",
+      "publisher": "ACM",
+      "url": "http://dblp.uni-trier.de/db/conf/mm/",
+      "areas": [
+        "计算机图形学与多媒体"
+      ],
+      "source_pages": [
+        47
+      ]
+    },
+    {
+      "kind": "conference",
+      "ccf_rank": "A",
+      "short_name": "SIGGRAPH",
+      "full_name": "ACMSpecialInterestGrouponComputerGraphics",
+      "publisher": "ACM",
+      "url": "http://dblp.uni- trier.de/db/conf/siggraph/index.html",
+      "areas": [
+        "计算机图形学与多媒体"
+      ],
+      "source_pages": [
+        47
+      ]
+    },
+    {
+      "kind": "conference",
+      "ccf_rank": "A",
+      "short_name": "VR",
+      "full_name": "IEEEConferenceonVirtualRealityand3DUserInterfaces （原IEEEVirtualReality）",
+      "publisher": "IEEE",
+      "url": "http://dblp.uni-trier.de/db/conf/vr/",
+      "areas": [
+        "计算机图形学与多媒体"
+      ],
+      "source_pages": [
+        47
+      ]
+    },
+    {
+      "kind": "conference",
+      "ccf_rank": "A",
+      "short_name": "IEEEVIS",
+      "full_name": "IEEEVisualizationConference",
+      "publisher": "IEEE",
+      "url": "http://dblp.uni- trier.de/db/conf/visualization/index.html",
+      "areas": [
+        "计算机图形学与多媒体"
+      ],
+      "source_pages": [
+        47
+      ]
+    },
+    {
+      "kind": "conference",
+      "ccf_rank": "B",
+      "short_name": "ICMR",
+      "full_name": "ACMSIGMMInternationalConferenceonMultimedia Retrieval",
+      "publisher": "ACM",
+      "url": "http://dblp.uni-trier.de/db/conf/mir/",
+      "areas": [
+        "计算机图形学与多媒体"
+      ],
+      "source_pages": [
+        48
+      ]
+    },
+    {
+      "kind": "conference",
+      "ccf_rank": "B",
+      "short_name": "I3D",
+      "full_name": "ACMSIGGRAPHSymposiumonInteractive3DGraphics andGames",
+      "publisher": "ACM",
+      "url": "http://dblp.uni-trier.de/db/conf/si3d/",
+      "areas": [
+        "计算机图形学与多媒体"
+      ],
+      "source_pages": [
+        48
+      ]
+    },
+    {
+      "kind": "conference",
+      "ccf_rank": "B",
+      "short_name": "SCA",
+      "full_name": "ACMSIGGRAPH/EurographicsSymposiumonComputer Animation",
+      "publisher": "ACM",
+      "url": "http://dblp.uni-trier.de/db/conf/sca/index.html",
+      "areas": [
+        "计算机图形学与多媒体"
+      ],
+      "source_pages": [
+        48
+      ]
+    },
+    {
+      "kind": "conference",
+      "ccf_rank": "B",
+      "short_name": "DCC",
+      "full_name": "DataCompressionConference",
+      "publisher": "IEEE",
+      "url": "http://dblp.uni-trier.de/db/conf/dcc/",
+      "areas": [
+        "计算机图形学与多媒体"
+      ],
+      "source_pages": [
+        48
+      ]
+    },
+    {
+      "kind": "conference",
+      "ccf_rank": "B",
+      "short_name": "Eurographics",
+      "full_name": "AnnualConferenceoftheEuropeanAssociationforComputer Graphics",
+      "publisher": "Wiley/ Blackwell",
+      "url": "http://dblp.uni-trier.de/db/conf/eurographics/",
+      "areas": [
+        "计算机图形学与多媒体"
+      ],
+      "source_pages": [
+        48
+      ]
+    },
+    {
+      "kind": "conference",
+      "ccf_rank": "B",
+      "short_name": "EuroVis",
+      "full_name": "EurographicsConferenceonVisualization",
+      "publisher": "ACM",
+      "url": "http://dblp.uni-trier.de/db/conf/vissym/",
+      "areas": [
+        "计算机图形学与多媒体"
+      ],
+      "source_pages": [
+        48
+      ]
+    },
+    {
+      "kind": "conference",
+      "ccf_rank": "B",
+      "short_name": "SGP",
+      "full_name": "EurographicsSymposiumonGeometryProcessing",
+      "publisher": "Wiley/ Blackwell",
+      "url": "http://dblp.uni-trier.de/db/conf/sgp/",
+      "areas": [
+        "计算机图形学与多媒体"
+      ],
+      "source_pages": [
+        48
+      ]
+    },
+    {
+      "kind": "conference",
+      "ccf_rank": "B",
+      "short_name": "EGSR",
+      "full_name": "EurographicsSymposiumonRendering",
+      "publisher": "Wiley/ Blackwell",
+      "url": "http://dblp.uni-trier.de/db/conf/rt/",
+      "areas": [
+        "计算机图形学与多媒体"
+      ],
+      "source_pages": [
+        48
+      ]
+    },
+    {
+      "kind": "conference",
+      "ccf_rank": "B",
+      "short_name": "ICASSP",
+      "full_name": "IEEEInternationalConferenceonAcoustics,Speechand SignalProcessing",
+      "publisher": "IEEE",
+      "url": "http://dblp.uni-trier.de/db/conf/icassp/",
+      "areas": [
+        "计算机图形学与多媒体"
+      ],
+      "source_pages": [
+        48
+      ]
+    },
+    {
+      "kind": "conference",
+      "ccf_rank": "B",
+      "short_name": "ICME",
+      "full_name": "IEEEInternationalConferenceon Multimedia&Expo",
+      "publisher": "IEEE",
+      "url": "http://dblp.uni-trier.de/db/conf/icmcs/",
+      "areas": [
+        "计算机图形学与多媒体"
+      ],
+      "source_pages": [
+        48
+      ]
+    },
+    {
+      "kind": "conference",
+      "ccf_rank": "B",
+      "short_name": "ISMAR",
+      "full_name": "InternationalSymposiumonMixedandAugmentedReality",
+      "publisher": "IEEE/ ACM",
+      "url": "http://dblp.uni-trier.de/db/conf/ismar/",
+      "areas": [
+        "计算机图形学与多媒体"
+      ],
+      "source_pages": [
+        48
+      ]
+    },
+    {
+      "kind": "conference",
+      "ccf_rank": "B",
+      "short_name": "PG",
+      "full_name": "PacificConferenceonComputerGraphicsandApplications",
+      "publisher": "Wiley/ Blackwell",
+      "url": "http://dblp.uni-trier.de/db/conf/pg/index.html",
+      "areas": [
+        "计算机图形学与多媒体"
+      ],
+      "source_pages": [
+        48
+      ]
+    },
+    {
+      "kind": "conference",
+      "ccf_rank": "B",
+      "short_name": "SPM",
+      "full_name": "SymposiumonSolidandPhysicalModeling",
+      "publisher": "SMA/ Elsevier",
+      "url": "http://dblp.uni-trier.de/db/conf/sma/",
+      "areas": [
+        "计算机图形学与多媒体"
+      ],
+      "source_pages": [
+        48
+      ]
+    },
+    {
+      "kind": "conference",
+      "ccf_rank": "B",
+      "short_name": "INTER- SPEECH",
+      "full_name": "ConferenceoftheInternationalSpeechCommunication Association",
+      "publisher": "ISCA",
+      "url": "http://dblp.uni-trier.de/db/conf/interspeech/index.html",
+      "areas": [
+        "计算机图形学与多媒体"
+      ],
+      "source_pages": [
+        48
+      ]
+    },
+    {
+      "kind": "journal",
+      "ccf_rank": "A",
+      "short_name": "AI",
+      "full_name": "ArtificialIntelligence",
+      "publisher": "Elsevier",
+      "url": "http://dblp.uni-trier.de/db/journals/ai/",
+      "areas": [
+        "人工智能"
+      ],
+      "source_pages": [
+        51
+      ]
+    },
+    {
+      "kind": "journal",
+      "ccf_rank": "A",
+      "short_name": "TPAMI",
+      "full_name": "IEEETransactionsonPatternAnalysisandMachine Intelligence",
+      "publisher": "IEEE",
+      "url": "http://dblp.uni-trier.de/db/journals/pami/",
+      "areas": [
+        "人工智能"
+      ],
+      "source_pages": [
+        51
+      ]
+    },
+    {
+      "kind": "journal",
+      "ccf_rank": "A",
+      "short_name": "IJCV",
+      "full_name": "InternationalJournalofComputerVision",
+      "publisher": "Springer",
+      "url": "http://dblp.uni-trier.de/db/journals/ijcv/",
+      "areas": [
+        "人工智能"
+      ],
+      "source_pages": [
+        51
+      ]
+    },
+    {
+      "kind": "journal",
+      "ccf_rank": "A",
+      "short_name": "JMLR",
+      "full_name": "JournalofMachineLearningResearch",
+      "publisher": "MITPress",
+      "url": "http://dblp.uni-trier.de/db/journals/jmlr/",
+      "areas": [
+        "人工智能"
+      ],
+      "source_pages": [
+        51
+      ]
+    },
+    {
+      "kind": "journal",
+      "ccf_rank": "B",
+      "short_name": "TAP",
+      "full_name": "ACMTransactionsonAppliedPerception",
+      "publisher": "ACM",
+      "url": "http://dblp.uni-trier.de/db/journals/tap/",
+      "areas": [
+        "人工智能"
+      ],
+      "source_pages": [
+        52
+      ]
+    },
+    {
+      "kind": "journal",
+      "ccf_rank": "B",
+      "short_name": "AAMAS",
+      "full_name": "AutonomousAgentsandMulti-AgentSystems",
+      "publisher": "Springer",
+      "url": "http://dblp.uni-trier.de/db/journals/aamas/",
+      "areas": [
+        "人工智能"
+      ],
+      "source_pages": [
+        52
+      ]
+    },
+    {
+      "kind": "journal",
+      "ccf_rank": "B",
+      "short_name": "",
+      "full_name": "ComputationalLinguistics",
+      "publisher": "MITPress",
+      "url": "http://dblp.uni-trier.de/db/journals/coling/",
+      "areas": [
+        "人工智能"
+      ],
+      "source_pages": [
+        52
+      ]
+    },
+    {
+      "kind": "journal",
+      "ccf_rank": "B",
+      "short_name": "CVIU",
+      "full_name": "ComputerVisionandImageUnderstanding",
+      "publisher": "Elsevier",
+      "url": "http://dblp.uni-trier.de/db/journals/cviu/",
+      "areas": [
+        "人工智能"
+      ],
+      "source_pages": [
+        52
+      ]
+    },
+    {
+      "kind": "journal",
+      "ccf_rank": "B",
+      "short_name": "",
+      "full_name": "EvolutionaryComputation",
+      "publisher": "MITPress",
+      "url": "http://dblp.uni-trier.de/db/journals/ec/",
+      "areas": [
+        "人工智能"
+      ],
+      "source_pages": [
+        52
+      ]
+    },
+    {
+      "kind": "journal",
+      "ccf_rank": "B",
+      "short_name": "TAC",
+      "full_name": "IEEETransactionsonAffectiveComputing",
+      "publisher": "IEEE",
+      "url": "http://dblp.uni-trier.de/db/journals/taffco/",
+      "areas": [
+        "人工智能"
+      ],
+      "source_pages": [
+        52
+      ]
+    },
+    {
+      "kind": "journal",
+      "ccf_rank": "B",
+      "short_name": "TASLP",
+      "full_name": "IEEETransactionsonAudio,SpeechandLanguage Processing （原IEEE/ACMTransactionsonAudio,Speechand LanguageProcessing）",
+      "publisher": "IEEE",
+      "url": "http://dblp.uni-trier.de/db/journals/taslp/",
+      "areas": [
+        "人工智能"
+      ],
+      "source_pages": [
+        52
+      ]
+    },
+    {
+      "kind": "journal",
+      "ccf_rank": "B",
+      "short_name": "",
+      "full_name": "IEEETransactionsonCybernetics",
+      "publisher": "IEEE",
+      "url": "http://dblp.uni-trier.de/db/journals/tcyb/",
+      "areas": [
+        "人工智能"
+      ],
+      "source_pages": [
+        52
+      ]
+    },
+    {
+      "kind": "journal",
+      "ccf_rank": "B",
+      "short_name": "TEC",
+      "full_name": "IEEETransactionsonEvolutionaryComputation",
+      "publisher": "IEEE",
+      "url": "http://dblp.uni-trier.de/db/journals/tec/",
+      "areas": [
+        "人工智能"
+      ],
+      "source_pages": [
+        52
+      ]
+    },
+    {
+      "kind": "journal",
+      "ccf_rank": "B",
+      "short_name": "TFS",
+      "full_name": "IEEETransactionsonFuzzySystems",
+      "publisher": "IEEE",
+      "url": "http://dblp.uni-trier.de/db/journals/tfs/",
+      "areas": [
+        "人工智能"
+      ],
+      "source_pages": [
+        52
+      ]
+    },
+    {
+      "kind": "journal",
+      "ccf_rank": "B",
+      "short_name": "TNNLS",
+      "full_name": "IEEETransactionsonNeuralNetworksandlearning systems",
+      "publisher": "IEEE",
+      "url": "http://dblp.uni-trier.de/db/journals/tnn/",
+      "areas": [
+        "人工智能"
+      ],
+      "source_pages": [
+        52
+      ]
+    },
+    {
+      "kind": "journal",
+      "ccf_rank": "B",
+      "short_name": "IJAR",
+      "full_name": "InternationalJournalofApproximateReasoning",
+      "publisher": "Elsevier",
+      "url": "http://dblp.uni-trier.de/db/journals/ijar/",
+      "areas": [
+        "人工智能"
+      ],
+      "source_pages": [
+        52
+      ]
+    },
+    {
+      "kind": "journal",
+      "ccf_rank": "B",
+      "short_name": "JAIR",
+      "full_name": "JournalofArtificialIntelligenceResearch",
+      "publisher": "AAAI",
+      "url": "http://dblp.uni-trier.de/db/journals/jair/index.html",
+      "areas": [
+        "人工智能"
+      ],
+      "source_pages": [
+        53
+      ]
+    },
+    {
+      "kind": "journal",
+      "ccf_rank": "B",
+      "short_name": "",
+      "full_name": "JournalofAutomatedReasoning",
+      "publisher": "Springer",
+      "url": "http://dblp.uni-trier.de/db/journals/jar/",
+      "areas": [
+        "人工智能"
+      ],
+      "source_pages": [
+        53
+      ]
+    },
+    {
+      "kind": "journal",
+      "ccf_rank": "B",
+      "short_name": "JSLHR",
+      "full_name": "JournalofSpeech,Language,andHearing Research",
+      "publisher": "AmericanSpeech- LanguageHearing Association",
+      "url": "http://jslhr.pubs.asha.org/",
+      "areas": [
+        "人工智能"
+      ],
+      "source_pages": [
+        53
+      ]
+    },
+    {
+      "kind": "journal",
+      "ccf_rank": "B",
+      "short_name": "",
+      "full_name": "MachineLearning",
+      "publisher": "Springer",
+      "url": "http://dblp.uni-trier.de/db/journals/ml/",
+      "areas": [
+        "人工智能"
+      ],
+      "source_pages": [
+        53
+      ]
+    },
+    {
+      "kind": "journal",
+      "ccf_rank": "B",
+      "short_name": "",
+      "full_name": "NeuralComputation",
+      "publisher": "MITPress",
+      "url": "http://dblp.uni-trier.de/db/journals/neco/",
+      "areas": [
+        "人工智能"
+      ],
+      "source_pages": [
+        53
+      ]
+    },
+    {
+      "kind": "journal",
+      "ccf_rank": "B",
+      "short_name": "",
+      "full_name": "NeuralNetworks",
+      "publisher": "Elsevier",
+      "url": "http://dblp.uni-trier.de/db/journals/nn/",
+      "areas": [
+        "人工智能"
+      ],
+      "source_pages": [
+        53
+      ]
+    },
+    {
+      "kind": "journal",
+      "ccf_rank": "B",
+      "short_name": "PR",
+      "full_name": "PatternRecognition",
+      "publisher": "Elsevier",
+      "url": "http://dblp.uni-trier.de/db/conf/par/",
+      "areas": [
+        "人工智能"
+      ],
+      "source_pages": [
+        53
+      ]
+    },
+    {
+      "kind": "journal",
+      "ccf_rank": "B",
+      "short_name": "TACL",
+      "full_name": "TransactionsoftheAssociationforComputational Linguistics",
+      "publisher": "TheAssociationfor Computational Linguistics",
+      "url": "https://dblp.org/db/journals/tacl/index.html",
+      "areas": [
+        "人工智能"
+      ],
+      "source_pages": [
+        53
+      ]
+    },
+    {
+      "kind": "conference",
+      "ccf_rank": "A",
+      "short_name": "AAAI",
+      "full_name": "AAAIConferenceonArtificialIntelligence",
+      "publisher": "AAAI",
+      "url": "http://dblp.uni-trier.de/db/conf/aaai/",
+      "areas": [
+        "人工智能"
+      ],
+      "source_pages": [
+        57
+      ]
+    },
+    {
+      "kind": "conference",
+      "ccf_rank": "A",
+      "short_name": "NeurIPS",
+      "full_name": "ConferenceonNeuralInformationProcessingSystems",
+      "publisher": "MITPress",
+      "url": "http://dblp.uni-trier.de/db/conf/nips/",
+      "areas": [
+        "人工智能"
+      ],
+      "source_pages": [
+        57
+      ]
+    },
+    {
+      "kind": "conference",
+      "ccf_rank": "A",
+      "short_name": "ACL",
+      "full_name": "AnnualMeetingoftheAssociationforComputational Linguistics",
+      "publisher": "ACL",
+      "url": "http://dblp.uni-trier.de/db/conf/acl/",
+      "areas": [
+        "人工智能"
+      ],
+      "source_pages": [
+        57
+      ]
+    },
+    {
+      "kind": "conference",
+      "ccf_rank": "A",
+      "short_name": "CVPR",
+      "full_name": "IEEE/CVFComputerVisionandPatternRecognition Conference",
+      "publisher": "IEEE",
+      "url": "http://dblp.uni-trier.de/db/conf/cvpr/",
+      "areas": [
+        "人工智能"
+      ],
+      "source_pages": [
+        57
+      ]
+    },
+    {
+      "kind": "conference",
+      "ccf_rank": "A",
+      "short_name": "ICCV",
+      "full_name": "InternationalConferenceonComputerVision",
+      "publisher": "IEEE",
+      "url": "http://dblp.uni-trier.de/db/conf/iccv/",
+      "areas": [
+        "人工智能"
+      ],
+      "source_pages": [
+        57
+      ]
+    },
+    {
+      "kind": "conference",
+      "ccf_rank": "A",
+      "short_name": "ICML",
+      "full_name": "InternationalConferenceonMachineLearning",
+      "publisher": "ACM",
+      "url": "http://dblp.uni-trier.de/db/conf/icml/",
+      "areas": [
+        "人工智能"
+      ],
+      "source_pages": [
+        57
+      ]
+    },
+    {
+      "kind": "conference",
+      "ccf_rank": "A",
+      "short_name": "ICLR",
+      "full_name": "InternationalConferenceonLearningRepresentations",
+      "publisher": "OpenReview",
+      "url": "https://dblp.uni-trier.de/db/conf/iclr/index.html",
+      "areas": [
+        "人工智能"
+      ],
+      "source_pages": [
+        57
+      ]
+    },
+    {
+      "kind": "conference",
+      "ccf_rank": "B",
+      "short_name": "COLT",
+      "full_name": "AnnualConferenceonComputationalLearningTheory",
+      "publisher": "Springer",
+      "url": "http://dblp.uni-trier.de/db/conf/colt/",
+      "areas": [
+        "人工智能"
+      ],
+      "source_pages": [
+        58
+      ]
+    },
+    {
+      "kind": "conference",
+      "ccf_rank": "B",
+      "short_name": "EMNLP",
+      "full_name": "ConferenceonEmpirical MethodsinNaturalLanguage Processing",
+      "publisher": "ACL",
+      "url": "http://dblp.uni-trier.de/db/conf/emnlp/",
+      "areas": [
+        "人工智能"
+      ],
+      "source_pages": [
+        58
+      ]
+    },
+    {
+      "kind": "conference",
+      "ccf_rank": "B",
+      "short_name": "ECAI",
+      "full_name": "EuropeanConferenceonArtificialIntelligence",
+      "publisher": "IOSPress",
+      "url": "http://dblp.uni-trier.de/db/conf/ecai/",
+      "areas": [
+        "人工智能"
+      ],
+      "source_pages": [
+        58
+      ]
+    },
+    {
+      "kind": "conference",
+      "ccf_rank": "B",
+      "short_name": "ECCV",
+      "full_name": "EuropeanConferenceonComputerVision",
+      "publisher": "Springer",
+      "url": "http://dblp.uni-trier.de/db/conf/eccv/",
+      "areas": [
+        "人工智能"
+      ],
+      "source_pages": [
+        58
+      ]
+    },
+    {
+      "kind": "conference",
+      "ccf_rank": "B",
+      "short_name": "ICRA",
+      "full_name": "IEEEInternationalConferenceonRoboticsand Automation",
+      "publisher": "IEEE",
+      "url": "http://dblp.uni-trier.de/db/conf/icra/",
+      "areas": [
+        "人工智能"
+      ],
+      "source_pages": [
+        58
+      ]
+    },
+    {
+      "kind": "conference",
+      "ccf_rank": "B",
+      "short_name": "ICAPS",
+      "full_name": "InternationalConferenceonAutomatedPlanningand Scheduling",
+      "publisher": "AAAI",
+      "url": "https://dblp.uni- trier.de/db/conf/icaps/index.html",
+      "areas": [
+        "人工智能"
+      ],
+      "source_pages": [
+        58
+      ]
+    },
+    {
+      "kind": "conference",
+      "ccf_rank": "B",
+      "short_name": "ICCBR",
+      "full_name": "InternationalConferenceonCase-BasedReasoning",
+      "publisher": "Springer",
+      "url": "http://dblp.uni-trier.de/db/conf/iccbr/",
+      "areas": [
+        "人工智能"
+      ],
+      "source_pages": [
+        58
+      ]
+    },
+    {
+      "kind": "conference",
+      "ccf_rank": "B",
+      "short_name": "COLING",
+      "full_name": "InternationalConferenceonComputationalLinguistics",
+      "publisher": "InternationalCommittee onComputational Linguistics",
+      "url": "http://dblp.uni-trier.de/db/conf/coling/",
+      "areas": [
+        "人工智能"
+      ],
+      "source_pages": [
+        58
+      ]
+    },
+    {
+      "kind": "conference",
+      "ccf_rank": "B",
+      "short_name": "KR",
+      "full_name": "InternationalConferenceonPrinciplesofKnowledge RepresentationandReasoning",
+      "publisher": "MorganKaufmann",
+      "url": "http://dblp.uni-trier.de/db/conf/kr/",
+      "areas": [
+        "人工智能"
+      ],
+      "source_pages": [
+        58
+      ]
+    },
+    {
+      "kind": "conference",
+      "ccf_rank": "B",
+      "short_name": "UAI",
+      "full_name": "ConferenceonUncertaintyinArtificialIntelligence",
+      "publisher": "AUAI",
+      "url": "http://dblp.uni-trier.de/db/conf/uai/",
+      "areas": [
+        "人工智能"
+      ],
+      "source_pages": [
+        58
+      ]
+    },
+    {
+      "kind": "conference",
+      "ccf_rank": "B",
+      "short_name": "AAMAS",
+      "full_name": "InternationalJointConferenceonAutonomousAgentsand Multi-agentSystems",
+      "publisher": "Springer",
+      "url": "https://dblp.uni- trier.de/db/conf/ifaamas/index.html",
+      "areas": [
+        "人工智能"
+      ],
+      "source_pages": [
+        58
+      ]
+    },
+    {
+      "kind": "conference",
+      "ccf_rank": "B",
+      "short_name": "PPSN",
+      "full_name": "ParallelProblemSolvingfrom Nature",
+      "publisher": "Springer",
+      "url": "http://dblp.uni-trier.de/db/conf/ppsn/",
+      "areas": [
+        "人工智能"
+      ],
+      "source_pages": [
+        58
+      ]
+    },
+    {
+      "kind": "conference",
+      "ccf_rank": "B",
+      "short_name": "NAACL",
+      "full_name": "NorthAmericanChapteroftheAssociationfor ComputationalLinguistics",
+      "publisher": "Associationfor ComputationalLinguistics",
+      "url": "http://dblp.uni-trier.de/db/conf/naacl/",
+      "areas": [
+        "人工智能"
+      ],
+      "source_pages": [
+        58
+      ]
+    },
+    {
+      "kind": "conference",
+      "ccf_rank": "B",
+      "short_name": "IJCAI",
+      "full_name": "InternationalJointConferenceonArtificialIntelligence",
+      "publisher": "MorganKaufmann",
+      "url": "http://dblp.uni-trier.de/db/conf/ijcai/",
+      "areas": [
+        "人工智能"
+      ],
+      "source_pages": [
+        58
+      ]
+    },
+    {
+      "kind": "journal",
+      "ccf_rank": "A",
+      "short_name": "TOCHI",
+      "full_name": "ACMTransactionsonComputer-HumanInteraction",
+      "publisher": "ACM",
+      "url": "http://dblp.uni-trier.de/db/journals/tochi/",
+      "areas": [
+        "人机交互与普适计算"
+      ],
+      "source_pages": [
+        61
+      ]
+    },
+    {
+      "kind": "journal",
+      "ccf_rank": "A",
+      "short_name": "IJHCS",
+      "full_name": "InternationalJournalofHuman-ComputerStudies",
+      "publisher": "Elsevier",
+      "url": "http://dblp.uni-trier.de/db/journals/ijmms/",
+      "areas": [
+        "人机交互与普适计算"
+      ],
+      "source_pages": [
+        61
+      ]
+    },
+    {
+      "kind": "journal",
+      "ccf_rank": "B",
+      "short_name": "CSCW",
+      "full_name": "ComputerSupportedCooperativeWork",
+      "publisher": "Springer",
+      "url": "http://dblp.uni-trier.de/db/journals/cscw/",
+      "areas": [
+        "人机交互与普适计算"
+      ],
+      "source_pages": [
+        62
+      ]
+    },
+    {
+      "kind": "journal",
+      "ccf_rank": "B",
+      "short_name": "HCI",
+      "full_name": "Human-ComputerInteraction",
+      "publisher": "Taylor& Francis",
+      "url": "http://dblp.uni-trier.de/db/journals/hhci/",
+      "areas": [
+        "人机交互与普适计算"
+      ],
+      "source_pages": [
+        62
+      ]
+    },
+    {
+      "kind": "journal",
+      "ccf_rank": "B",
+      "short_name": "",
+      "full_name": "IEEETransactionsonHuman-MachineSystems",
+      "publisher": "IEEE",
+      "url": "http://dblp.uni-trier.de/db/journals/thms/",
+      "areas": [
+        "人机交互与普适计算"
+      ],
+      "source_pages": [
+        62
+      ]
+    },
+    {
+      "kind": "journal",
+      "ccf_rank": "B",
+      "short_name": "IWC",
+      "full_name": "InteractingwithComputers",
+      "publisher": "Oxford University Press",
+      "url": "http://dblp.uni-trier.de/db/journals/iwc/",
+      "areas": [
+        "人机交互与普适计算"
+      ],
+      "source_pages": [
+        62
+      ]
+    },
+    {
+      "kind": "journal",
+      "ccf_rank": "B",
+      "short_name": "IJHCI",
+      "full_name": "InternationalJournalofHuman-ComputerInteraction",
+      "publisher": "Taylor& Francis",
+      "url": "http://dblp.uni-trier.de/db/journals/ijhci/",
+      "areas": [
+        "人机交互与普适计算"
+      ],
+      "source_pages": [
+        62
+      ]
+    },
+    {
+      "kind": "journal",
+      "ccf_rank": "B",
+      "short_name": "UMUAI",
+      "full_name": "UserModelingandUser-AdaptedInteraction",
+      "publisher": "Springer",
+      "url": "http://dblp.uni-trier.de/db/journals/umuai/",
+      "areas": [
+        "人机交互与普适计算"
+      ],
+      "source_pages": [
+        62
+      ]
+    },
+    {
+      "kind": "journal",
+      "ccf_rank": "B",
+      "short_name": "TSMC",
+      "full_name": "IEEETransactionsonSystems,Man,andCybernetics: Systems",
+      "publisher": "IEEE",
+      "url": "https://dblp.org/db/journals/tsmc/tsmc12.html",
+      "areas": [
+        "人机交互与普适计算"
+      ],
+      "source_pages": [
+        62
+      ]
+    },
+    {
+      "kind": "journal",
+      "ccf_rank": "B",
+      "short_name": "CCFTPCI",
+      "full_name": "CCFTransactionsonPervasiveComputingandInteraction",
+      "publisher": "CCF/ Springer",
+      "url": "https://dblp.uni-trier.de/db/journals/ccftpci/index.html",
+      "areas": [
+        "人机交互与普适计算"
+      ],
+      "source_pages": [
+        62
+      ]
+    },
+    {
+      "kind": "conference",
+      "ccf_rank": "A",
+      "short_name": "CSCW",
+      "full_name": "ACMConferenceOnComputer-SupportedCooperative WorkAndSocialComputing",
+      "publisher": "ACM",
+      "url": "http://dblp.uni-trier.de/db/conf/cscw",
+      "areas": [
+        "人机交互与普适计算"
+      ],
+      "source_pages": [
+        64
+      ]
+    },
+    {
+      "kind": "conference",
+      "ccf_rank": "A",
+      "short_name": "CHI",
+      "full_name": "ACMConferenceonHumanFactorsinComputing Systems",
+      "publisher": "ACM",
+      "url": "http://dblp.uni-trier.de/db/conf/chi",
+      "areas": [
+        "人机交互与普适计算"
+      ],
+      "source_pages": [
+        64
+      ]
+    },
+    {
+      "kind": "conference",
+      "ccf_rank": "A",
+      "short_name": "UbiComp",
+      "full_name": "ACMinternationaljointconferenceonPervasiveand UbiquitousComputing",
+      "publisher": "ACM",
+      "url": "https://dblp.uni-trier.de/db/conf/huc/",
+      "areas": [
+        "人机交互与普适计算"
+      ],
+      "source_pages": [
+        64
+      ]
+    },
+    {
+      "kind": "conference",
+      "ccf_rank": "A",
+      "short_name": "UIST",
+      "full_name": "ACMSymposiumonUserInterfaceSoftwareand Technology",
+      "publisher": "ACM",
+      "url": "http://dblp.uni-trier.de/db/conf/uist/",
+      "areas": [
+        "人机交互与普适计算"
+      ],
+      "source_pages": [
+        64
+      ]
+    },
+    {
+      "kind": "conference",
+      "ccf_rank": "B",
+      "short_name": "GROUP",
+      "full_name": "ACMInternationalConferenceonSupportingGroup Work",
+      "publisher": "ACM",
+      "url": "http://dblp.uni-trier.de/db/conf/group/",
+      "areas": [
+        "人机交互与普适计算"
+      ],
+      "source_pages": [
+        65
+      ]
+    },
+    {
+      "kind": "conference",
+      "ccf_rank": "B",
+      "short_name": "IUI",
+      "full_name": "ACMInternationalConferenceonIntelligentUser Interfaces",
+      "publisher": "ACM",
+      "url": "http://dblp.uni-trier.de/db/conf/iui/",
+      "areas": [
+        "人机交互与普适计算"
+      ],
+      "source_pages": [
+        65
+      ]
+    },
+    {
+      "kind": "conference",
+      "ccf_rank": "B",
+      "short_name": "ISS",
+      "full_name": "ACMInternationalConferenceonInteractiveSurfacesand Spaces",
+      "publisher": "ACM",
+      "url": "http://dblp.uni-trier.de/db/conf/tabletop/",
+      "areas": [
+        "人机交互与普适计算"
+      ],
+      "source_pages": [
+        65
+      ]
+    },
+    {
+      "kind": "conference",
+      "ccf_rank": "B",
+      "short_name": "ECSCW",
+      "full_name": "EuropeanConferenceonComputerSupportedCooperative Work",
+      "publisher": "Springer",
+      "url": "http://dblp.uni-trier.de/db/conf/ecscw/",
+      "areas": [
+        "人机交互与普适计算"
+      ],
+      "source_pages": [
+        65
+      ]
+    },
+    {
+      "kind": "conference",
+      "ccf_rank": "B",
+      "short_name": "PERCOM",
+      "full_name": "IEEEInternationalConferenceonPervasiveComputing andCommunications",
+      "publisher": "IEEE",
+      "url": "http://dblp.uni-trier.de/db/conf/percom/",
+      "areas": [
+        "人机交互与普适计算"
+      ],
+      "source_pages": [
+        65
+      ]
+    },
+    {
+      "kind": "conference",
+      "ccf_rank": "B",
+      "short_name": "MobileHCI",
+      "full_name": "ACMInternationalConferenceonMobileHuman- ComputerInteraction",
+      "publisher": "ACM",
+      "url": "http://dblp.uni-trier.de/db/conf/mhci/",
+      "areas": [
+        "人机交互与普适计算"
+      ],
+      "source_pages": [
+        65
+      ]
+    },
+    {
+      "kind": "conference",
+      "ccf_rank": "B",
+      "short_name": "ICWSM",
+      "full_name": "TheInternationalAAAIConferenceonWebandSocial Media",
+      "publisher": "AAAI",
+      "url": "https://dblp.org/db/conf/icwsm/index.html",
+      "areas": [
+        "人机交互与普适计算"
+      ],
+      "source_pages": [
+        65
+      ]
+    },
+    {
+      "kind": "journal",
+      "ccf_rank": "A",
+      "short_name": "JACM",
+      "full_name": "JournaloftheACM",
+      "publisher": "ACM",
+      "url": "http://dblp.uni-trier.de/db/journals/jacm/",
+      "areas": [
+        "交叉/综合/新兴"
+      ],
+      "source_pages": [
+        67
+      ]
+    },
+    {
+      "kind": "journal",
+      "ccf_rank": "A",
+      "short_name": "Proc.IEEE",
+      "full_name": "ProceedingsoftheIEEE",
+      "publisher": "IEEE",
+      "url": "http://dblp.uni-trier.de/db/journals/pieee/",
+      "areas": [
+        "交叉/综合/新兴"
+      ],
+      "source_pages": [
+        67
+      ]
+    },
+    {
+      "kind": "journal",
+      "ccf_rank": "A",
+      "short_name": "SCIS",
+      "full_name": "ScienceChinaInformationSciences",
+      "publisher": "ScienceinChina Press/Springer",
+      "url": "http://dblp.uni-trier.de/db/journals/chinaf/",
+      "areas": [
+        "交叉/综合/新兴"
+      ],
+      "source_pages": [
+        67
+      ]
+    },
+    {
+      "kind": "journal",
+      "ccf_rank": "A",
+      "short_name": "Bioinformatics",
+      "full_name": "Bioinformatics",
+      "publisher": "OxfordUniversity Press",
+      "url": "http://dblp.uni-trier.de/db/journals/bioinformatics/",
+      "areas": [
+        "交叉/综合/新兴"
+      ],
+      "source_pages": [
+        67
+      ]
+    },
+    {
+      "kind": "journal",
+      "ccf_rank": "B",
+      "short_name": "",
+      "full_name": "BriefingsinBioinformatics",
+      "publisher": "OxfordUniversity Press",
+      "url": "http://dblp.uni-trier.de/db/journals/bib/",
+      "areas": [
+        "交叉/综合/新兴"
+      ],
+      "source_pages": [
+        68
+      ]
+    },
+    {
+      "kind": "journal",
+      "ccf_rank": "B",
+      "short_name": "Cognition",
+      "full_name": "Cognition",
+      "publisher": "Elsevier",
+      "url": "http://www.journals.elsevier.com/cognition/",
+      "areas": [
+        "交叉/综合/新兴"
+      ],
+      "source_pages": [
+        68
+      ]
+    },
+    {
+      "kind": "journal",
+      "ccf_rank": "B",
+      "short_name": "TASAE",
+      "full_name": "IEEETransactionsonAutomationScienceandEngineering",
+      "publisher": "IEEE",
+      "url": "http://dblp.uni-trier.de/db/journals/tase/",
+      "areas": [
+        "交叉/综合/新兴"
+      ],
+      "source_pages": [
+        68
+      ]
+    },
+    {
+      "kind": "journal",
+      "ccf_rank": "B",
+      "short_name": "TGARS",
+      "full_name": "IEEETransactionsonGeoscienceandRemoteSensing",
+      "publisher": "IEEE",
+      "url": "http://dblp.uni-trier.de/db/journals/tgrs/",
+      "areas": [
+        "交叉/综合/新兴"
+      ],
+      "source_pages": [
+        68
+      ]
+    },
+    {
+      "kind": "journal",
+      "ccf_rank": "B",
+      "short_name": "TITS",
+      "full_name": "IEEETransactionsonIntelligentTransportationSystems",
+      "publisher": "IEEE",
+      "url": "http://dblp.uni-trier.de/db/journals/tits/",
+      "areas": [
+        "交叉/综合/新兴"
+      ],
+      "source_pages": [
+        68
+      ]
+    },
+    {
+      "kind": "journal",
+      "ccf_rank": "B",
+      "short_name": "TMI",
+      "full_name": "IEEETransactionsonMedicalImaging",
+      "publisher": "IEEE",
+      "url": "http://dblp.uni-trier.de/db/journals/tmi/",
+      "areas": [
+        "交叉/综合/新兴"
+      ],
+      "source_pages": [
+        68
+      ]
+    },
+    {
+      "kind": "journal",
+      "ccf_rank": "B",
+      "short_name": "TR",
+      "full_name": "IEEETransactionsonRobotics",
+      "publisher": "IEEE",
+      "url": "http://dblp.uni-trier.de/db/journals/trob/",
+      "areas": [
+        "交叉/综合/新兴"
+      ],
+      "source_pages": [
+        68
+      ]
+    },
+    {
+      "kind": "journal",
+      "ccf_rank": "B",
+      "short_name": "TCBB",
+      "full_name": "IEEE/ACMTransactionsonComputationalBiologyand Bioinformatics",
+      "publisher": "IEEE/ACM",
+      "url": "http://dblp.uni-trier.de/db/journals/tcbb/",
+      "areas": [
+        "交叉/综合/新兴"
+      ],
+      "source_pages": [
+        68
+      ]
+    },
+    {
+      "kind": "journal",
+      "ccf_rank": "B",
+      "short_name": "JCST",
+      "full_name": "JournalofComputerScienceandTechnology",
+      "publisher": "SCIENCE PRESS/Springer",
+      "url": "http://dblp.uni-trier.de/db/journals/jcst/",
+      "areas": [
+        "交叉/综合/新兴"
+      ],
+      "source_pages": [
+        68
+      ]
+    },
+    {
+      "kind": "journal",
+      "ccf_rank": "B",
+      "short_name": "JAMIA",
+      "full_name": "JournaloftheAmericanMedicalInformaticsAssociation",
+      "publisher": "BMJJournals",
+      "url": "http://dblp.uni-trier.de/db/journals/jamia/",
+      "areas": [
+        "交叉/综合/新兴"
+      ],
+      "source_pages": [
+        68
+      ]
+    },
+    {
+      "kind": "journal",
+      "ccf_rank": "B",
+      "short_name": "",
+      "full_name": "PLOSComputationalBiology",
+      "publisher": "PublicLibraryof Science",
+      "url": "http://dblp.uni-trier.de/db/journals/ploscb/",
+      "areas": [
+        "交叉/综合/新兴"
+      ],
+      "source_pages": [
+        68
+      ]
+    },
+    {
+      "kind": "journal",
+      "ccf_rank": "B",
+      "short_name": "",
+      "full_name": "TheComputerJournal",
+      "publisher": "OxfordUniversity Press",
+      "url": "http://dblp.uni-trier.de/db/journals/cj/",
+      "areas": [
+        "交叉/综合/新兴"
+      ],
+      "source_pages": [
+        68
+      ]
+    },
+    {
+      "kind": "journal",
+      "ccf_rank": "B",
+      "short_name": "WWW",
+      "full_name": "WorldWideWeb",
+      "publisher": "Springer",
+      "url": "https://dblp.org/db/journals/www/index.html",
+      "areas": [
+        "交叉/综合/新兴"
+      ],
+      "source_pages": [
+        68
+      ]
+    },
+    {
+      "kind": "journal",
+      "ccf_rank": "B",
+      "short_name": "FCS",
+      "full_name": "FrontiersofComputerScience",
+      "publisher": "HigherEducation Press",
+      "url": "http://dblp.uni-trier.de/db/journals/fcsc/",
+      "areas": [
+        "交叉/综合/新兴"
+      ],
+      "source_pages": [
+        68
+      ]
+    },
+    {
+      "kind": "journal",
+      "ccf_rank": "B",
+      "short_name": "BCRA",
+      "full_name": "Blockchain:ResearchandApplications",
+      "publisher": "浙江大学出版社 /Elsevier",
+      "url": "https://dblp.uni-trier.de/search?q=BCRA",
+      "areas": [
+        "交叉/综合/新兴"
+      ],
+      "source_pages": [
+        68
+      ]
+    },
+    {
+      "kind": "conference",
+      "ccf_rank": "A",
+      "short_name": "WWW",
+      "full_name": "TheWebConference （原InternationalWorldWideWebConference）",
+      "publisher": "ACM",
+      "url": "http://dblp.uni-trier.de/db/conf/www/",
+      "areas": [
+        "交叉/综合/新兴"
+      ],
+      "source_pages": [
+        70
+      ]
+    },
+    {
+      "kind": "conference",
+      "ccf_rank": "A",
+      "short_name": "RTSS",
+      "full_name": "IEEEReal-TimeSystemsSymposium",
+      "publisher": "IEEE",
+      "url": "http://dblp.uni-trier.de/db/conf/rtss/",
+      "areas": [
+        "交叉/综合/新兴"
+      ],
+      "source_pages": [
+        70
+      ]
+    },
+    {
+      "kind": "conference",
+      "ccf_rank": "B",
+      "short_name": "CogSci",
+      "full_name": "AnnualMeetingoftheCognitiveScienceSociety",
+      "publisher": "Psychology Press",
+      "url": "https://dblp.uni-trier.de/db/conf/cogsci/",
+      "areas": [
+        "交叉/综合/新兴"
+      ],
+      "source_pages": [
+        71
+      ]
+    },
+    {
+      "kind": "conference",
+      "ccf_rank": "B",
+      "short_name": "BIBM",
+      "full_name": "IEEEInternationalConferenceonBioinformaticsand Biomedicine",
+      "publisher": "IEEE",
+      "url": "http://dblp.uni-trier.de/db/conf/bibm/",
+      "areas": [
+        "交叉/综合/新兴"
+      ],
+      "source_pages": [
+        71
+      ]
+    },
+    {
+      "kind": "conference",
+      "ccf_rank": "B",
+      "short_name": "EMSOFT",
+      "full_name": "InternationalConferenceonEmbeddedSoftware",
+      "publisher": "IEEE/ACM /IFIP",
+      "url": "http://dblp.uni-trier.de/db/conf/emsoft/",
+      "areas": [
+        "交叉/综合/新兴"
+      ],
+      "source_pages": [
+        71
+      ]
+    },
+    {
+      "kind": "conference",
+      "ccf_rank": "B",
+      "short_name": "ISMB",
+      "full_name": "InternationalconferenceonIntelligentSystemsfor MolecularBiology",
+      "publisher": "Oxford Journals",
+      "url": "https://dblp.org/db/conf/ismb/index.html",
+      "areas": [
+        "交叉/综合/新兴"
+      ],
+      "source_pages": [
+        71
+      ]
+    },
+    {
+      "kind": "conference",
+      "ccf_rank": "B",
+      "short_name": "RECOMB",
+      "full_name": "AnnualInternationalConferenceonResearchin ComputationalMolecularBiology",
+      "publisher": "Springer",
+      "url": "http://dblp.uni-trier.de/db/conf/recomb/",
+      "areas": [
+        "交叉/综合/新兴"
+      ],
+      "source_pages": [
+        71
+      ]
+    },
+    {
+      "kind": "conference",
+      "ccf_rank": "B",
+      "short_name": "MICCAI",
+      "full_name": "InternationalConferenceonMedicalImageComputing andComputer-AssistedIntervention",
+      "publisher": "Springer",
+      "url": "https://dblp.org/db/conf/miccai/index.html",
+      "areas": [
+        "交叉/综合/新兴"
+      ],
+      "source_pages": [
+        71
+      ]
+    },
+    {
+      "kind": "conference",
+      "ccf_rank": "B",
+      "short_name": "WINE",
+      "full_name": "ConferenceonWebandInternet Economics",
+      "publisher": "Springer",
+      "url": "https://dblp.org/db/conf/wine/index.html",
+      "areas": [
+        "交叉/综合/新兴"
+      ],
+      "source_pages": [
+        71
+      ]
+    }
+  ]
+}

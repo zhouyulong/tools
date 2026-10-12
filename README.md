@@ -9,6 +9,7 @@ tools/
 ├── claude-model-switch/      # Claude Code 模型快速切换工具
 ├── codex-switch-script/      # Codex 多供应商/模型一键切换工具
 ├── skills/
+│   ├── ccf-prioritized-literature-search-package/  # CCF 顶会/顶刊优先文献检索 Skill（可移植打包）
 │   ├── get-news/             # 晨间新闻聚合 Skill
 │   └── dida365-working-sync/ # 滴答清单 working 项目同步 Skill
 └── README.md
@@ -52,6 +53,23 @@ Codex 多供应商/模型一键切换脚本（PowerShell），通过改写 `~/.c
 > **会话改写**：`-Find` 通过查询桌面端 SQLite 会话注册表（`state_5.sqlite`）搜索历史会话，配合 `-Session` 可快速定位并改写旧会话的供应商绑定；`-Session -P official` 会自动映射为内置 id `openai`。改写时自动同步桌面端注册表。
 >
 > **部署副本**：实际运行版本在 `~/.codex/model-providers/`（其 providers.json 含真实 key）；本目录的 providers.json 为脱敏模板。更新脚本后需同步拷贝到部署目录。注意：ChatGPT 桌面端运行中会自行回写 config.toml 的 `model`/`model_reasoning_effort` 键，切换供应商/模型后需托盘退出重开桌面端。
+
+### ccf-prioritized-literature-search (Claude Skill)
+面向计算机领域的「顶会/顶刊优先」文献检索 Skill。当用户的检索诉求同时包含质量与时效（"顶刊/顶会/顶级/高质量/优质/前沿/最新"等）时触发，默认时间窗为检索日前 12 个月（用户给定区间可覆盖），按以下优先级取样并逐条给出场地证据标签：
+
+1. CCF A 期刊与会议
+2. CCF B 会议（仅当 CCF A 结果不足；AI / HCI 与泛在计算 / 交叉综合与新兴方向须并入专用补充索引中的全部相关会议）
+3. 经 EasyScholar 校验为 SCI一区的 CCF B 期刊
+4. 其他经 EasyScholar 校验为 SCI一区的期刊
+
+内置数据：2026 年（第七版）CCF A/B 会议与期刊目录、上述三个方向的 CCF B 会议补充索引（28 个）、以及经 EasyScholar 校验的 CCF B SCI一区缓存（2026-10-11 校验，90 天内有效）。实时校验仅在环境变量中读取 `EASY_SCHOLAR_KEY`，绝不打印、落盘或写入 URL；缺失时引导用户自行在 EasyScholar 开放 API 控制台获取。无明确证据一律判为"未验证"，不得臆断 SCI一区或"顶级"。
+
+```bash
+python ccf-prioritized-literature-search/scripts/easyscholar_rank.py                            # 查询期刊分区
+python ccf-prioritized-literature-search/scripts/refresh_ccf_b_sci_q1_cache.py --confirm-batch  # 刷新 CCF B SCI一区缓存
+```
+
+> 该 Skill 以「目录型可移植包」形式提供（`skills/ccf-prioritized-literature-search-package/`）：`manifest.json` 为包清单，`TRANSFER.md` 为迁移说明——把内层 `ccf-prioritized-literature-search/` 目录整体拷入目标环境的 skill 目录即可，`agents/openai.yaml` 为 Codex 可选的 UI 元数据，其他环境可忽略。脚本仅依赖 Python 3.9+ 标准库，包内不含任何密钥。
 
 ### get-news (Claude Skill)
 每日自动聚合高价值新闻：世界局势、中东专题、经济政策、AI 技术动态、学术成果等，并做多源交叉验证。
