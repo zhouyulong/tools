@@ -26,23 +26,52 @@ claudemodel current         # 查看当前模型
 ```
 
 ### codex-switch-script
-Codex 多供应商/模型一键切换脚本（PowerShell），通过改写 `~/.codex/config.toml` 和同步环境变量实现。支持官方/自定义供应商切换、模型自动探测与交互选择、供应商的增删查改、会话搜索与供应商改写（含桌面端 SQLite 注册表同步）等功能。内置 UTF-8 编码兼容，避免中文输出乱码。
+Codex 多供应商/模型一键切换脚本，通过改写 `~/.codex/config.toml` 和同步环境变量实现。支持官方/自定义供应商切换、模型自动探测与交互选择、供应商的增删查改、会话搜索与供应商改写（含桌面端 SQLite 注册表同步）等功能。内置 UTF-8 编码兼容，避免中文输出乱码。
 
-```powershell
-.\switch-codex-provider.ps1 -List                          # 列出所有已配置供应商（含内置官方 official）
-.\switch-codex-provider.ps1 -Provider sharedchat           # 切换：自动探测可用模型，交互选择（选中即回写默认模型）
-.\switch-codex-provider.ps1 -P sharedchat -M gpt-5.6-sol   # 显式指定模型（跳过菜单，仍静默探测用于 catalog；不回写默认模型）
-.\switch-codex-provider.ps1 -P sharedchat -Auto            # 跳过菜单，直接用该供应商默认模型（仍静默探测用于 catalog）
-.\switch-codex-provider.ps1 -Probe sharedchat              # 只探测列出可用模型，不切换
-.\switch-codex-provider.ps1 -P official                    # 切回 OpenAI 官方（ChatGPT 登录走 auth.json，自动清理劫持环境变量）
-.\switch-codex-provider.ps1 -Show                          # 查看当前生效配置（模式判定+环境变量残留警告）
-.\switch-codex-provider.ps1 -Add myrelay -BaseUrl "https://xxx.com/v1" -ApiKey "sk-xxx" -Model "gpt-5.6-sol"  # 添加供应商
-.\switch-codex-provider.ps1 -Remove myrelay                # 删除供应商（official 不可删）
-.\switch-codex-provider.ps1 -Find "关键词"                  # 按关键词搜索会话（首条消息/标题/工作目录）
-.\switch-codex-provider.ps1 -Session <session_id>          # 改写指定会话的供应商
+两个平台等价实现，参数名一致（`-P/-M/-L/-S/-A/-R/-Se/-F/-Pr/--auto`）：
+
+| 平台 | 文件 | 运行方式 |
+| --- | --- | --- |
+| Windows | `switch-codex-provider.ps1` | PowerShell |
+| macOS/Linux | `switch-codex-provider.py` | `./switch-codex-provider.py`（需 python3，系统自带即可） |
+
+macOS 版差异（Windows 语义无对应物，做了等价替换）：
+
+- **环境变量**：Windows 的「用户级环境变量」在 macOS 不存在，改为写入 shell 启动文件（`~/.zshrc`/`~/.bash_profile`/`~/.bashrc`）里的托管块 `# >>> codex-switch-provider (managed) >>>`，同时 `launchctl setenv/unsetenv` 让 Dock/Finder 启动的 GUI 应用也能继承；新终端才生效，当前窗口 `source ~/.zshrc`。
+- **残留劫持检测**：托管块之外手写的同名 `export` 会覆盖本工具的值（官方模式下 `OPENAI_BASE_URL` 会劫持请求），`-S` 会按「文件:行号」报出来，`-P official --clean-env` 可自动注释掉。
+- **交互检测**：`stdin` 非 TTY（管道/定时任务）时自动跳过选择菜单，直接用默认模型，不会卡住。
+- **依赖**：不需要外部 python 探测（sqlite 逻辑由当前解释器直接执行），模型探测优先用系统 `curl`（TLS 指纹能过 Cloudflare 类防护）。
+
+```bash
+./switch-codex-provider.py -L                             # 列出所有已配置供应商（含内置官方 official）
+./switch-codex-provider.py -P sharedchat                  # 切换：自动探测可用模型，交互选择（选中即回写默认模型）
+./switch-codex-provider.py -P sharedchat -M gpt-5.6-sol   # 显式指定模型（跳过菜单，仍静默探测用于 catalog；不回写默认模型）
+./switch-codex-provider.py -P sharedchat --auto           # 跳过菜单，直接用该供应商默认模型（脚本化场景）
+./switch-codex-provider.py -Pr sharedchat                 # 只探测列出可用模型，不切换
+./switch-codex-provider.py -P official                    # 切回 OpenAI 官方（ChatGPT 登录走 auth.json，自动清理劫持环境变量）
+./switch-codex-provider.py -S                             # 查看当前生效配置（模式判定+环境变量残留警告）
+./switch-codex-provider.py -A myrelay --base-url "https://xxx.com/v1" --api-key "sk-xxx" -M "gpt-5.6-sol"   # 添加供应商
+./switch-codex-provider.py -R myrelay                     # 删除供应商（official 不可删）
+./switch-codex-provider.py -F "关键词"                     # 按关键词搜索会话（首条消息/标题/工作目录）
+./switch-codex-provider.py -Se <session_id>               # 改写指定会话的供应商
 ```
 
-供应商清单存储在脚本同目录的 `providers.json` 中，可直接手动编辑。
+可软链到 PATH 全局使用：`ln -s "$PWD/switch-codex-provider.py" /usr/local/bin/codex-switch`。
+
+供应商清单存储在脚本同目录的 `providers.json` 中（不存在则读 `~/.codex/providers.json`），可直接手动编辑。
+
+**文件位置速查**（注意：没有 `model.json`，供应商清单叫 `providers.json`）：
+
+| 文件 | 作用 | 何时出现 |
+| --- | --- | --- |
+| `<脚本同目录>/providers.json` | 供应商清单（base_url / api_key / default_model / wire_api），`-A`/`-R`/回写默认模型都改这里。**优先级最高** | 仓库里这份是脱敏模板；首次 `-A` 自动生成 |
+| `~/.codex/providers.json` | 同上，脚本同目录没有清单时的兜底位置（把脚本单独放进 `~/.codex/model-providers/` 时就用这份） | 在该目录运行 `-A` 时生成 |
+| `~/.codex/config.toml` | 当前生效配置：根键 `model_provider`/`model`/`model_catalog_json` + `[model_providers.<id>]` 段 | Codex 本体 |
+| `~/.codex/model-providers/catalog-<id>.json` | 桌面端模型列表/显示名的真相源，按供应商生成 | 切到 relay 供应商时 |
+| `~/.codex/models.json` | 旧模型目录缓存（合并进 catalog 以保留 `model_messages` 模板），**不是本工具产出** | 其他中转安装脚本可能生成 |
+| `~/.codex/models_cache.json` | 官方模型清单缓存（`-Pr official` 读它） | ChatGPT 桌面端登录后可能生成 |
+
+查看方式：`-L` 列出清单并打印实际使用的文件路径；看原文直接 `cat` 该 json。
 
 > **官方供应商**：`official` 为内置条目（清单缺失时自动补种）。base_url/api_key 留空 = ChatGPT 订阅登录（auth.json）；给 official 填 api_key 则走 OpenAI API Key 模式。切回官方时会删除 config.toml 根键 `model_provider` 与 `model_catalog_json`（恢复内置 openai provider 与内置模型目录），订阅登录模式下还会自动删除 DeepSeek/中转安装脚本遗留的 `preferred_auth_method="apikey"` / `forced_login_method="api"`（这两个键会强制只能 API Key 登录、禁用账号登录；官方配 api_key 时保留），并清理会劫持官方请求的 `OPENAI_BASE_URL` 与残留 Key 环境变量。
 >
