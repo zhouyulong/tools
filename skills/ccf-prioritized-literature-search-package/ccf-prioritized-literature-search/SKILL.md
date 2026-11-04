@@ -1,15 +1,28 @@
 ---
 name: ccf-prioritized-literature-search
-description: Prioritize recent, high-quality computer-science papers when users ask for top journals/conferences, top-tier, frontier, high-quality, or new literature. Prefer CCF A venues, then controlled CCF B and SCI Q1 fallbacks; do not use for ordinary broad literature searches.
+description: Prioritize high-quality computer-science papers when users ask for top journals/conferences, top-tier, high-quality, or frontier literature. Prefer CCF A venues, then controlled CCF B and SCI Q1 fallbacks; apply a date window only when the user specifies one, and do not use for ordinary broad literature searches.
 ---
 
 # CCF-prioritized literature search
 
-Use this skill for computer-science paper discovery when the request conveys both quality and recency, including terms such as “顶刊”, “顶会”, “顶级”, “高质量”, “优质”, “前沿”, “最新”, or “新近”. Do not apply it merely because the user requests papers, asks about a supplied paper, or explicitly asks for classic/historical work.
+Use this skill for computer-science paper discovery when the request conveys quality, including terms such as “顶刊”, “顶会”, “顶级”, “高质量”, “优质”, “前沿”, “最新”, or “新近”. Recency words such as “最新” or “新近” still select this skill for their quality intent, but only a date range the user states explicitly becomes a search constraint. Do not apply it merely because the user requests papers, asks about a supplied paper, or explicitly asks for classic/historical work.
 
-## Time window
+## Date window
 
-Treat “new” as papers whose first public scholarly date (online-first or official publication date) falls in the 12 months before the search date. A date range or other recency requirement from the user overrides this default. State the period used in the result.
+There is no default time window. Do not filter papers by publication or online-first date unless the user states an explicit date range, year, or other period.
+
+- When the user gives a period (“近三年”, “2022–…”, “2023 年以后”, “最近半年”), use exactly that period. If it is ambiguous, state the interpretation you applied.
+- When the user gives no period, search without one. Do not implicitly fall back to “the last 12 months” or any other unstated window.
+- Always state the window actually used, including “no date limit” when none was requested.
+
+### Half-year granularity
+
+Six months is the finest granularity the user may specify, and the finest you should resolve a window to. Interpret and report every window on half-year boundaries; do not narrow to months or days.
+
+- Half-year units: `2024 H1` = 2024-01-01 to 2024-06-30; `2024 H2` = 2024-07-01 to 2024-12-31.
+- Relative periods are counted back from the search date in half-year steps: “最近半年” is the current half-year block plus the one before it (the 12 months preceding the search date), “最近一年” is the four most recent half-year blocks, and so on.
+- A whole year (“2023”, “2023 年”) means both halves of that year. A month or quarter given by the user (e.g. “2024 年 3 月”) is widened to the containing half-year, and you must say which half-year you used.
+- When reporting, write the window as half-year ranges, e.g. `2023 H2–2024 H1` or `2024 H1`. Never claim month-level precision.
 
 ## Venue evidence
 
@@ -30,7 +43,7 @@ Apply the requested topic, date window, and any user-specified venue constraints
 
 Do not use unranked conferences as a substitute for CCF A/B conferences. If the user asks only for journals or only for conferences, apply the corresponding branches only. Preserve topic relevance: a venue rank never makes an off-topic paper suitable.
 
-When several candidates have the same tier, prefer the more recent paper, then the closer topical fit. Do not fill a request with marginally relevant papers just to reach a number; say how many qualified results were found.
+When several candidates have the same tier, prefer the closer topical fit, then the more recent paper. Do not fill a request with marginally relevant papers just to reach a number; say how many qualified results were found.
 
 ## CCF B SCI一区 cache
 
@@ -38,4 +51,4 @@ To create or refresh the reusable CCF B journal cache, run [scripts/refresh_ccf_
 
 ## Result reporting
 
-For each recommended paper, report its publication date, venue, and one compact venue-evidence label: `CCF A`, `CCF B conference`, `CCF B + SCI一区`, or `SCI一区 (EasyScholar)`. Include the searched date window and disclose any shortfall or unavailable SCI verification. Do not claim “top-tier” for a venue whose evidence was not established.
+For each recommended paper, report its publication date, venue, and one compact venue-evidence label: `CCF A`, `CCF B conference`, `CCF B + SCI一区`, or `SCI一区 (EasyScholar)`. Include the date window actually applied, written at half-year granularity (e.g. `2024 H2–2025 H1`, or “no date limit” when the user gave none), and disclose any shortfall or unavailable SCI verification. Do not claim “top-tier” for a venue whose evidence was not established.
