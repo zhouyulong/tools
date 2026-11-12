@@ -2,9 +2,10 @@
   "schema_version": 1,
   "catalog": "第七版中国计算机学会推荐国际学术会议和期刊目录（正式版）",
   "status": "complete",
-  "generated_at": "2026-10-11T02:31:31.310077+00:00",
+  "generated_at": "2026-11-12T13:46:38.585736+00:00",
   "source_journal_count": 111,
-  "queried_journal_count": 111,
+  "queried_journal_count": 0,
+  "reused_journal_count": 111,
   "journals": [
     {
       "kind": "journal",
@@ -74,7 +75,36 @@
           }
         }
       },
-      "verification": "verified_sci_q1"
+      "verification": "verified_sci_q1",
+      "sci_grade": {
+        "jcr_quartile": "Q1",
+        "cas_major_base": "工程技术4区",
+        "cas_major_upgraded": "计算机科学4区",
+        "cas_minor_upgraded": "计算机：理论方法3区/计算机：人工智能4区/计算机：信息系统4区。",
+        "impact_factor": "5.2"
+      },
+      "freshness": {
+        "status": "current",
+        "checked_at": "2026-10-11",
+        "per_cycle": [
+          {
+            "cycle": "JCR",
+            "released_at": "2026-06-20",
+            "confirmed_at": "2026-07-20",
+            "lag_days": 30,
+            "state": "current"
+          },
+          {
+            "cycle": "CAS",
+            "released_at": "2025-12-01",
+            "confirmed_at": "2025-12-31",
+            "lag_days": 30,
+            "state": "current"
+          }
+        ],
+        "message": "校验于 2026-10-11，已过各分区同步确认点。"
+      },
+      "grade_changed": false
     },
     {
       "kind": "journal",
@@ -145,7 +175,36 @@
           }
         }
       },
-      "verification": "verified_sci_q1"
+      "verification": "verified_sci_q1",
+      "sci_grade": {
+        "jcr_quartile": "Q1",
+        "cas_major_base": "工程技术2区",
+        "cas_major_upgraded": "计算机科学2区",
+        "cas_minor_upgraded": "计算机：理论方法1区/计算机：信息系统2区。",
+        "impact_factor": "5.3"
+      },
+      "freshness": {
+        "status": "current",
+        "checked_at": "2026-10-11",
+        "per_cycle": [
+          {
+            "cycle": "JCR",
+            "released_at": "2026-06-20",
+            "confirmed_at": "2026-07-20",
+            "lag_days": 30,
+            "state": "current"
+          },
+          {
+            "cycle": "CAS",
+            "released_at": "2025-12-01",
+            "confirmed_at": "2025-12-31",
+            "lag_days": 30,
+            "state": "current"
+          }
+        ],
+        "message": "校验于 2026-10-11，已过各分区同步确认点。"
+      },
+      "grade_changed": false
     },
     {
       "kind": "journal",
@@ -217,7 +276,36 @@
           }
         }
       },
-      "verification": "verified_sci_q1"
+      "verification": "verified_sci_q1",
+      "sci_grade": {
+        "jcr_quartile": "Q1",
+        "cas_major_base": "工程技术3区",
+        "cas_major_upgraded": "计算机科学3区",
+        "cas_minor_upgraded": "计算机：软件工程3区/计算机：信息系统4区。",
+        "impact_factor": "5.1"
+      },
+      "freshness": {
+        "status": "current",
+        "checked_at": "2026-10-11",
+        "per_cycle": [
+          {
+            "cycle": "JCR",
+            "released_at": "2026-06-20",
+            "confirmed_at": "2026-07-20",
+            "lag_days": 30,
+            "state": "current"
+          },
+          {
+            "cycle": "CAS",
+            "released_at": "2025-12-01",
+            "confirmed_at": "2025-12-31",
+            "lag_days": 30,
+            "state": "current"
+          }
+        ],
+        "message": "校验于 2026-10-11，已过各分区同步确认点。"
+      },
+      "grade_changed": false
     },
     {
       "kind": "journal",
@@ -293,7 +381,36 @@
           }
         }
       },
-      "verification": "verified_sci_q1"
+      "verification": "verified_sci_q1",
+      "sci_grade": {
+        "jcr_quartile": "Q1",
+        "cas_major_base": "工程技术3区",
+        "cas_major_upgraded": "计算机科学3区",
+        "cas_minor_upgraded": "计算机：理论方法2区/计算机：信息系统3区/计算机：软件工程3区。",
+        "impact_factor": "5.6"
+      },
+      "freshness": {
+        "status": "current",
+        "checked_at": "2026-10-11",
+        "per_cycle": [
+          {
+            "cycle": "JCR",
+            "released_at": "2026-06-20",
+            "confirmed_at": "2026-07-20",
+            "lag_days": 30,
+            "state": "current"
+          },
+          {
+            "cycle": "CAS",
+            "released_at": "2025-12-01",
+            "confirmed_at": "2025-12-31",
+            "lag_days": 30,
+            "state": "current"
+          }
+        ],
+        "message": "校验于 2026-10-11，已过各分区同步确认点。"
+      },
+      "grade_changed": false
     },
     {
       "kind": "journal",
@@ -370,7 +487,36 @@
           }
         }
       },
-      "verification": "verified_sci_q1"
+      "verification": "verified_sci_q1",
+      "sci_grade": {
+        "jcr_quartile": "Q1",
+        "cas_major_base": "工程技术2区",
+        "cas_major_upgraded": "计算机科学2区",
+        "cas_minor_upgraded": "工程：电子与电气2区/电信学2区。",
+        "impact_factor": "8.4"
+      },
+      "freshness": {
+        "status": "current",
+        "checked_at": "2026-10-11",
+        "per_cycle": [
+          {
+            "cycle": "JCR",
+            "released_at": "2026-06-20",
+            "confirmed_at": "2026-07-20",
+            "lag_days": 30,
+            "state": "current"
+          },
+          {
+            "cycle": "CAS",
+            "released_at": "2025-12-01",
+            "confirmed_at": "2025-12-31",
+            "lag_days": 30,
+            "state": "current"
+          }
+        ],
+        "message": "校验于 2026-10-11，已过各分区同步确认点。"
+      },
+      "grade_changed": false
     },
     {
       "kind": "journal",
@@ -447,7 +593,36 @@
           }
         }
       },
-      "verification": "verified_sci_q1"
+      "verification": "verified_sci_q1",
+      "sci_grade": {
+        "jcr_quartile": "Q1",
+        "cas_major_base": "工程技术2区",
+        "cas_major_upgraded": "计算机科学1区",
+        "cas_minor_upgraded": "工程：电子与电气1区/电信学1区。",
+        "impact_factor": "10.3"
+      },
+      "freshness": {
+        "status": "current",
+        "checked_at": "2026-10-11",
+        "per_cycle": [
+          {
+            "cycle": "JCR",
+            "released_at": "2026-06-20",
+            "confirmed_at": "2026-07-20",
+            "lag_days": 30,
+            "state": "current"
+          },
+          {
+            "cycle": "CAS",
+            "released_at": "2025-12-01",
+            "confirmed_at": "2025-12-31",
+            "lag_days": 30,
+            "state": "current"
+          }
+        ],
+        "message": "校验于 2026-10-11，已过各分区同步确认点。"
+      },
+      "grade_changed": false
     },
     {
       "kind": "journal",
@@ -522,7 +697,36 @@
           }
         }
       },
-      "verification": "verified_sci_q1"
+      "verification": "verified_sci_q1",
+      "sci_grade": {
+        "jcr_quartile": "Q1",
+        "cas_major_base": "工程技术3区",
+        "cas_major_upgraded": "计算机科学2区",
+        "cas_minor_upgraded": "计算机：信息系统2区。",
+        "impact_factor": "6.8"
+      },
+      "freshness": {
+        "status": "current",
+        "checked_at": "2026-10-11",
+        "per_cycle": [
+          {
+            "cycle": "JCR",
+            "released_at": "2026-06-20",
+            "confirmed_at": "2026-07-20",
+            "lag_days": 30,
+            "state": "current"
+          },
+          {
+            "cycle": "CAS",
+            "released_at": "2025-12-01",
+            "confirmed_at": "2025-12-31",
+            "lag_days": 30,
+            "state": "current"
+          }
+        ],
+        "message": "校验于 2026-10-11，已过各分区同步确认点。"
+      },
+      "grade_changed": false
     },
     {
       "kind": "journal",
@@ -595,7 +799,36 @@
           }
         }
       },
-      "verification": "verified_sci_q1"
+      "verification": "verified_sci_q1",
+      "sci_grade": {
+        "jcr_quartile": "Q1",
+        "cas_major_base": "工程技术3区",
+        "cas_major_upgraded": "计算机科学2区",
+        "cas_minor_upgraded": "计算机：信息系统2区/计算机：软件工程2区。",
+        "impact_factor": "4.6"
+      },
+      "freshness": {
+        "status": "current",
+        "checked_at": "2026-10-11",
+        "per_cycle": [
+          {
+            "cycle": "JCR",
+            "released_at": "2026-06-20",
+            "confirmed_at": "2026-07-20",
+            "lag_days": 30,
+            "state": "current"
+          },
+          {
+            "cycle": "CAS",
+            "released_at": "2025-12-01",
+            "confirmed_at": "2025-12-31",
+            "lag_days": 30,
+            "state": "current"
+          }
+        ],
+        "message": "校验于 2026-10-11，已过各分区同步确认点。"
+      },
+      "grade_changed": false
     },
     {
       "kind": "journal",
@@ -673,7 +906,36 @@
           }
         }
       },
-      "verification": "verified_sci_q1"
+      "verification": "verified_sci_q1",
+      "sci_grade": {
+        "jcr_quartile": "Q1",
+        "cas_major_base": "工程技术3区",
+        "cas_major_upgraded": "计算机科学3区",
+        "cas_minor_upgraded": "计算机：信息系统3区/计算机：软件工程3区。",
+        "impact_factor": "6.9"
+      },
+      "freshness": {
+        "status": "current",
+        "checked_at": "2026-10-11",
+        "per_cycle": [
+          {
+            "cycle": "JCR",
+            "released_at": "2026-06-20",
+            "confirmed_at": "2026-07-20",
+            "lag_days": 30,
+            "state": "current"
+          },
+          {
+            "cycle": "CAS",
+            "released_at": "2025-12-01",
+            "confirmed_at": "2025-12-31",
+            "lag_days": 30,
+            "state": "current"
+          }
+        ],
+        "message": "校验于 2026-10-11，已过各分区同步确认点。"
+      },
+      "grade_changed": false
     },
     {
       "kind": "journal",
@@ -747,7 +1009,36 @@
           }
         }
       },
-      "verification": "verified_sci_q1"
+      "verification": "verified_sci_q1",
+      "sci_grade": {
+        "jcr_quartile": "Q1",
+        "cas_major_base": "工程技术4区",
+        "cas_major_upgraded": "计算机科学4区",
+        "cas_minor_upgraded": "计算机：信息系统4区/计算机：软件工程4区。",
+        "impact_factor": "4.9"
+      },
+      "freshness": {
+        "status": "current",
+        "checked_at": "2026-10-11",
+        "per_cycle": [
+          {
+            "cycle": "JCR",
+            "released_at": "2026-06-20",
+            "confirmed_at": "2026-07-20",
+            "lag_days": 30,
+            "state": "current"
+          },
+          {
+            "cycle": "CAS",
+            "released_at": "2025-12-01",
+            "confirmed_at": "2025-12-31",
+            "lag_days": 30,
+            "state": "current"
+          }
+        ],
+        "message": "校验于 2026-10-11，已过各分区同步确认点。"
+      },
+      "grade_changed": false
     },
     {
       "kind": "journal",
@@ -823,7 +1114,36 @@
           }
         }
       },
-      "verification": "verified_sci_q1"
+      "verification": "verified_sci_q1",
+      "sci_grade": {
+        "jcr_quartile": "Q1",
+        "cas_major_base": "工程技术2区",
+        "cas_major_upgraded": "工程技术1区",
+        "cas_minor_upgraded": "计算机：人工智能1区/工程：综合1区。",
+        "impact_factor": "11.5"
+      },
+      "freshness": {
+        "status": "current",
+        "checked_at": "2026-10-11",
+        "per_cycle": [
+          {
+            "cycle": "JCR",
+            "released_at": "2026-06-20",
+            "confirmed_at": "2026-07-20",
+            "lag_days": 30,
+            "state": "current"
+          },
+          {
+            "cycle": "CAS",
+            "released_at": "2025-12-01",
+            "confirmed_at": "2025-12-31",
+            "lag_days": 30,
+            "state": "current"
+          }
+        ],
+        "message": "校验于 2026-10-11，已过各分区同步确认点。"
+      },
+      "grade_changed": false
     },
     {
       "kind": "journal",
@@ -898,7 +1218,36 @@
           }
         }
       },
-      "verification": "verified_sci_q1"
+      "verification": "verified_sci_q1",
+      "sci_grade": {
+        "jcr_quartile": "Q1",
+        "cas_major_base": "工程技术3区",
+        "cas_major_upgraded": "计算机科学3区",
+        "cas_minor_upgraded": "计算机：人工智能3区/计算机：信息系统4区。",
+        "impact_factor": "5.5"
+      },
+      "freshness": {
+        "status": "current",
+        "checked_at": "2026-10-11",
+        "per_cycle": [
+          {
+            "cycle": "JCR",
+            "released_at": "2026-06-20",
+            "confirmed_at": "2026-07-20",
+            "lag_days": 30,
+            "state": "current"
+          },
+          {
+            "cycle": "CAS",
+            "released_at": "2025-12-01",
+            "confirmed_at": "2025-12-31",
+            "lag_days": 30,
+            "state": "current"
+          }
+        ],
+        "message": "校验于 2026-10-11，已过各分区同步确认点。"
+      },
+      "grade_changed": false
     },
     {
       "kind": "journal",
@@ -977,7 +1326,36 @@
           }
         }
       },
-      "verification": "verified_sci_q1"
+      "verification": "verified_sci_q1",
+      "sci_grade": {
+        "jcr_quartile": "Q1",
+        "cas_major_base": "管理科学3区",
+        "cas_major_upgraded": "管理学2区",
+        "cas_minor_upgraded": "计算机：信息系统2区/图书情报与档案管理2区/管理学3区。",
+        "impact_factor": "8.1"
+      },
+      "freshness": {
+        "status": "current",
+        "checked_at": "2026-10-11",
+        "per_cycle": [
+          {
+            "cycle": "JCR",
+            "released_at": "2026-06-20",
+            "confirmed_at": "2026-07-20",
+            "lag_days": 30,
+            "state": "current"
+          },
+          {
+            "cycle": "CAS",
+            "released_at": "2025-12-01",
+            "confirmed_at": "2025-12-31",
+            "lag_days": 30,
+            "state": "current"
+          }
+        ],
+        "message": "校验于 2026-10-11，已过各分区同步确认点。"
+      },
+      "grade_changed": false
     },
     {
       "kind": "journal",
@@ -1059,7 +1437,36 @@
           }
         }
       },
-      "verification": "verified_sci_q1"
+      "verification": "verified_sci_q1",
+      "sci_grade": {
+        "jcr_quartile": "Q1",
+        "cas_major_base": "工程技术2区",
+        "cas_major_upgraded": "计算机科学1区",
+        "cas_minor_upgraded": "计算机：信息系统1区/图书情报与档案管理1区。",
+        "impact_factor": "8.1"
+      },
+      "freshness": {
+        "status": "current",
+        "checked_at": "2026-10-11",
+        "per_cycle": [
+          {
+            "cycle": "JCR",
+            "released_at": "2026-06-20",
+            "confirmed_at": "2026-07-20",
+            "lag_days": 30,
+            "state": "current"
+          },
+          {
+            "cycle": "CAS",
+            "released_at": "2025-12-01",
+            "confirmed_at": "2025-12-31",
+            "lag_days": 30,
+            "state": "current"
+          }
+        ],
+        "message": "校验于 2026-10-11，已过各分区同步确认点。"
+      },
+      "grade_changed": false
     },
     {
       "kind": "journal",
@@ -1137,7 +1544,36 @@
           }
         }
       },
-      "verification": "verified_sci_q1"
+      "verification": "verified_sci_q1",
+      "sci_grade": {
+        "jcr_quartile": "Q1",
+        "cas_major_base": "工程技术2区",
+        "cas_major_upgraded": "计算机科学2区",
+        "cas_minor_upgraded": "计算机：信息系统2区。",
+        "impact_factor": "6.0"
+      },
+      "freshness": {
+        "status": "current",
+        "checked_at": "2026-10-11",
+        "per_cycle": [
+          {
+            "cycle": "JCR",
+            "released_at": "2026-06-20",
+            "confirmed_at": "2026-07-20",
+            "lag_days": 30,
+            "state": "current"
+          },
+          {
+            "cycle": "CAS",
+            "released_at": "2025-12-01",
+            "confirmed_at": "2025-12-31",
+            "lag_days": 30,
+            "state": "current"
+          }
+        ],
+        "message": "校验于 2026-10-11，已过各分区同步确认点。"
+      },
+      "grade_changed": false
     },
     {
       "kind": "journal",
@@ -1206,7 +1642,36 @@
           }
         }
       },
-      "verification": "verified_sci_q1"
+      "verification": "verified_sci_q1",
+      "sci_grade": {
+        "jcr_quartile": "Q1",
+        "cas_major_base": "工程技术4区",
+        "cas_major_upgraded": "数学4区",
+        "cas_minor_upgraded": "计算机：理论方法4区/逻辑学4区。",
+        "impact_factor": "1.1"
+      },
+      "freshness": {
+        "status": "current",
+        "checked_at": "2026-10-11",
+        "per_cycle": [
+          {
+            "cycle": "JCR",
+            "released_at": "2026-06-20",
+            "confirmed_at": "2026-07-20",
+            "lag_days": 30,
+            "state": "current"
+          },
+          {
+            "cycle": "CAS",
+            "released_at": "2025-12-01",
+            "confirmed_at": "2025-12-31",
+            "lag_days": 30,
+            "state": "current"
+          }
+        ],
+        "message": "校验于 2026-10-11，已过各分区同步确认点。"
+      },
+      "grade_changed": false
     },
     {
       "kind": "journal",
@@ -1281,7 +1746,36 @@
           }
         }
       },
-      "verification": "verified_sci_q1"
+      "verification": "verified_sci_q1",
+      "sci_grade": {
+        "jcr_quartile": "Q1",
+        "cas_major_base": "工程技术4区",
+        "cas_major_upgraded": "数学2区",
+        "cas_minor_upgraded": "应用数学2区/计算机：软件工程3区。",
+        "impact_factor": "2.0"
+      },
+      "freshness": {
+        "status": "current",
+        "checked_at": "2026-10-11",
+        "per_cycle": [
+          {
+            "cycle": "JCR",
+            "released_at": "2026-06-20",
+            "confirmed_at": "2026-07-20",
+            "lag_days": 30,
+            "state": "current"
+          },
+          {
+            "cycle": "CAS",
+            "released_at": "2025-12-01",
+            "confirmed_at": "2025-12-31",
+            "lag_days": 30,
+            "state": "current"
+          }
+        ],
+        "message": "校验于 2026-10-11，已过各分区同步确认点。"
+      },
+      "grade_changed": false
     },
     {
       "kind": "journal",
@@ -1359,7 +1853,36 @@
           }
         }
       },
-      "verification": "verified_sci_q1"
+      "verification": "verified_sci_q1",
+      "sci_grade": {
+        "jcr_quartile": "Q1",
+        "cas_major_base": "工程技术2区",
+        "cas_major_upgraded": "计算机科学1区",
+        "cas_minor_upgraded": "工程：电子与电气1区。",
+        "impact_factor": "10.8"
+      },
+      "freshness": {
+        "status": "current",
+        "checked_at": "2026-10-11",
+        "per_cycle": [
+          {
+            "cycle": "JCR",
+            "released_at": "2026-06-20",
+            "confirmed_at": "2026-07-20",
+            "lag_days": 30,
+            "state": "current"
+          },
+          {
+            "cycle": "CAS",
+            "released_at": "2025-12-01",
+            "confirmed_at": "2025-12-31",
+            "lag_days": 30,
+            "state": "current"
+          }
+        ],
+        "message": "校验于 2026-10-11，已过各分区同步确认点。"
+      },
+      "grade_changed": false
     },
     {
       "kind": "journal",
@@ -1432,7 +1955,36 @@
           }
         }
       },
-      "verification": "verified_sci_q1"
+      "verification": "verified_sci_q1",
+      "sci_grade": {
+        "jcr_quartile": "Q1",
+        "cas_major_base": "物理3区",
+        "cas_major_upgraded": "物理与天体物理3区",
+        "cas_minor_upgraded": "声学3区/听力学与言语病理学3区。",
+        "impact_factor": "2.6"
+      },
+      "freshness": {
+        "status": "current",
+        "checked_at": "2026-10-11",
+        "per_cycle": [
+          {
+            "cycle": "JCR",
+            "released_at": "2026-06-20",
+            "confirmed_at": "2026-07-20",
+            "lag_days": 30,
+            "state": "current"
+          },
+          {
+            "cycle": "CAS",
+            "released_at": "2025-12-01",
+            "confirmed_at": "2025-12-31",
+            "lag_days": 30,
+            "state": "current"
+          }
+        ],
+        "message": "校验于 2026-10-11，已过各分区同步确认点。"
+      },
+      "grade_changed": false
     },
     {
       "kind": "journal",
@@ -1508,7 +2060,36 @@
           }
         }
       },
-      "verification": "verified_sci_q1"
+      "verification": "verified_sci_q1",
+      "sci_grade": {
+        "jcr_quartile": "Q1",
+        "cas_major_base": "数学2区",
+        "cas_major_upgraded": "数学3区",
+        "cas_minor_upgraded": "计算机：软件工程3区/成像科学与照相技术3区/应用数学3区/计算机：人工智能4区。",
+        "impact_factor": "2.5"
+      },
+      "freshness": {
+        "status": "current",
+        "checked_at": "2026-10-11",
+        "per_cycle": [
+          {
+            "cycle": "JCR",
+            "released_at": "2026-06-20",
+            "confirmed_at": "2026-07-20",
+            "lag_days": 30,
+            "state": "current"
+          },
+          {
+            "cycle": "CAS",
+            "released_at": "2025-12-01",
+            "confirmed_at": "2025-12-31",
+            "lag_days": 30,
+            "state": "current"
+          }
+        ],
+        "message": "校验于 2026-10-11，已过各分区同步确认点。"
+      },
+      "grade_changed": false
     },
     {
       "kind": "journal",
@@ -1581,7 +2162,36 @@
           }
         }
       },
-      "verification": "verified_sci_q1"
+      "verification": "verified_sci_q1",
+      "sci_grade": {
+        "jcr_quartile": "Q1",
+        "cas_major_base": null,
+        "cas_major_upgraded": "计算机科学2区",
+        "cas_minor_upgraded": "计算机：软件工程2区。",
+        "impact_factor": "8.3"
+      },
+      "freshness": {
+        "status": "current",
+        "checked_at": "2026-10-11",
+        "per_cycle": [
+          {
+            "cycle": "JCR",
+            "released_at": "2026-06-20",
+            "confirmed_at": "2026-07-20",
+            "lag_days": 30,
+            "state": "current"
+          },
+          {
+            "cycle": "CAS",
+            "released_at": "2025-12-01",
+            "confirmed_at": "2025-12-31",
+            "lag_days": 30,
+            "state": "current"
+          }
+        ],
+        "message": "校验于 2026-10-11，已过各分区同步确认点。"
+      },
+      "grade_changed": false
     },
     {
       "kind": "journal",
@@ -1662,7 +2272,36 @@
           }
         }
       },
-      "verification": "verified_sci_q1"
+      "verification": "verified_sci_q1",
+      "sci_grade": {
+        "jcr_quartile": "Q1",
+        "cas_major_base": "工程技术4区",
+        "cas_major_upgraded": "计算机科学2区",
+        "cas_minor_upgraded": "语言与语言学2区/计算机：人工智能3区/计算机：跨学科应用3区/语言学3区。",
+        "impact_factor": "13.4"
+      },
+      "freshness": {
+        "status": "current",
+        "checked_at": "2026-10-11",
+        "per_cycle": [
+          {
+            "cycle": "JCR",
+            "released_at": "2026-06-20",
+            "confirmed_at": "2026-07-20",
+            "lag_days": 30,
+            "state": "current"
+          },
+          {
+            "cycle": "CAS",
+            "released_at": "2025-12-01",
+            "confirmed_at": "2025-12-31",
+            "lag_days": 30,
+            "state": "current"
+          }
+        ],
+        "message": "校验于 2026-10-11，已过各分区同步确认点。"
+      },
+      "grade_changed": false
     },
     {
       "kind": "journal",
@@ -1739,7 +2378,36 @@
           }
         }
       },
-      "verification": "verified_sci_q1"
+      "verification": "verified_sci_q1",
+      "sci_grade": {
+        "jcr_quartile": "Q1",
+        "cas_major_base": "工程技术3区",
+        "cas_major_upgraded": "计算机科学3区",
+        "cas_minor_upgraded": "计算机：人工智能3区/计算机：理论方法3区。",
+        "impact_factor": "4.1"
+      },
+      "freshness": {
+        "status": "current",
+        "checked_at": "2026-10-11",
+        "per_cycle": [
+          {
+            "cycle": "JCR",
+            "released_at": "2026-06-20",
+            "confirmed_at": "2026-07-20",
+            "lag_days": 30,
+            "state": "current"
+          },
+          {
+            "cycle": "CAS",
+            "released_at": "2025-12-01",
+            "confirmed_at": "2025-12-31",
+            "lag_days": 30,
+            "state": "current"
+          }
+        ],
+        "message": "校验于 2026-10-11，已过各分区同步确认点。"
+      },
+      "grade_changed": false
     },
     {
       "kind": "journal",
@@ -1815,7 +2483,36 @@
           }
         }
       },
-      "verification": "verified_sci_q1"
+      "verification": "verified_sci_q1",
+      "sci_grade": {
+        "jcr_quartile": "Q1",
+        "cas_major_base": "工程技术1区",
+        "cas_major_upgraded": "计算机科学1区",
+        "cas_minor_upgraded": "计算机：人工智能2区/计算机：控制论2区。",
+        "impact_factor": "11.3"
+      },
+      "freshness": {
+        "status": "current",
+        "checked_at": "2026-10-11",
+        "per_cycle": [
+          {
+            "cycle": "JCR",
+            "released_at": "2026-06-20",
+            "confirmed_at": "2026-07-20",
+            "lag_days": 30,
+            "state": "current"
+          },
+          {
+            "cycle": "CAS",
+            "released_at": "2025-12-01",
+            "confirmed_at": "2025-12-31",
+            "lag_days": 30,
+            "state": "current"
+          }
+        ],
+        "message": "校验于 2026-10-11，已过各分区同步确认点。"
+      },
+      "grade_changed": false
     },
     {
       "kind": "journal",
@@ -1896,7 +2593,36 @@
           }
         }
       },
-      "verification": "verified_sci_q1"
+      "verification": "verified_sci_q1",
+      "sci_grade": {
+        "jcr_quartile": "Q1",
+        "cas_major_base": "工程技术1区",
+        "cas_major_upgraded": "计算机科学1区",
+        "cas_minor_upgraded": "自动化与控制系统1区/计算机：人工智能1区/计算机：控制论1区。",
+        "impact_factor": "11.3"
+      },
+      "freshness": {
+        "status": "current",
+        "checked_at": "2026-10-11",
+        "per_cycle": [
+          {
+            "cycle": "JCR",
+            "released_at": "2026-06-20",
+            "confirmed_at": "2026-07-20",
+            "lag_days": 30,
+            "state": "current"
+          },
+          {
+            "cycle": "CAS",
+            "released_at": "2025-12-01",
+            "confirmed_at": "2025-12-31",
+            "lag_days": 30,
+            "state": "current"
+          }
+        ],
+        "message": "校验于 2026-10-11，已过各分区同步确认点。"
+      },
+      "grade_changed": false
     },
     {
       "kind": "journal",
@@ -1976,7 +2702,36 @@
           }
         }
       },
-      "verification": "verified_sci_q1"
+      "verification": "verified_sci_q1",
+      "sci_grade": {
+        "jcr_quartile": "Q1",
+        "cas_major_base": "工程技术1区",
+        "cas_major_upgraded": "计算机科学1区",
+        "cas_minor_upgraded": "计算机：人工智能1区/计算机：理论方法1区。",
+        "impact_factor": "15.9"
+      },
+      "freshness": {
+        "status": "current",
+        "checked_at": "2026-10-11",
+        "per_cycle": [
+          {
+            "cycle": "JCR",
+            "released_at": "2026-06-20",
+            "confirmed_at": "2026-07-20",
+            "lag_days": 30,
+            "state": "current"
+          },
+          {
+            "cycle": "CAS",
+            "released_at": "2025-12-01",
+            "confirmed_at": "2025-12-31",
+            "lag_days": 30,
+            "state": "current"
+          }
+        ],
+        "message": "校验于 2026-10-11，已过各分区同步确认点。"
+      },
+      "grade_changed": false
     },
     {
       "kind": "journal",
@@ -2053,7 +2808,36 @@
           }
         }
       },
-      "verification": "verified_sci_q1"
+      "verification": "verified_sci_q1",
+      "sci_grade": {
+        "jcr_quartile": "Q1",
+        "cas_major_base": "工程技术1区",
+        "cas_major_upgraded": "计算机科学1区",
+        "cas_minor_upgraded": "计算机：人工智能1区/工程：电子与电气1区。",
+        "impact_factor": "10.2"
+      },
+      "freshness": {
+        "status": "current",
+        "checked_at": "2026-10-11",
+        "per_cycle": [
+          {
+            "cycle": "JCR",
+            "released_at": "2026-06-20",
+            "confirmed_at": "2026-07-20",
+            "lag_days": 30,
+            "state": "current"
+          },
+          {
+            "cycle": "CAS",
+            "released_at": "2025-12-01",
+            "confirmed_at": "2025-12-31",
+            "lag_days": 30,
+            "state": "current"
+          }
+        ],
+        "message": "校验于 2026-10-11，已过各分区同步确认点。"
+      },
+      "grade_changed": false
     },
     {
       "kind": "journal",
@@ -2131,7 +2915,36 @@
           }
         }
       },
-      "verification": "verified_sci_q1"
+      "verification": "verified_sci_q1",
+      "sci_grade": {
+        "jcr_quartile": "Q1",
+        "cas_major_base": "工程技术1区",
+        "cas_major_upgraded": "计算机科学1区",
+        "cas_minor_upgraded": "计算机：硬件1区/计算机：理论方法1区/工程：电子与电气1区/计算机：人工智能2区。",
+        "impact_factor": "9.7"
+      },
+      "freshness": {
+        "status": "current",
+        "checked_at": "2026-10-11",
+        "per_cycle": [
+          {
+            "cycle": "JCR",
+            "released_at": "2026-06-20",
+            "confirmed_at": "2026-07-20",
+            "lag_days": 30,
+            "state": "current"
+          },
+          {
+            "cycle": "CAS",
+            "released_at": "2025-12-01",
+            "confirmed_at": "2025-12-31",
+            "lag_days": 30,
+            "state": "current"
+          }
+        ],
+        "message": "校验于 2026-10-11，已过各分区同步确认点。"
+      },
+      "grade_changed": false
     },
     {
       "kind": "journal",
@@ -2204,7 +3017,36 @@
           }
         }
       },
-      "verification": "verified_sci_q1"
+      "verification": "verified_sci_q1",
+      "sci_grade": {
+        "jcr_quartile": "Q1",
+        "cas_major_base": "医学4区",
+        "cas_major_upgraded": "医学2区",
+        "cas_minor_upgraded": "听力学与言语病理学2区/康复医学2区/语言学3区。",
+        "impact_factor": "2.5"
+      },
+      "freshness": {
+        "status": "current",
+        "checked_at": "2026-10-11",
+        "per_cycle": [
+          {
+            "cycle": "JCR",
+            "released_at": "2026-06-20",
+            "confirmed_at": "2026-07-20",
+            "lag_days": 30,
+            "state": "current"
+          },
+          {
+            "cycle": "CAS",
+            "released_at": "2025-12-01",
+            "confirmed_at": "2025-12-31",
+            "lag_days": 30,
+            "state": "current"
+          }
+        ],
+        "message": "校验于 2026-10-11，已过各分区同步确认点。"
+      },
+      "grade_changed": false
     },
     {
       "kind": "journal",
@@ -2283,7 +3125,36 @@
           }
         }
       },
-      "verification": "verified_sci_q1"
+      "verification": "verified_sci_q1",
+      "sci_grade": {
+        "jcr_quartile": "Q1",
+        "cas_major_base": "工程技术2区",
+        "cas_major_upgraded": "计算机科学2区",
+        "cas_minor_upgraded": "计算机：人工智能2区/神经科学2区。",
+        "impact_factor": "7.2"
+      },
+      "freshness": {
+        "status": "current",
+        "checked_at": "2026-10-11",
+        "per_cycle": [
+          {
+            "cycle": "JCR",
+            "released_at": "2026-06-20",
+            "confirmed_at": "2026-07-20",
+            "lag_days": 30,
+            "state": "current"
+          },
+          {
+            "cycle": "CAS",
+            "released_at": "2025-12-01",
+            "confirmed_at": "2025-12-31",
+            "lag_days": 30,
+            "state": "current"
+          }
+        ],
+        "message": "校验于 2026-10-11，已过各分区同步确认点。"
+      },
+      "grade_changed": false
     },
     {
       "kind": "journal",
@@ -2362,7 +3233,36 @@
           }
         }
       },
-      "verification": "verified_sci_q1"
+      "verification": "verified_sci_q1",
+      "sci_grade": {
+        "jcr_quartile": "Q1",
+        "cas_major_base": "工程技术2区",
+        "cas_major_upgraded": "计算机科学1区",
+        "cas_minor_upgraded": "计算机：人工智能1区/工程：电子与电气1区。",
+        "impact_factor": "9.1"
+      },
+      "freshness": {
+        "status": "current",
+        "checked_at": "2026-10-11",
+        "per_cycle": [
+          {
+            "cycle": "JCR",
+            "released_at": "2026-06-20",
+            "confirmed_at": "2026-07-20",
+            "lag_days": 30,
+            "state": "current"
+          },
+          {
+            "cycle": "CAS",
+            "released_at": "2025-12-01",
+            "confirmed_at": "2025-12-31",
+            "lag_days": 30,
+            "state": "current"
+          }
+        ],
+        "message": "校验于 2026-10-11，已过各分区同步确认点。"
+      },
+      "grade_changed": false
     },
     {
       "kind": "journal",
@@ -2433,7 +3333,36 @@
           }
         }
       },
-      "verification": "verified_sci_q1"
+      "verification": "verified_sci_q1",
+      "sci_grade": {
+        "jcr_quartile": "Q1",
+        "cas_major_base": null,
+        "cas_major_upgraded": "计算机科学2区",
+        "cas_minor_upgraded": "计算机：人工智能2区/语言与语言学2区/语言学2区。",
+        "impact_factor": "11.7"
+      },
+      "freshness": {
+        "status": "current",
+        "checked_at": "2026-10-11",
+        "per_cycle": [
+          {
+            "cycle": "JCR",
+            "released_at": "2026-06-20",
+            "confirmed_at": "2026-07-20",
+            "lag_days": 30,
+            "state": "current"
+          },
+          {
+            "cycle": "CAS",
+            "released_at": "2025-12-01",
+            "confirmed_at": "2025-12-31",
+            "lag_days": 30,
+            "state": "current"
+          }
+        ],
+        "message": "校验于 2026-10-11，已过各分区同步确认点。"
+      },
+      "grade_changed": false
     },
     {
       "kind": "journal",
@@ -2507,7 +3436,36 @@
           }
         }
       },
-      "verification": "verified_sci_q1"
+      "verification": "verified_sci_q1",
+      "sci_grade": {
+        "jcr_quartile": "Q1",
+        "cas_major_base": "工程技术2区",
+        "cas_major_upgraded": "计算机科学2区",
+        "cas_minor_upgraded": "计算机：理论方法1区/计算机：控制论2区。",
+        "impact_factor": "5.8"
+      },
+      "freshness": {
+        "status": "current",
+        "checked_at": "2026-10-11",
+        "per_cycle": [
+          {
+            "cycle": "JCR",
+            "released_at": "2026-06-20",
+            "confirmed_at": "2026-07-20",
+            "lag_days": 30,
+            "state": "current"
+          },
+          {
+            "cycle": "CAS",
+            "released_at": "2025-12-01",
+            "confirmed_at": "2025-12-31",
+            "lag_days": 30,
+            "state": "current"
+          }
+        ],
+        "message": "校验于 2026-10-11，已过各分区同步确认点。"
+      },
+      "grade_changed": false
     },
     {
       "kind": "journal",
@@ -2583,7 +3541,36 @@
           }
         }
       },
-      "verification": "verified_sci_q1"
+      "verification": "verified_sci_q1",
+      "sci_grade": {
+        "jcr_quartile": "Q1",
+        "cas_major_base": "工程技术4区",
+        "cas_major_upgraded": "计算机科学3区",
+        "cas_minor_upgraded": "计算机：控制论3区/人体工程学3区。",
+        "impact_factor": "6.1"
+      },
+      "freshness": {
+        "status": "current",
+        "checked_at": "2026-10-11",
+        "per_cycle": [
+          {
+            "cycle": "JCR",
+            "released_at": "2026-06-20",
+            "confirmed_at": "2026-07-20",
+            "lag_days": 30,
+            "state": "current"
+          },
+          {
+            "cycle": "CAS",
+            "released_at": "2025-12-01",
+            "confirmed_at": "2025-12-31",
+            "lag_days": 30,
+            "state": "current"
+          }
+        ],
+        "message": "校验于 2026-10-11，已过各分区同步确认点。"
+      },
+      "grade_changed": false
     },
     {
       "kind": "journal",
@@ -2655,7 +3642,36 @@
           }
         }
       },
-      "verification": "verified_sci_q1"
+      "verification": "verified_sci_q1",
+      "sci_grade": {
+        "jcr_quartile": "Q1",
+        "cas_major_base": "生物2区",
+        "cas_major_upgraded": "生物学2区",
+        "cas_minor_upgraded": "数学与计算生物学1区/生化研究方法2区。",
+        "impact_factor": "7.3"
+      },
+      "freshness": {
+        "status": "current",
+        "checked_at": "2026-10-11",
+        "per_cycle": [
+          {
+            "cycle": "JCR",
+            "released_at": "2026-06-20",
+            "confirmed_at": "2026-07-20",
+            "lag_days": 30,
+            "state": "current"
+          },
+          {
+            "cycle": "CAS",
+            "released_at": "2025-12-01",
+            "confirmed_at": "2025-12-31",
+            "lag_days": 30,
+            "state": "current"
+          }
+        ],
+        "message": "校验于 2026-10-11，已过各分区同步确认点。"
+      },
+      "grade_changed": false
     },
     {
       "kind": "journal",
@@ -2731,7 +3747,36 @@
           }
         }
       },
-      "verification": "verified_sci_q1"
+      "verification": "verified_sci_q1",
+      "sci_grade": {
+        "jcr_quartile": "Q1",
+        "cas_major_base": "工程技术2区",
+        "cas_major_upgraded": "计算机科学2区",
+        "cas_minor_upgraded": "自动化与控制系统2区。",
+        "impact_factor": "7.9"
+      },
+      "freshness": {
+        "status": "current",
+        "checked_at": "2026-10-11",
+        "per_cycle": [
+          {
+            "cycle": "JCR",
+            "released_at": "2026-06-20",
+            "confirmed_at": "2026-07-20",
+            "lag_days": 30,
+            "state": "current"
+          },
+          {
+            "cycle": "CAS",
+            "released_at": "2025-12-01",
+            "confirmed_at": "2025-12-31",
+            "lag_days": 30,
+            "state": "current"
+          }
+        ],
+        "message": "校验于 2026-10-11，已过各分区同步确认点。"
+      },
+      "grade_changed": false
     },
     {
       "kind": "journal",
@@ -2809,7 +3854,36 @@
           }
         }
       },
-      "verification": "verified_sci_q1"
+      "verification": "verified_sci_q1",
+      "sci_grade": {
+        "jcr_quartile": "Q1",
+        "cas_major_base": "工程技术2区",
+        "cas_major_upgraded": "地球科学1区",
+        "cas_minor_upgraded": "地球化学与地球物理1区/工程：电子与电气2区/成像科学与照相技术2区/遥感2区。",
+        "impact_factor": "9.4"
+      },
+      "freshness": {
+        "status": "current",
+        "checked_at": "2026-10-11",
+        "per_cycle": [
+          {
+            "cycle": "JCR",
+            "released_at": "2026-06-20",
+            "confirmed_at": "2026-07-20",
+            "lag_days": 30,
+            "state": "current"
+          },
+          {
+            "cycle": "CAS",
+            "released_at": "2025-12-01",
+            "confirmed_at": "2025-12-31",
+            "lag_days": 30,
+            "state": "current"
+          }
+        ],
+        "message": "校验于 2026-10-11，已过各分区同步确认点。"
+      },
+      "grade_changed": false
     },
     {
       "kind": "journal",
@@ -2888,7 +3962,36 @@
           }
         }
       },
-      "verification": "verified_sci_q1"
+      "verification": "verified_sci_q1",
+      "sci_grade": {
+        "jcr_quartile": "Q1",
+        "cas_major_base": "工程技术2区",
+        "cas_major_upgraded": "计算机科学2区",
+        "cas_minor_upgraded": "工程：土木1区/工程：电子与电气2区/运输科技2区。",
+        "impact_factor": "9.1"
+      },
+      "freshness": {
+        "status": "current",
+        "checked_at": "2026-10-11",
+        "per_cycle": [
+          {
+            "cycle": "JCR",
+            "released_at": "2026-06-20",
+            "confirmed_at": "2026-07-20",
+            "lag_days": 30,
+            "state": "current"
+          },
+          {
+            "cycle": "CAS",
+            "released_at": "2025-12-01",
+            "confirmed_at": "2025-12-31",
+            "lag_days": 30,
+            "state": "current"
+          }
+        ],
+        "message": "校验于 2026-10-11，已过各分区同步确认点。"
+      },
+      "grade_changed": false
     },
     {
       "kind": "journal",
@@ -2967,7 +4070,36 @@
           }
         }
       },
-      "verification": "verified_sci_q1"
+      "verification": "verified_sci_q1",
+      "sci_grade": {
+        "jcr_quartile": "Q1",
+        "cas_major_base": "医学1区",
+        "cas_major_upgraded": "医学1区",
+        "cas_minor_upgraded": "计算机：跨学科应用1区/工程：生物医学1区/工程：电子与电气1区/成像科学与照相技术1区/核医学1区。",
+        "impact_factor": "12.4"
+      },
+      "freshness": {
+        "status": "current",
+        "checked_at": "2026-10-11",
+        "per_cycle": [
+          {
+            "cycle": "JCR",
+            "released_at": "2026-06-20",
+            "confirmed_at": "2026-07-20",
+            "lag_days": 30,
+            "state": "current"
+          },
+          {
+            "cycle": "CAS",
+            "released_at": "2025-12-01",
+            "confirmed_at": "2025-12-31",
+            "lag_days": 30,
+            "state": "current"
+          }
+        ],
+        "message": "校验于 2026-10-11，已过各分区同步确认点。"
+      },
+      "grade_changed": false
     },
     {
       "kind": "journal",
@@ -3043,7 +4175,36 @@
           }
         }
       },
-      "verification": "verified_sci_q1"
+      "verification": "verified_sci_q1",
+      "sci_grade": {
+        "jcr_quartile": "Q1",
+        "cas_major_base": "工程技术2区",
+        "cas_major_upgraded": "计算机科学1区",
+        "cas_minor_upgraded": "机器人学2区。",
+        "impact_factor": "11.1"
+      },
+      "freshness": {
+        "status": "current",
+        "checked_at": "2026-10-11",
+        "per_cycle": [
+          {
+            "cycle": "JCR",
+            "released_at": "2026-06-20",
+            "confirmed_at": "2026-07-20",
+            "lag_days": 30,
+            "state": "current"
+          },
+          {
+            "cycle": "CAS",
+            "released_at": "2025-12-01",
+            "confirmed_at": "2025-12-31",
+            "lag_days": 30,
+            "state": "current"
+          }
+        ],
+        "message": "校验于 2026-10-11，已过各分区同步确认点。"
+      },
+      "grade_changed": false
     },
     {
       "kind": "journal",
@@ -3116,7 +4277,36 @@
           }
         }
       },
-      "verification": "verified_sci_q1"
+      "verification": "verified_sci_q1",
+      "sci_grade": {
+        "jcr_quartile": "Q1",
+        "cas_major_base": "工程技术3区",
+        "cas_major_upgraded": "生物学3区",
+        "cas_minor_upgraded": "生化研究方法3区/数学跨学科应用3区/统计学与概率论3区/计算机：跨学科应用4区。",
+        "impact_factor": "4.1"
+      },
+      "freshness": {
+        "status": "current",
+        "checked_at": "2026-10-11",
+        "per_cycle": [
+          {
+            "cycle": "JCR",
+            "released_at": "2026-06-20",
+            "confirmed_at": "2026-07-20",
+            "lag_days": 30,
+            "state": "current"
+          },
+          {
+            "cycle": "CAS",
+            "released_at": "2025-12-01",
+            "confirmed_at": "2025-12-31",
+            "lag_days": 30,
+            "state": "current"
+          }
+        ],
+        "message": "校验于 2026-10-11，已过各分区同步确认点。"
+      },
+      "grade_changed": false
     },
     {
       "kind": "journal",
@@ -3192,7 +4382,36 @@
           }
         }
       },
-      "verification": "verified_sci_q1"
+      "verification": "verified_sci_q1",
+      "sci_grade": {
+        "jcr_quartile": "Q1",
+        "cas_major_base": "管理科学2区",
+        "cas_major_upgraded": "医学2区",
+        "cas_minor_upgraded": "计算机：信息系统2区/计算机：跨学科应用2区/卫生保健与服务2区/图书情报与档案管理2区/医学：信息2区。",
+        "impact_factor": "7.1"
+      },
+      "freshness": {
+        "status": "current",
+        "checked_at": "2026-10-11",
+        "per_cycle": [
+          {
+            "cycle": "JCR",
+            "released_at": "2026-06-20",
+            "confirmed_at": "2026-07-20",
+            "lag_days": 30,
+            "state": "current"
+          },
+          {
+            "cycle": "CAS",
+            "released_at": "2025-12-01",
+            "confirmed_at": "2025-12-31",
+            "lag_days": 30,
+            "state": "current"
+          }
+        ],
+        "message": "校验于 2026-10-11，已过各分区同步确认点。"
+      },
+      "grade_changed": false
     },
     {
       "kind": "journal",
@@ -3264,7 +4483,36 @@
           }
         }
       },
-      "verification": "verified_sci_q1"
+      "verification": "verified_sci_q1",
+      "sci_grade": {
+        "jcr_quartile": "Q1",
+        "cas_major_base": "生物2区",
+        "cas_major_upgraded": "生物学2区",
+        "cas_minor_upgraded": "生化研究方法2区/数学与计算生物学2区。",
+        "impact_factor": "3.7"
+      },
+      "freshness": {
+        "status": "current",
+        "checked_at": "2026-10-11",
+        "per_cycle": [
+          {
+            "cycle": "JCR",
+            "released_at": "2026-06-20",
+            "confirmed_at": "2026-07-20",
+            "lag_days": 30,
+            "state": "current"
+          },
+          {
+            "cycle": "CAS",
+            "released_at": "2025-12-01",
+            "confirmed_at": "2025-12-31",
+            "lag_days": 30,
+            "state": "current"
+          }
+        ],
+        "message": "校验于 2026-10-11，已过各分区同步确认点。"
+      },
+      "grade_changed": false
     },
     {
       "kind": "journal",
@@ -3331,7 +4579,36 @@
           }
         }
       },
-      "verification": "verified_sci_q1"
+      "verification": "verified_sci_q1",
+      "sci_grade": {
+        "jcr_quartile": "Q1",
+        "cas_major_base": "工程技术3区",
+        "cas_major_upgraded": "计算机科学4区",
+        "cas_minor_upgraded": "计算机：信息系统4区/计算机：软件工程4区。",
+        "impact_factor": "4.5"
+      },
+      "freshness": {
+        "status": "current",
+        "checked_at": "2026-10-11",
+        "per_cycle": [
+          {
+            "cycle": "JCR",
+            "released_at": "2026-06-20",
+            "confirmed_at": "2026-07-20",
+            "lag_days": 30,
+            "state": "current"
+          },
+          {
+            "cycle": "CAS",
+            "released_at": "2025-12-01",
+            "confirmed_at": "2025-12-31",
+            "lag_days": 30,
+            "state": "current"
+          }
+        ],
+        "message": "校验于 2026-10-11，已过各分区同步确认点。"
+      },
+      "grade_changed": false
     },
     {
       "kind": "journal",
@@ -3407,7 +4684,36 @@
           }
         }
       },
-      "verification": "verified_sci_q1"
+      "verification": "verified_sci_q1",
+      "sci_grade": {
+        "jcr_quartile": "Q1",
+        "cas_major_base": "工程技术2区",
+        "cas_major_upgraded": "计算机科学2区",
+        "cas_minor_upgraded": "计算机：信息系统2区/计算机：软件工程2区/计算机：理论方法2区。",
+        "impact_factor": "7.3"
+      },
+      "freshness": {
+        "status": "current",
+        "checked_at": "2026-10-11",
+        "per_cycle": [
+          {
+            "cycle": "JCR",
+            "released_at": "2026-06-20",
+            "confirmed_at": "2026-07-20",
+            "lag_days": 30,
+            "state": "current"
+          },
+          {
+            "cycle": "CAS",
+            "released_at": "2025-12-01",
+            "confirmed_at": "2025-12-31",
+            "lag_days": 30,
+            "state": "current"
+          }
+        ],
+        "message": "校验于 2026-10-11，已过各分区同步确认点。"
+      },
+      "grade_changed": false
     }
   ],
   "unverified": [
@@ -3478,7 +4784,36 @@
           }
         }
       },
-      "verification": "not_verified_sci_q1"
+      "verification": "not_verified_sci_q1",
+      "sci_grade": {
+        "jcr_quartile": "Q2",
+        "cas_major_base": "工程技术4区",
+        "cas_major_upgraded": "计算机科学4区",
+        "cas_minor_upgraded": "计算机：硬件4区/计算机：软件工程4区。",
+        "impact_factor": "2.8"
+      },
+      "freshness": {
+        "status": "current",
+        "checked_at": "2026-10-11",
+        "per_cycle": [
+          {
+            "cycle": "JCR",
+            "released_at": "2026-06-20",
+            "confirmed_at": "2026-07-20",
+            "lag_days": 30,
+            "state": "current"
+          },
+          {
+            "cycle": "CAS",
+            "released_at": "2025-12-01",
+            "confirmed_at": "2025-12-31",
+            "lag_days": 30,
+            "state": "current"
+          }
+        ],
+        "message": "校验于 2026-10-11，已过各分区同步确认点。"
+      },
+      "grade_changed": false
     },
     {
       "kind": "journal",
@@ -3550,7 +4885,36 @@
           }
         }
       },
-      "verification": "not_verified_sci_q1"
+      "verification": "not_verified_sci_q1",
+      "sci_grade": {
+        "jcr_quartile": "Q2",
+        "cas_major_base": "工程技术4区",
+        "cas_major_upgraded": "计算机科学3区",
+        "cas_minor_upgraded": "计算机：硬件3区/计算机：软件工程3区。",
+        "impact_factor": "3.6"
+      },
+      "freshness": {
+        "status": "current",
+        "checked_at": "2026-10-11",
+        "per_cycle": [
+          {
+            "cycle": "JCR",
+            "released_at": "2026-06-20",
+            "confirmed_at": "2026-07-20",
+            "lag_days": 30,
+            "state": "current"
+          },
+          {
+            "cycle": "CAS",
+            "released_at": "2025-12-01",
+            "confirmed_at": "2025-12-31",
+            "lag_days": 30,
+            "state": "current"
+          }
+        ],
+        "message": "校验于 2026-10-11，已过各分区同步确认点。"
+      },
+      "grade_changed": false
     },
     {
       "kind": "journal",
@@ -3620,7 +4984,36 @@
           }
         }
       },
-      "verification": "not_verified_sci_q1"
+      "verification": "not_verified_sci_q1",
+      "sci_grade": {
+        "jcr_quartile": "Q3",
+        "cas_major_base": "工程技术4区",
+        "cas_major_upgraded": "计算机科学3区",
+        "cas_minor_upgraded": "计算机：硬件2区。",
+        "impact_factor": "3.0"
+      },
+      "freshness": {
+        "status": "current",
+        "checked_at": "2026-10-11",
+        "per_cycle": [
+          {
+            "cycle": "JCR",
+            "released_at": "2026-06-20",
+            "confirmed_at": "2026-07-20",
+            "lag_days": 30,
+            "state": "current"
+          },
+          {
+            "cycle": "CAS",
+            "released_at": "2025-12-01",
+            "confirmed_at": "2025-12-31",
+            "lag_days": 30,
+            "state": "current"
+          }
+        ],
+        "message": "校验于 2026-10-11，已过各分区同步确认点。"
+      },
+      "grade_changed": false
     },
     {
       "kind": "journal",
@@ -3690,7 +5083,36 @@
           }
         }
       },
-      "verification": "not_verified_sci_q1"
+      "verification": "not_verified_sci_q1",
+      "sci_grade": {
+        "jcr_quartile": "Q2",
+        "cas_major_base": "工程技术4区",
+        "cas_major_upgraded": "工程技术2区",
+        "cas_minor_upgraded": "计算机：硬件2区/工程：电子与电气3区。",
+        "impact_factor": "3.2"
+      },
+      "freshness": {
+        "status": "current",
+        "checked_at": "2026-10-11",
+        "per_cycle": [
+          {
+            "cycle": "JCR",
+            "released_at": "2026-06-20",
+            "confirmed_at": "2026-07-20",
+            "lag_days": 30,
+            "state": "current"
+          },
+          {
+            "cycle": "CAS",
+            "released_at": "2025-12-01",
+            "confirmed_at": "2025-12-31",
+            "lag_days": 30,
+            "state": "current"
+          }
+        ],
+        "message": "校验于 2026-10-11，已过各分区同步确认点。"
+      },
+      "grade_changed": false
     },
     {
       "kind": "journal",
@@ -3763,7 +5185,36 @@
           }
         }
       },
-      "verification": "not_verified_sci_q1"
+      "verification": "not_verified_sci_q1",
+      "sci_grade": {
+        "jcr_quartile": "Q2",
+        "cas_major_base": "工程技术3区",
+        "cas_major_upgraded": "计算机科学3区",
+        "cas_minor_upgraded": "计算机：理论方法3区。",
+        "impact_factor": "3.4"
+      },
+      "freshness": {
+        "status": "current",
+        "checked_at": "2026-10-11",
+        "per_cycle": [
+          {
+            "cycle": "JCR",
+            "released_at": "2026-06-20",
+            "confirmed_at": "2026-07-20",
+            "lag_days": 30,
+            "state": "current"
+          },
+          {
+            "cycle": "CAS",
+            "released_at": "2025-12-01",
+            "confirmed_at": "2025-12-31",
+            "lag_days": 30,
+            "state": "current"
+          }
+        ],
+        "message": "校验于 2026-10-11，已过各分区同步确认点。"
+      },
+      "grade_changed": false
     },
     {
       "kind": "journal",
@@ -3813,7 +5264,36 @@
           }
         }
       },
-      "verification": "not_verified_sci_q1"
+      "verification": "not_verified_sci_q1",
+      "sci_grade": {
+        "jcr_quartile": null,
+        "cas_major_base": null,
+        "cas_major_upgraded": null,
+        "cas_minor_upgraded": null,
+        "impact_factor": null
+      },
+      "freshness": {
+        "status": "current",
+        "checked_at": "2026-10-11",
+        "per_cycle": [
+          {
+            "cycle": "JCR",
+            "released_at": "2026-06-20",
+            "confirmed_at": "2026-07-20",
+            "lag_days": 30,
+            "state": "current"
+          },
+          {
+            "cycle": "CAS",
+            "released_at": "2025-12-01",
+            "confirmed_at": "2025-12-31",
+            "lag_days": 30,
+            "state": "current"
+          }
+        ],
+        "message": "校验于 2026-10-11，已过各分区同步确认点。"
+      },
+      "grade_changed": false
     },
     {
       "kind": "journal",
@@ -3884,7 +5364,36 @@
           }
         }
       },
-      "verification": "not_verified_sci_q1"
+      "verification": "not_verified_sci_q1",
+      "sci_grade": {
+        "jcr_quartile": "Q3",
+        "cas_major_base": "工程技术4区",
+        "cas_major_upgraded": "计算机科学3区",
+        "cas_minor_upgraded": "计算机：理论方法3区。",
+        "impact_factor": "1.1"
+      },
+      "freshness": {
+        "status": "current",
+        "checked_at": "2026-10-11",
+        "per_cycle": [
+          {
+            "cycle": "JCR",
+            "released_at": "2026-06-20",
+            "confirmed_at": "2026-07-20",
+            "lag_days": 30,
+            "state": "current"
+          },
+          {
+            "cycle": "CAS",
+            "released_at": "2025-12-01",
+            "confirmed_at": "2025-12-31",
+            "lag_days": 30,
+            "state": "current"
+          }
+        ],
+        "message": "校验于 2026-10-11，已过各分区同步确认点。"
+      },
+      "grade_changed": false
     },
     {
       "kind": "journal",
@@ -3932,7 +5441,36 @@
           }
         }
       },
-      "verification": "not_verified_sci_q1"
+      "verification": "not_verified_sci_q1",
+      "sci_grade": {
+        "jcr_quartile": null,
+        "cas_major_base": null,
+        "cas_major_upgraded": null,
+        "cas_minor_upgraded": null,
+        "impact_factor": null
+      },
+      "freshness": {
+        "status": "current",
+        "checked_at": "2026-10-11",
+        "per_cycle": [
+          {
+            "cycle": "JCR",
+            "released_at": "2026-06-20",
+            "confirmed_at": "2026-07-20",
+            "lag_days": 30,
+            "state": "current"
+          },
+          {
+            "cycle": "CAS",
+            "released_at": "2025-12-01",
+            "confirmed_at": "2025-12-31",
+            "lag_days": 30,
+            "state": "current"
+          }
+        ],
+        "message": "校验于 2026-10-11，已过各分区同步确认点。"
+      },
+      "grade_changed": false
     },
     {
       "kind": "journal",
@@ -4003,7 +5541,36 @@
           }
         }
       },
-      "verification": "not_verified_sci_q1"
+      "verification": "not_verified_sci_q1",
+      "sci_grade": {
+        "jcr_quartile": "Q2",
+        "cas_major_base": "工程技术3区",
+        "cas_major_upgraded": "计算机科学4区",
+        "cas_minor_upgraded": "计算机：信息系统4区/电信学4区。",
+        "impact_factor": "4.7"
+      },
+      "freshness": {
+        "status": "current",
+        "checked_at": "2026-10-11",
+        "per_cycle": [
+          {
+            "cycle": "JCR",
+            "released_at": "2026-06-20",
+            "confirmed_at": "2026-07-20",
+            "lag_days": 30,
+            "state": "current"
+          },
+          {
+            "cycle": "CAS",
+            "released_at": "2025-12-01",
+            "confirmed_at": "2025-12-31",
+            "lag_days": 30,
+            "state": "current"
+          }
+        ],
+        "message": "校验于 2026-10-11，已过各分区同步确认点。"
+      },
+      "grade_changed": false
     },
     {
       "kind": "journal",
@@ -4076,7 +5643,36 @@
           }
         }
       },
-      "verification": "not_verified_sci_q1"
+      "verification": "not_verified_sci_q1",
+      "sci_grade": {
+        "jcr_quartile": "Q2",
+        "cas_major_base": "工程技术3区",
+        "cas_major_upgraded": "计算机科学3区",
+        "cas_minor_upgraded": "计算机：硬件3区/计算机：信息系统3区/工程：电子与电气3区/电信学3区。",
+        "impact_factor": "4.7"
+      },
+      "freshness": {
+        "status": "current",
+        "checked_at": "2026-10-11",
+        "per_cycle": [
+          {
+            "cycle": "JCR",
+            "released_at": "2026-06-20",
+            "confirmed_at": "2026-07-20",
+            "lag_days": 30,
+            "state": "current"
+          },
+          {
+            "cycle": "CAS",
+            "released_at": "2025-12-01",
+            "confirmed_at": "2025-12-31",
+            "lag_days": 30,
+            "state": "current"
+          }
+        ],
+        "message": "校验于 2026-10-11，已过各分区同步确认点。"
+      },
+      "grade_changed": false
     },
     {
       "kind": "journal",
@@ -4146,7 +5742,36 @@
           }
         }
       },
-      "verification": "not_verified_sci_q1"
+      "verification": "not_verified_sci_q1",
+      "sci_grade": {
+        "jcr_quartile": "Q2",
+        "cas_major_base": "工程技术4区",
+        "cas_major_upgraded": "计算机科学3区",
+        "cas_minor_upgraded": "计算机：信息系统3区。",
+        "impact_factor": "4.0"
+      },
+      "freshness": {
+        "status": "current",
+        "checked_at": "2026-10-11",
+        "per_cycle": [
+          {
+            "cycle": "JCR",
+            "released_at": "2026-06-20",
+            "confirmed_at": "2026-07-20",
+            "lag_days": 30,
+            "state": "current"
+          },
+          {
+            "cycle": "CAS",
+            "released_at": "2025-12-01",
+            "confirmed_at": "2025-12-31",
+            "lag_days": 30,
+            "state": "current"
+          }
+        ],
+        "message": "校验于 2026-10-11，已过各分区同步确认点。"
+      },
+      "grade_changed": false
     },
     {
       "kind": "journal",
@@ -4221,7 +5846,36 @@
           }
         }
       },
-      "verification": "not_verified_sci_q1"
+      "verification": "not_verified_sci_q1",
+      "sci_grade": {
+        "jcr_quartile": "Q2",
+        "cas_major_base": "数学3区",
+        "cas_major_upgraded": "数学3区",
+        "cas_minor_upgraded": "计算机：理论方法3区/应用数学3区。",
+        "impact_factor": "1.2"
+      },
+      "freshness": {
+        "status": "current",
+        "checked_at": "2026-10-11",
+        "per_cycle": [
+          {
+            "cycle": "JCR",
+            "released_at": "2026-06-20",
+            "confirmed_at": "2026-07-20",
+            "lag_days": 30,
+            "state": "current"
+          },
+          {
+            "cycle": "CAS",
+            "released_at": "2025-12-01",
+            "confirmed_at": "2025-12-31",
+            "lag_days": 30,
+            "state": "current"
+          }
+        ],
+        "message": "校验于 2026-10-11，已过各分区同步确认点。"
+      },
+      "grade_changed": false
     },
     {
       "kind": "journal",
@@ -4281,7 +5935,36 @@
           }
         }
       },
-      "verification": "not_verified_sci_q1"
+      "verification": "not_verified_sci_q1",
+      "sci_grade": {
+        "jcr_quartile": null,
+        "cas_major_base": null,
+        "cas_major_upgraded": "计算机科学4区",
+        "cas_minor_upgraded": "计算机：信息系统4区。",
+        "impact_factor": "1.3"
+      },
+      "freshness": {
+        "status": "current",
+        "checked_at": "2026-10-11",
+        "per_cycle": [
+          {
+            "cycle": "JCR",
+            "released_at": "2026-06-20",
+            "confirmed_at": "2026-07-20",
+            "lag_days": 30,
+            "state": "current"
+          },
+          {
+            "cycle": "CAS",
+            "released_at": "2025-12-01",
+            "confirmed_at": "2025-12-31",
+            "lag_days": 30,
+            "state": "current"
+          }
+        ],
+        "message": "校验于 2026-10-11，已过各分区同步确认点。"
+      },
+      "grade_changed": false
     },
     {
       "kind": "journal",
@@ -4346,7 +6029,36 @@
           }
         }
       },
-      "verification": "not_verified_sci_q1"
+      "verification": "not_verified_sci_q1",
+      "sci_grade": {
+        "jcr_quartile": null,
+        "cas_major_base": null,
+        "cas_major_upgraded": "计算机科学3区",
+        "cas_minor_upgraded": "计算机：信息系统3区/计算机：软件工程3区/计算机：跨学科应用4区。",
+        "impact_factor": "4.1"
+      },
+      "freshness": {
+        "status": "current",
+        "checked_at": "2026-10-11",
+        "per_cycle": [
+          {
+            "cycle": "JCR",
+            "released_at": "2026-06-20",
+            "confirmed_at": "2026-07-20",
+            "lag_days": 30,
+            "state": "current"
+          },
+          {
+            "cycle": "CAS",
+            "released_at": "2025-12-01",
+            "confirmed_at": "2025-12-31",
+            "lag_days": 30,
+            "state": "current"
+          }
+        ],
+        "message": "校验于 2026-10-11，已过各分区同步确认点。"
+      },
+      "grade_changed": false
     },
     {
       "kind": "journal",
@@ -4419,7 +6131,36 @@
           }
         }
       },
-      "verification": "not_verified_sci_q1"
+      "verification": "not_verified_sci_q1",
+      "sci_grade": {
+        "jcr_quartile": "Q2",
+        "cas_major_base": "工程技术4区",
+        "cas_major_upgraded": "计算机科学4区",
+        "cas_minor_upgraded": "计算机：软件工程4区。",
+        "impact_factor": "3.9"
+      },
+      "freshness": {
+        "status": "current",
+        "checked_at": "2026-10-11",
+        "per_cycle": [
+          {
+            "cycle": "JCR",
+            "released_at": "2026-06-20",
+            "confirmed_at": "2026-07-20",
+            "lag_days": 30,
+            "state": "current"
+          },
+          {
+            "cycle": "CAS",
+            "released_at": "2025-12-01",
+            "confirmed_at": "2025-12-31",
+            "lag_days": 30,
+            "state": "current"
+          }
+        ],
+        "message": "校验于 2026-10-11，已过各分区同步确认点。"
+      },
+      "grade_changed": false
     },
     {
       "kind": "journal",
@@ -4494,7 +6235,36 @@
           }
         }
       },
-      "verification": "not_verified_sci_q1"
+      "verification": "not_verified_sci_q1",
+      "sci_grade": {
+        "jcr_quartile": "Q2",
+        "cas_major_base": "工程技术3区",
+        "cas_major_upgraded": "计算机科学2区",
+        "cas_minor_upgraded": "计算机：软件工程2区。",
+        "impact_factor": "3.4"
+      },
+      "freshness": {
+        "status": "current",
+        "checked_at": "2026-10-11",
+        "per_cycle": [
+          {
+            "cycle": "JCR",
+            "released_at": "2026-06-20",
+            "confirmed_at": "2026-07-20",
+            "lag_days": 30,
+            "state": "current"
+          },
+          {
+            "cycle": "CAS",
+            "released_at": "2025-12-01",
+            "confirmed_at": "2025-12-31",
+            "lag_days": 30,
+            "state": "current"
+          }
+        ],
+        "message": "校验于 2026-10-11，已过各分区同步确认点。"
+      },
+      "grade_changed": false
     },
     {
       "kind": "journal",
@@ -4564,7 +6334,36 @@
           }
         }
       },
-      "verification": "not_verified_sci_q1"
+      "verification": "not_verified_sci_q1",
+      "sci_grade": {
+        "jcr_quartile": "Q4",
+        "cas_major_base": "工程技术4区",
+        "cas_major_upgraded": "计算机科学4区",
+        "cas_minor_upgraded": "计算机：软件工程4区。",
+        "impact_factor": "1.4"
+      },
+      "freshness": {
+        "status": "current",
+        "checked_at": "2026-10-11",
+        "per_cycle": [
+          {
+            "cycle": "JCR",
+            "released_at": "2026-06-20",
+            "confirmed_at": "2026-07-20",
+            "lag_days": 30,
+            "state": "current"
+          },
+          {
+            "cycle": "CAS",
+            "released_at": "2025-12-01",
+            "confirmed_at": "2025-12-31",
+            "lag_days": 30,
+            "state": "current"
+          }
+        ],
+        "message": "校验于 2026-10-11，已过各分区同步确认点。"
+      },
+      "grade_changed": false
     },
     {
       "kind": "journal",
@@ -4634,7 +6433,36 @@
           }
         }
       },
-      "verification": "not_verified_sci_q1"
+      "verification": "not_verified_sci_q1",
+      "sci_grade": {
+        "jcr_quartile": "Q4",
+        "cas_major_base": "工程技术4区",
+        "cas_major_upgraded": "计算机科学3区",
+        "cas_minor_upgraded": "计算机：软件工程2区。",
+        "impact_factor": "1.0"
+      },
+      "freshness": {
+        "status": "current",
+        "checked_at": "2026-10-11",
+        "per_cycle": [
+          {
+            "cycle": "JCR",
+            "released_at": "2026-06-20",
+            "confirmed_at": "2026-07-20",
+            "lag_days": 30,
+            "state": "current"
+          },
+          {
+            "cycle": "CAS",
+            "released_at": "2025-12-01",
+            "confirmed_at": "2025-12-31",
+            "lag_days": 30,
+            "state": "current"
+          }
+        ],
+        "message": "校验于 2026-10-11，已过各分区同步确认点。"
+      },
+      "grade_changed": false
     },
     {
       "kind": "journal",
@@ -4704,7 +6532,36 @@
           }
         }
       },
-      "verification": "not_verified_sci_q1"
+      "verification": "not_verified_sci_q1",
+      "sci_grade": {
+        "jcr_quartile": "Q3",
+        "cas_major_base": "工程技术4区",
+        "cas_major_upgraded": "计算机科学4区",
+        "cas_minor_upgraded": "计算机：软件工程4区。",
+        "impact_factor": "1.6"
+      },
+      "freshness": {
+        "status": "current",
+        "checked_at": "2026-10-11",
+        "per_cycle": [
+          {
+            "cycle": "JCR",
+            "released_at": "2026-06-20",
+            "confirmed_at": "2026-07-20",
+            "lag_days": 30,
+            "state": "current"
+          },
+          {
+            "cycle": "CAS",
+            "released_at": "2025-12-01",
+            "confirmed_at": "2025-12-31",
+            "lag_days": 30,
+            "state": "current"
+          }
+        ],
+        "message": "校验于 2026-10-11，已过各分区同步确认点。"
+      },
+      "grade_changed": false
     },
     {
       "kind": "journal",
@@ -4778,7 +6635,36 @@
           }
         }
       },
-      "verification": "not_verified_sci_q1"
+      "verification": "not_verified_sci_q1",
+      "sci_grade": {
+        "jcr_quartile": "Q2",
+        "cas_major_base": "工程技术3区",
+        "cas_major_upgraded": "计算机科学2区",
+        "cas_minor_upgraded": "计算机：软件工程2区/计算机：理论方法2区。",
+        "impact_factor": "3.8"
+      },
+      "freshness": {
+        "status": "current",
+        "checked_at": "2026-10-11",
+        "per_cycle": [
+          {
+            "cycle": "JCR",
+            "released_at": "2026-06-20",
+            "confirmed_at": "2026-07-20",
+            "lag_days": 30,
+            "state": "current"
+          },
+          {
+            "cycle": "CAS",
+            "released_at": "2025-12-01",
+            "confirmed_at": "2025-12-31",
+            "lag_days": 30,
+            "state": "current"
+          }
+        ],
+        "message": "校验于 2026-10-11，已过各分区同步确认点。"
+      },
+      "grade_changed": false
     },
     {
       "kind": "journal",
@@ -4852,7 +6738,36 @@
           }
         }
       },
-      "verification": "not_verified_sci_q1"
+      "verification": "not_verified_sci_q1",
+      "sci_grade": {
+        "jcr_quartile": "Q2",
+        "cas_major_base": "工程技术4区",
+        "cas_major_upgraded": "计算机科学3区",
+        "cas_minor_upgraded": "计算机：软件工程3区/计算机：信息系统4区。",
+        "impact_factor": "3.3"
+      },
+      "freshness": {
+        "status": "current",
+        "checked_at": "2026-10-11",
+        "per_cycle": [
+          {
+            "cycle": "JCR",
+            "released_at": "2026-06-20",
+            "confirmed_at": "2026-07-20",
+            "lag_days": 30,
+            "state": "current"
+          },
+          {
+            "cycle": "CAS",
+            "released_at": "2025-12-01",
+            "confirmed_at": "2025-12-31",
+            "lag_days": 30,
+            "state": "current"
+          }
+        ],
+        "message": "校验于 2026-10-11，已过各分区同步确认点。"
+      },
+      "grade_changed": false
     },
     {
       "kind": "journal",
@@ -4921,7 +6836,36 @@
           }
         }
       },
-      "verification": "not_verified_sci_q1"
+      "verification": "not_verified_sci_q1",
+      "sci_grade": {
+        "jcr_quartile": "Q3",
+        "cas_major_base": "工程技术4区",
+        "cas_major_upgraded": "计算机科学4区",
+        "cas_minor_upgraded": "计算机：软件工程4区。",
+        "impact_factor": "1.6"
+      },
+      "freshness": {
+        "status": "current",
+        "checked_at": "2026-10-11",
+        "per_cycle": [
+          {
+            "cycle": "JCR",
+            "released_at": "2026-06-20",
+            "confirmed_at": "2026-07-20",
+            "lag_days": 30,
+            "state": "current"
+          },
+          {
+            "cycle": "CAS",
+            "released_at": "2025-12-01",
+            "confirmed_at": "2025-12-31",
+            "lag_days": 30,
+            "state": "current"
+          }
+        ],
+        "message": "校验于 2026-10-11，已过各分区同步确认点。"
+      },
+      "grade_changed": false
     },
     {
       "kind": "journal",
@@ -4992,7 +6936,36 @@
           }
         }
       },
-      "verification": "not_verified_sci_q1"
+      "verification": "not_verified_sci_q1",
+      "sci_grade": {
+        "jcr_quartile": "Q2",
+        "cas_major_base": "工程技术4区",
+        "cas_major_upgraded": "计算机科学3区",
+        "cas_minor_upgraded": "计算机：软件工程3区。",
+        "impact_factor": "3.0"
+      },
+      "freshness": {
+        "status": "current",
+        "checked_at": "2026-10-11",
+        "per_cycle": [
+          {
+            "cycle": "JCR",
+            "released_at": "2026-06-20",
+            "confirmed_at": "2026-07-20",
+            "lag_days": 30,
+            "state": "current"
+          },
+          {
+            "cycle": "CAS",
+            "released_at": "2025-12-01",
+            "confirmed_at": "2025-12-31",
+            "lag_days": 30,
+            "state": "current"
+          }
+        ],
+        "message": "校验于 2026-10-11，已过各分区同步确认点。"
+      },
+      "grade_changed": false
     },
     {
       "kind": "journal",
@@ -5063,7 +7036,36 @@
           }
         }
       },
-      "verification": "not_verified_sci_q1"
+      "verification": "not_verified_sci_q1",
+      "sci_grade": {
+        "jcr_quartile": "Q3",
+        "cas_major_base": "工程技术4区",
+        "cas_major_upgraded": "计算机科学4区",
+        "cas_minor_upgraded": "计算机：软件工程4区。",
+        "impact_factor": "1.7"
+      },
+      "freshness": {
+        "status": "current",
+        "checked_at": "2026-10-11",
+        "per_cycle": [
+          {
+            "cycle": "JCR",
+            "released_at": "2026-06-20",
+            "confirmed_at": "2026-07-20",
+            "lag_days": 30,
+            "state": "current"
+          },
+          {
+            "cycle": "CAS",
+            "released_at": "2025-12-01",
+            "confirmed_at": "2025-12-31",
+            "lag_days": 30,
+            "state": "current"
+          }
+        ],
+        "message": "校验于 2026-10-11，已过各分区同步确认点。"
+      },
+      "grade_changed": false
     },
     {
       "kind": "journal",
@@ -5133,7 +7135,36 @@
           }
         }
       },
-      "verification": "not_verified_sci_q1"
+      "verification": "not_verified_sci_q1",
+      "sci_grade": {
+        "jcr_quartile": "Q2",
+        "cas_major_base": "工程技术4区",
+        "cas_major_upgraded": "计算机科学4区",
+        "cas_minor_upgraded": "计算机：软件工程4区。",
+        "impact_factor": "3.5"
+      },
+      "freshness": {
+        "status": "current",
+        "checked_at": "2026-10-11",
+        "per_cycle": [
+          {
+            "cycle": "JCR",
+            "released_at": "2026-06-20",
+            "confirmed_at": "2026-07-20",
+            "lag_days": 30,
+            "state": "current"
+          },
+          {
+            "cycle": "CAS",
+            "released_at": "2025-12-01",
+            "confirmed_at": "2025-12-31",
+            "lag_days": 30,
+            "state": "current"
+          }
+        ],
+        "message": "校验于 2026-10-11，已过各分区同步确认点。"
+      },
+      "grade_changed": false
     },
     {
       "kind": "journal",
@@ -5211,7 +7242,36 @@
           }
         }
       },
-      "verification": "not_verified_sci_q1"
+      "verification": "not_verified_sci_q1",
+      "sci_grade": {
+        "jcr_quartile": "Q2",
+        "cas_major_base": "工程技术4区",
+        "cas_major_upgraded": "计算机科学3区",
+        "cas_minor_upgraded": "计算机：人工智能3区/计算机：信息系统3区。",
+        "impact_factor": "3.9"
+      },
+      "freshness": {
+        "status": "current",
+        "checked_at": "2026-10-11",
+        "per_cycle": [
+          {
+            "cycle": "JCR",
+            "released_at": "2026-06-20",
+            "confirmed_at": "2026-07-20",
+            "lag_days": 30,
+            "state": "current"
+          },
+          {
+            "cycle": "CAS",
+            "released_at": "2025-12-01",
+            "confirmed_at": "2025-12-31",
+            "lag_days": 30,
+            "state": "current"
+          }
+        ],
+        "message": "校验于 2026-10-11，已过各分区同步确认点。"
+      },
+      "grade_changed": false
     },
     {
       "kind": "journal",
@@ -5282,7 +7342,36 @@
           }
         }
       },
-      "verification": "not_verified_sci_q1"
+      "verification": "not_verified_sci_q1",
+      "sci_grade": {
+        "jcr_quartile": "Q2",
+        "cas_major_base": "工程技术4区",
+        "cas_major_upgraded": "计算机科学3区",
+        "cas_minor_upgraded": "计算机：信息系统4区/自然地理4区。",
+        "impact_factor": "2.5"
+      },
+      "freshness": {
+        "status": "current",
+        "checked_at": "2026-10-11",
+        "per_cycle": [
+          {
+            "cycle": "JCR",
+            "released_at": "2026-06-20",
+            "confirmed_at": "2026-07-20",
+            "lag_days": 30,
+            "state": "current"
+          },
+          {
+            "cycle": "CAS",
+            "released_at": "2025-12-01",
+            "confirmed_at": "2025-12-31",
+            "lag_days": 30,
+            "state": "current"
+          }
+        ],
+        "message": "校验于 2026-10-11，已过各分区同步确认点。"
+      },
+      "grade_changed": false
     },
     {
       "kind": "journal",
@@ -5359,7 +7448,36 @@
           }
         }
       },
-      "verification": "not_verified_sci_q1"
+      "verification": "not_verified_sci_q1",
+      "sci_grade": {
+        "jcr_quartile": "Q2",
+        "cas_major_base": "工程技术4区",
+        "cas_major_upgraded": "计算机科学3区",
+        "cas_minor_upgraded": "计算机：信息系统3区。",
+        "impact_factor": "4.0"
+      },
+      "freshness": {
+        "status": "current",
+        "checked_at": "2026-10-11",
+        "per_cycle": [
+          {
+            "cycle": "JCR",
+            "released_at": "2026-06-20",
+            "confirmed_at": "2026-07-20",
+            "lag_days": 30,
+            "state": "current"
+          },
+          {
+            "cycle": "CAS",
+            "released_at": "2025-12-01",
+            "confirmed_at": "2025-12-31",
+            "lag_days": 30,
+            "state": "current"
+          }
+        ],
+        "message": "校验于 2026-10-11，已过各分区同步确认点。"
+      },
+      "grade_changed": false
     },
     {
       "kind": "journal",
@@ -5435,7 +7553,36 @@
           }
         }
       },
-      "verification": "not_verified_sci_q1"
+      "verification": "not_verified_sci_q1",
+      "sci_grade": {
+        "jcr_quartile": "Q2",
+        "cas_major_base": "管理科学3区",
+        "cas_major_upgraded": "管理学3区",
+        "cas_minor_upgraded": "计算机：信息系统2区/图书情报与档案管理3区。",
+        "impact_factor": "5.1"
+      },
+      "freshness": {
+        "status": "current",
+        "checked_at": "2026-10-11",
+        "per_cycle": [
+          {
+            "cycle": "JCR",
+            "released_at": "2026-06-20",
+            "confirmed_at": "2026-07-20",
+            "lag_days": 30,
+            "state": "current"
+          },
+          {
+            "cycle": "CAS",
+            "released_at": "2025-12-01",
+            "confirmed_at": "2025-12-31",
+            "lag_days": 30,
+            "state": "current"
+          }
+        ],
+        "message": "校验于 2026-10-11，已过各分区同步确认点。"
+      },
+      "grade_changed": false
     },
     {
       "kind": "journal",
@@ -5508,7 +7655,36 @@
           }
         }
       },
-      "verification": "not_verified_sci_q1"
+      "verification": "not_verified_sci_q1",
+      "sci_grade": {
+        "jcr_quartile": "Q2",
+        "cas_major_base": "工程技术4区",
+        "cas_major_upgraded": "计算机科学3区",
+        "cas_minor_upgraded": "计算机：人工智能3区/计算机：信息系统3区/计算机：软件工程3区。",
+        "impact_factor": "3.2"
+      },
+      "freshness": {
+        "status": "current",
+        "checked_at": "2026-10-11",
+        "per_cycle": [
+          {
+            "cycle": "JCR",
+            "released_at": "2026-06-20",
+            "confirmed_at": "2026-07-20",
+            "lag_days": 30,
+            "state": "current"
+          },
+          {
+            "cycle": "CAS",
+            "released_at": "2025-12-01",
+            "confirmed_at": "2025-12-31",
+            "lag_days": 30,
+            "state": "current"
+          }
+        ],
+        "message": "校验于 2026-10-11，已过各分区同步确认点。"
+      },
+      "grade_changed": false
     },
     {
       "kind": "journal",
@@ -5581,7 +7757,36 @@
           }
         }
       },
-      "verification": "not_verified_sci_q1"
+      "verification": "not_verified_sci_q1",
+      "sci_grade": {
+        "jcr_quartile": "Q2",
+        "cas_major_base": "工程技术3区",
+        "cas_major_upgraded": "计算机科学4区",
+        "cas_minor_upgraded": "计算机：人工智能4区/计算机：信息系统4区。",
+        "impact_factor": "3.6"
+      },
+      "freshness": {
+        "status": "current",
+        "checked_at": "2026-10-11",
+        "per_cycle": [
+          {
+            "cycle": "JCR",
+            "released_at": "2026-06-20",
+            "confirmed_at": "2026-07-20",
+            "lag_days": 30,
+            "state": "current"
+          },
+          {
+            "cycle": "CAS",
+            "released_at": "2025-12-01",
+            "confirmed_at": "2025-12-31",
+            "lag_days": 30,
+            "state": "current"
+          }
+        ],
+        "message": "校验于 2026-10-11，已过各分区同步确认点。"
+      },
+      "grade_changed": false
     },
     {
       "kind": "journal",
@@ -5646,7 +7851,36 @@
           }
         }
       },
-      "verification": "not_verified_sci_q1"
+      "verification": "not_verified_sci_q1",
+      "sci_grade": {
+        "jcr_quartile": null,
+        "cas_major_base": null,
+        "cas_major_upgraded": "计算机科学1区",
+        "cas_minor_upgraded": "计算机：信息系统1区/计算机：理论方法1区。",
+        "impact_factor": "4.1"
+      },
+      "freshness": {
+        "status": "current",
+        "checked_at": "2026-10-11",
+        "per_cycle": [
+          {
+            "cycle": "JCR",
+            "released_at": "2026-06-20",
+            "confirmed_at": "2026-07-20",
+            "lag_days": 30,
+            "state": "current"
+          },
+          {
+            "cycle": "CAS",
+            "released_at": "2025-12-01",
+            "confirmed_at": "2025-12-31",
+            "lag_days": 30,
+            "state": "current"
+          }
+        ],
+        "message": "校验于 2026-10-11，已过各分区同步确认点。"
+      },
+      "grade_changed": false
     },
     {
       "kind": "journal",
@@ -5719,7 +7953,36 @@
           }
         }
       },
-      "verification": "not_verified_sci_q1"
+      "verification": "not_verified_sci_q1",
+      "sci_grade": {
+        "jcr_quartile": "Q2",
+        "cas_major_base": "工程技术4区",
+        "cas_major_upgraded": "计算机科学3区",
+        "cas_minor_upgraded": "计算机：理论方法3区/应用数学3区。",
+        "impact_factor": "1.4"
+      },
+      "freshness": {
+        "status": "current",
+        "checked_at": "2026-10-11",
+        "per_cycle": [
+          {
+            "cycle": "JCR",
+            "released_at": "2026-06-20",
+            "confirmed_at": "2026-07-20",
+            "lag_days": 30,
+            "state": "current"
+          },
+          {
+            "cycle": "CAS",
+            "released_at": "2025-12-01",
+            "confirmed_at": "2025-12-31",
+            "lag_days": 30,
+            "state": "current"
+          }
+        ],
+        "message": "校验于 2026-10-11，已过各分区同步确认点。"
+      },
+      "grade_changed": false
     },
     {
       "kind": "journal",
@@ -5789,7 +8052,36 @@
           }
         }
       },
-      "verification": "not_verified_sci_q1"
+      "verification": "not_verified_sci_q1",
+      "sci_grade": {
+        "jcr_quartile": "Q3",
+        "cas_major_base": "工程技术4区",
+        "cas_major_upgraded": "计算机科学4区",
+        "cas_minor_upgraded": "应用数学3区/计算机：软件工程4区。",
+        "impact_factor": "1.0"
+      },
+      "freshness": {
+        "status": "current",
+        "checked_at": "2026-10-11",
+        "per_cycle": [
+          {
+            "cycle": "JCR",
+            "released_at": "2026-06-20",
+            "confirmed_at": "2026-07-20",
+            "lag_days": 30,
+            "state": "current"
+          },
+          {
+            "cycle": "CAS",
+            "released_at": "2025-12-01",
+            "confirmed_at": "2025-12-31",
+            "lag_days": 30,
+            "state": "current"
+          }
+        ],
+        "message": "校验于 2026-10-11，已过各分区同步确认点。"
+      },
+      "grade_changed": false
     },
     {
       "kind": "journal",
@@ -5858,7 +8150,36 @@
           }
         }
       },
-      "verification": "not_verified_sci_q1"
+      "verification": "not_verified_sci_q1",
+      "sci_grade": {
+        "jcr_quartile": "Q3",
+        "cas_major_base": "工程技术4区",
+        "cas_major_upgraded": "计算机科学4区",
+        "cas_minor_upgraded": "计算机：理论方法4区/数学4区。",
+        "impact_factor": "0.7"
+      },
+      "freshness": {
+        "status": "current",
+        "checked_at": "2026-10-11",
+        "per_cycle": [
+          {
+            "cycle": "JCR",
+            "released_at": "2026-06-20",
+            "confirmed_at": "2026-07-20",
+            "lag_days": 30,
+            "state": "current"
+          },
+          {
+            "cycle": "CAS",
+            "released_at": "2025-12-01",
+            "confirmed_at": "2025-12-31",
+            "lag_days": 30,
+            "state": "current"
+          }
+        ],
+        "message": "校验于 2026-10-11，已过各分区同步确认点。"
+      },
+      "grade_changed": false
     },
     {
       "kind": "journal",
@@ -5927,7 +8248,36 @@
           }
         }
       },
-      "verification": "not_verified_sci_q1"
+      "verification": "not_verified_sci_q1",
+      "sci_grade": {
+        "jcr_quartile": "Q4",
+        "cas_major_base": "工程技术4区",
+        "cas_major_upgraded": "计算机科学3区",
+        "cas_minor_upgraded": "计算机：软件工程3区。",
+        "impact_factor": "1.1"
+      },
+      "freshness": {
+        "status": "current",
+        "checked_at": "2026-10-11",
+        "per_cycle": [
+          {
+            "cycle": "JCR",
+            "released_at": "2026-06-20",
+            "confirmed_at": "2026-07-20",
+            "lag_days": 30,
+            "state": "current"
+          },
+          {
+            "cycle": "CAS",
+            "released_at": "2025-12-01",
+            "confirmed_at": "2025-12-31",
+            "lag_days": 30,
+            "state": "current"
+          }
+        ],
+        "message": "校验于 2026-10-11，已过各分区同步确认点。"
+      },
+      "grade_changed": false
     },
     {
       "kind": "journal",
@@ -5997,7 +8347,36 @@
           }
         }
       },
-      "verification": "not_verified_sci_q1"
+      "verification": "not_verified_sci_q1",
+      "sci_grade": {
+        "jcr_quartile": "Q3",
+        "cas_major_base": "工程技术4区",
+        "cas_major_upgraded": "计算机科学4区",
+        "cas_minor_upgraded": "计算机：理论方法4区。",
+        "impact_factor": "1.0"
+      },
+      "freshness": {
+        "status": "current",
+        "checked_at": "2026-10-11",
+        "per_cycle": [
+          {
+            "cycle": "JCR",
+            "released_at": "2026-06-20",
+            "confirmed_at": "2026-07-20",
+            "lag_days": 30,
+            "state": "current"
+          },
+          {
+            "cycle": "CAS",
+            "released_at": "2025-12-01",
+            "confirmed_at": "2025-12-31",
+            "lag_days": 30,
+            "state": "current"
+          }
+        ],
+        "message": "校验于 2026-10-11，已过各分区同步确认点。"
+      },
+      "grade_changed": false
     },
     {
       "kind": "journal",
@@ -6076,7 +8455,36 @@
           }
         }
       },
-      "verification": "not_verified_sci_q1"
+      "verification": "not_verified_sci_q1",
+      "sci_grade": {
+        "jcr_quartile": "Q2",
+        "cas_major_base": "工程技术4区",
+        "cas_major_upgraded": "计算机科学3区",
+        "cas_minor_upgraded": "计算机：跨学科应用3区/运筹学与管理科学3区。",
+        "impact_factor": "2.5"
+      },
+      "freshness": {
+        "status": "current",
+        "checked_at": "2026-10-11",
+        "per_cycle": [
+          {
+            "cycle": "JCR",
+            "released_at": "2026-06-20",
+            "confirmed_at": "2026-07-20",
+            "lag_days": 30,
+            "state": "current"
+          },
+          {
+            "cycle": "CAS",
+            "released_at": "2025-12-01",
+            "confirmed_at": "2025-12-31",
+            "lag_days": 30,
+            "state": "current"
+          }
+        ],
+        "message": "校验于 2026-10-11，已过各分区同步确认点。"
+      },
+      "grade_changed": false
     },
     {
       "kind": "journal",
@@ -6148,7 +8556,36 @@
           }
         }
       },
-      "verification": "not_verified_sci_q1"
+      "verification": "not_verified_sci_q1",
+      "sci_grade": {
+        "jcr_quartile": "Q3",
+        "cas_major_base": "工程技术4区",
+        "cas_major_upgraded": "计算机科学3区",
+        "cas_minor_upgraded": "计算机：理论方法2区/计算机：硬件3区。",
+        "impact_factor": "1.4"
+      },
+      "freshness": {
+        "status": "current",
+        "checked_at": "2026-10-11",
+        "per_cycle": [
+          {
+            "cycle": "JCR",
+            "released_at": "2026-06-20",
+            "confirmed_at": "2026-07-20",
+            "lag_days": 30,
+            "state": "current"
+          },
+          {
+            "cycle": "CAS",
+            "released_at": "2025-12-01",
+            "confirmed_at": "2025-12-31",
+            "lag_days": 30,
+            "state": "current"
+          }
+        ],
+        "message": "校验于 2026-10-11，已过各分区同步确认点。"
+      },
+      "grade_changed": false
     },
     {
       "kind": "journal",
@@ -6224,7 +8661,36 @@
           }
         }
       },
-      "verification": "not_verified_sci_q1"
+      "verification": "not_verified_sci_q1",
+      "sci_grade": {
+        "jcr_quartile": "Q2",
+        "cas_major_base": "数学2区",
+        "cas_major_upgraded": "数学4区",
+        "cas_minor_upgraded": "运筹学与管理科学3区/应用数学4区。",
+        "impact_factor": "1.8"
+      },
+      "freshness": {
+        "status": "current",
+        "checked_at": "2026-10-11",
+        "per_cycle": [
+          {
+            "cycle": "JCR",
+            "released_at": "2026-06-20",
+            "confirmed_at": "2026-07-20",
+            "lag_days": 30,
+            "state": "current"
+          },
+          {
+            "cycle": "CAS",
+            "released_at": "2025-12-01",
+            "confirmed_at": "2025-12-31",
+            "lag_days": 30,
+            "state": "current"
+          }
+        ],
+        "message": "校验于 2026-10-11，已过各分区同步确认点。"
+      },
+      "grade_changed": false
     },
     {
       "kind": "journal",
@@ -6291,7 +8757,36 @@
           }
         }
       },
-      "verification": "not_verified_sci_q1"
+      "verification": "not_verified_sci_q1",
+      "sci_grade": {
+        "jcr_quartile": "Q3",
+        "cas_major_base": "数学4区",
+        "cas_major_upgraded": "数学4区",
+        "cas_minor_upgraded": "计算机：理论方法4区/应用数学4区。",
+        "impact_factor": "0.9"
+      },
+      "freshness": {
+        "status": "current",
+        "checked_at": "2026-10-11",
+        "per_cycle": [
+          {
+            "cycle": "JCR",
+            "released_at": "2026-06-20",
+            "confirmed_at": "2026-07-20",
+            "lag_days": 30,
+            "state": "current"
+          },
+          {
+            "cycle": "CAS",
+            "released_at": "2025-12-01",
+            "confirmed_at": "2025-12-31",
+            "lag_days": 30,
+            "state": "current"
+          }
+        ],
+        "message": "校验于 2026-10-11，已过各分区同步确认点。"
+      },
+      "grade_changed": false
     },
     {
       "kind": "journal",
@@ -6358,7 +8853,36 @@
           }
         }
       },
-      "verification": "not_verified_sci_q1"
+      "verification": "not_verified_sci_q1",
+      "sci_grade": {
+        "jcr_quartile": "Q4",
+        "cas_major_base": "工程技术4区",
+        "cas_major_upgraded": "计算机科学4区",
+        "cas_minor_upgraded": "计算机：理论方法4区。",
+        "impact_factor": "0.9"
+      },
+      "freshness": {
+        "status": "current",
+        "checked_at": "2026-10-11",
+        "per_cycle": [
+          {
+            "cycle": "JCR",
+            "released_at": "2026-06-20",
+            "confirmed_at": "2026-07-20",
+            "lag_days": 30,
+            "state": "current"
+          },
+          {
+            "cycle": "CAS",
+            "released_at": "2025-12-01",
+            "confirmed_at": "2025-12-31",
+            "lag_days": 30,
+            "state": "current"
+          }
+        ],
+        "message": "校验于 2026-10-11，已过各分区同步确认点。"
+      },
+      "grade_changed": false
     },
     {
       "kind": "journal",
@@ -6427,7 +8951,36 @@
           }
         }
       },
-      "verification": "not_verified_sci_q1"
+      "verification": "not_verified_sci_q1",
+      "sci_grade": {
+        "jcr_quartile": "Q3",
+        "cas_major_base": "工程技术4区",
+        "cas_major_upgraded": "计算机科学4区",
+        "cas_minor_upgraded": "计算机：理论方法4区。",
+        "impact_factor": "1.1"
+      },
+      "freshness": {
+        "status": "current",
+        "checked_at": "2026-10-11",
+        "per_cycle": [
+          {
+            "cycle": "JCR",
+            "released_at": "2026-06-20",
+            "confirmed_at": "2026-07-20",
+            "lag_days": 30,
+            "state": "current"
+          },
+          {
+            "cycle": "CAS",
+            "released_at": "2025-12-01",
+            "confirmed_at": "2025-12-31",
+            "lag_days": 30,
+            "state": "current"
+          }
+        ],
+        "message": "校验于 2026-10-11，已过各分区同步确认点。"
+      },
+      "grade_changed": false
     },
     {
       "kind": "journal",
@@ -6498,7 +9051,36 @@
           }
         }
       },
-      "verification": "not_verified_sci_q1"
+      "verification": "not_verified_sci_q1",
+      "sci_grade": {
+        "jcr_quartile": "Q2",
+        "cas_major_base": "工程技术4区",
+        "cas_major_upgraded": "计算机科学4区",
+        "cas_minor_upgraded": "计算机：软件工程4区/应用数学4区。",
+        "impact_factor": "1.7"
+      },
+      "freshness": {
+        "status": "current",
+        "checked_at": "2026-10-11",
+        "per_cycle": [
+          {
+            "cycle": "JCR",
+            "released_at": "2026-06-20",
+            "confirmed_at": "2026-07-20",
+            "lag_days": 30,
+            "state": "current"
+          },
+          {
+            "cycle": "CAS",
+            "released_at": "2025-12-01",
+            "confirmed_at": "2025-12-31",
+            "lag_days": 30,
+            "state": "current"
+          }
+        ],
+        "message": "校验于 2026-10-11，已过各分区同步确认点。"
+      },
+      "grade_changed": false
     },
     {
       "kind": "journal",
@@ -6571,7 +9153,36 @@
           }
         }
       },
-      "verification": "not_verified_sci_q1"
+      "verification": "not_verified_sci_q1",
+      "sci_grade": {
+        "jcr_quartile": "Q2",
+        "cas_major_base": "工程技术4区",
+        "cas_major_upgraded": "计算机科学4区",
+        "cas_minor_upgraded": "计算机：软件工程4区。",
+        "impact_factor": "2.6"
+      },
+      "freshness": {
+        "status": "current",
+        "checked_at": "2026-10-11",
+        "per_cycle": [
+          {
+            "cycle": "JCR",
+            "released_at": "2026-06-20",
+            "confirmed_at": "2026-07-20",
+            "lag_days": 30,
+            "state": "current"
+          },
+          {
+            "cycle": "CAS",
+            "released_at": "2025-12-01",
+            "confirmed_at": "2025-12-31",
+            "lag_days": 30,
+            "state": "current"
+          }
+        ],
+        "message": "校验于 2026-10-11，已过各分区同步确认点。"
+      },
+      "grade_changed": false
     },
     {
       "kind": "journal",
@@ -6642,7 +9253,36 @@
           }
         }
       },
-      "verification": "not_verified_sci_q1"
+      "verification": "not_verified_sci_q1",
+      "sci_grade": {
+        "jcr_quartile": "Q2",
+        "cas_major_base": "工程技术3区",
+        "cas_major_upgraded": "计算机科学3区",
+        "cas_minor_upgraded": "计算机：软件工程3区。",
+        "impact_factor": "3.2"
+      },
+      "freshness": {
+        "status": "current",
+        "checked_at": "2026-10-11",
+        "per_cycle": [
+          {
+            "cycle": "JCR",
+            "released_at": "2026-06-20",
+            "confirmed_at": "2026-07-20",
+            "lag_days": 30,
+            "state": "current"
+          },
+          {
+            "cycle": "CAS",
+            "released_at": "2025-12-01",
+            "confirmed_at": "2025-12-31",
+            "lag_days": 30,
+            "state": "current"
+          }
+        ],
+        "message": "校验于 2026-10-11，已过各分区同步确认点。"
+      },
+      "grade_changed": false
     },
     {
       "kind": "journal",
@@ -6715,7 +9355,36 @@
           }
         }
       },
-      "verification": "not_verified_sci_q1"
+      "verification": "not_verified_sci_q1",
+      "sci_grade": {
+        "jcr_quartile": "Q2",
+        "cas_major_base": "工程技术4区",
+        "cas_major_upgraded": "计算机科学3区",
+        "cas_minor_upgraded": "声学2区/计算机：跨学科应用3区。",
+        "impact_factor": "2.9"
+      },
+      "freshness": {
+        "status": "current",
+        "checked_at": "2026-10-11",
+        "per_cycle": [
+          {
+            "cycle": "JCR",
+            "released_at": "2026-06-20",
+            "confirmed_at": "2026-07-20",
+            "lag_days": 30,
+            "state": "current"
+          },
+          {
+            "cycle": "CAS",
+            "released_at": "2025-12-01",
+            "confirmed_at": "2025-12-31",
+            "lag_days": 30,
+            "state": "current"
+          }
+        ],
+        "message": "校验于 2026-10-11，已过各分区同步确认点。"
+      },
+      "grade_changed": false
     },
     {
       "kind": "journal",
@@ -6788,7 +9457,36 @@
           }
         }
       },
-      "verification": "not_verified_sci_q1"
+      "verification": "not_verified_sci_q1",
+      "sci_grade": {
+        "jcr_quartile": "Q2",
+        "cas_major_base": "工程技术4区",
+        "cas_major_upgraded": "计算机科学3区",
+        "cas_minor_upgraded": "计算机：软件工程3区。",
+        "impact_factor": "2.5"
+      },
+      "freshness": {
+        "status": "current",
+        "checked_at": "2026-10-11",
+        "per_cycle": [
+          {
+            "cycle": "JCR",
+            "released_at": "2026-06-20",
+            "confirmed_at": "2026-07-20",
+            "lag_days": 30,
+            "state": "current"
+          },
+          {
+            "cycle": "CAS",
+            "released_at": "2025-12-01",
+            "confirmed_at": "2025-12-31",
+            "lag_days": 30,
+            "state": "current"
+          }
+        ],
+        "message": "校验于 2026-10-11，已过各分区同步确认点。"
+      },
+      "grade_changed": false
     },
     {
       "kind": "journal",
@@ -6862,7 +9560,36 @@
           }
         }
       },
-      "verification": "not_verified_sci_q1"
+      "verification": "not_verified_sci_q1",
+      "sci_grade": {
+        "jcr_quartile": "Q2",
+        "cas_major_base": "工程技术4区",
+        "cas_major_upgraded": "计算机科学3区",
+        "cas_minor_upgraded": "自动化与控制系统3区/计算机：人工智能3区。",
+        "impact_factor": "2.4"
+      },
+      "freshness": {
+        "status": "current",
+        "checked_at": "2026-10-11",
+        "per_cycle": [
+          {
+            "cycle": "JCR",
+            "released_at": "2026-06-20",
+            "confirmed_at": "2026-07-20",
+            "lag_days": 30,
+            "state": "current"
+          },
+          {
+            "cycle": "CAS",
+            "released_at": "2025-12-01",
+            "confirmed_at": "2025-12-31",
+            "lag_days": 30,
+            "state": "current"
+          }
+        ],
+        "message": "校验于 2026-10-11，已过各分区同步确认点。"
+      },
+      "grade_changed": false
     },
     {
       "kind": "journal",
@@ -6937,7 +9664,36 @@
           }
         }
       },
-      "verification": "not_verified_sci_q1"
+      "verification": "not_verified_sci_q1",
+      "sci_grade": {
+        "jcr_quartile": "Q2",
+        "cas_major_base": "工程技术3区",
+        "cas_major_upgraded": "计算机科学3区",
+        "cas_minor_upgraded": "计算机：人工智能3区/工程：电子与电气3区。",
+        "impact_factor": "3.6"
+      },
+      "freshness": {
+        "status": "current",
+        "checked_at": "2026-10-11",
+        "per_cycle": [
+          {
+            "cycle": "JCR",
+            "released_at": "2026-06-20",
+            "confirmed_at": "2026-07-20",
+            "lag_days": 30,
+            "state": "current"
+          },
+          {
+            "cycle": "CAS",
+            "released_at": "2025-12-01",
+            "confirmed_at": "2025-12-31",
+            "lag_days": 30,
+            "state": "current"
+          }
+        ],
+        "message": "校验于 2026-10-11，已过各分区同步确认点。"
+      },
+      "grade_changed": false
     },
     {
       "kind": "journal",
@@ -6982,7 +9738,36 @@
           }
         }
       },
-      "verification": "not_verified_sci_q1"
+      "verification": "not_verified_sci_q1",
+      "sci_grade": {
+        "jcr_quartile": null,
+        "cas_major_base": null,
+        "cas_major_upgraded": null,
+        "cas_minor_upgraded": null,
+        "impact_factor": null
+      },
+      "freshness": {
+        "status": "current",
+        "checked_at": "2026-10-11",
+        "per_cycle": [
+          {
+            "cycle": "JCR",
+            "released_at": "2026-06-20",
+            "confirmed_at": "2026-07-20",
+            "lag_days": 30,
+            "state": "current"
+          },
+          {
+            "cycle": "CAS",
+            "released_at": "2025-12-01",
+            "confirmed_at": "2025-12-31",
+            "lag_days": 30,
+            "state": "current"
+          }
+        ],
+        "message": "校验于 2026-10-11，已过各分区同步确认点。"
+      },
+      "grade_changed": false
     },
     {
       "kind": "journal",
@@ -7056,7 +9841,36 @@
           }
         }
       },
-      "verification": "not_verified_sci_q1"
+      "verification": "not_verified_sci_q1",
+      "sci_grade": {
+        "jcr_quartile": "Q3",
+        "cas_major_base": "工程技术3区",
+        "cas_major_upgraded": "计算机科学3区",
+        "cas_minor_upgraded": "计算机：人工智能3区。",
+        "impact_factor": "2.8"
+      },
+      "freshness": {
+        "status": "current",
+        "checked_at": "2026-10-11",
+        "per_cycle": [
+          {
+            "cycle": "JCR",
+            "released_at": "2026-06-20",
+            "confirmed_at": "2026-07-20",
+            "lag_days": 30,
+            "state": "current"
+          },
+          {
+            "cycle": "CAS",
+            "released_at": "2025-12-01",
+            "confirmed_at": "2025-12-31",
+            "lag_days": 30,
+            "state": "current"
+          }
+        ],
+        "message": "校验于 2026-10-11，已过各分区同步确认点。"
+      },
+      "grade_changed": false
     },
     {
       "kind": "journal",
@@ -7130,7 +9944,36 @@
           }
         }
       },
-      "verification": "not_verified_sci_q1"
+      "verification": "not_verified_sci_q1",
+      "sci_grade": {
+        "jcr_quartile": "Q2",
+        "cas_major_base": "工程技术4区",
+        "cas_major_upgraded": "计算机科学3区",
+        "cas_minor_upgraded": "计算机：人工智能3区。",
+        "impact_factor": "4.0"
+      },
+      "freshness": {
+        "status": "current",
+        "checked_at": "2026-10-11",
+        "per_cycle": [
+          {
+            "cycle": "JCR",
+            "released_at": "2026-06-20",
+            "confirmed_at": "2026-07-20",
+            "lag_days": 30,
+            "state": "current"
+          },
+          {
+            "cycle": "CAS",
+            "released_at": "2025-12-01",
+            "confirmed_at": "2025-12-31",
+            "lag_days": 30,
+            "state": "current"
+          }
+        ],
+        "message": "校验于 2026-10-11，已过各分区同步确认点。"
+      },
+      "grade_changed": false
     },
     {
       "kind": "journal",
@@ -7201,7 +10044,36 @@
           }
         }
       },
-      "verification": "not_verified_sci_q1"
+      "verification": "not_verified_sci_q1",
+      "sci_grade": {
+        "jcr_quartile": "Q4",
+        "cas_major_base": "工程技术4区",
+        "cas_major_upgraded": "计算机科学3区",
+        "cas_minor_upgraded": "计算机：人工智能3区。",
+        "impact_factor": "0.7"
+      },
+      "freshness": {
+        "status": "current",
+        "checked_at": "2026-10-11",
+        "per_cycle": [
+          {
+            "cycle": "JCR",
+            "released_at": "2026-06-20",
+            "confirmed_at": "2026-07-20",
+            "lag_days": 30,
+            "state": "current"
+          },
+          {
+            "cycle": "CAS",
+            "released_at": "2025-12-01",
+            "confirmed_at": "2025-12-31",
+            "lag_days": 30,
+            "state": "current"
+          }
+        ],
+        "message": "校验于 2026-10-11，已过各分区同步确认点。"
+      },
+      "grade_changed": false
     },
     {
       "kind": "journal",
@@ -7277,7 +10149,36 @@
           }
         }
       },
-      "verification": "not_verified_sci_q1"
+      "verification": "not_verified_sci_q1",
+      "sci_grade": {
+        "jcr_quartile": "Q2",
+        "cas_major_base": "工程技术3区",
+        "cas_major_upgraded": "计算机科学4区",
+        "cas_minor_upgraded": "计算机：人工智能4区。",
+        "impact_factor": "4.9"
+      },
+      "freshness": {
+        "status": "current",
+        "checked_at": "2026-10-11",
+        "per_cycle": [
+          {
+            "cycle": "JCR",
+            "released_at": "2026-06-20",
+            "confirmed_at": "2026-07-20",
+            "lag_days": 30,
+            "state": "current"
+          },
+          {
+            "cycle": "CAS",
+            "released_at": "2025-12-01",
+            "confirmed_at": "2025-12-31",
+            "lag_days": 30,
+            "state": "current"
+          }
+        ],
+        "message": "校验于 2026-10-11，已过各分区同步确认点。"
+      },
+      "grade_changed": false
     },
     {
       "kind": "journal",
@@ -7351,7 +10252,36 @@
           }
         }
       },
-      "verification": "not_verified_sci_q1"
+      "verification": "not_verified_sci_q1",
+      "sci_grade": {
+        "jcr_quartile": "Q3",
+        "cas_major_base": "工程技术4区",
+        "cas_major_upgraded": "计算机科学4区",
+        "cas_minor_upgraded": "计算机：人工智能4区/神经科学4区。",
+        "impact_factor": "2.1"
+      },
+      "freshness": {
+        "status": "current",
+        "checked_at": "2026-10-11",
+        "per_cycle": [
+          {
+            "cycle": "JCR",
+            "released_at": "2026-06-20",
+            "confirmed_at": "2026-07-20",
+            "lag_days": 30,
+            "state": "current"
+          },
+          {
+            "cycle": "CAS",
+            "released_at": "2025-12-01",
+            "confirmed_at": "2025-12-31",
+            "lag_days": 30,
+            "state": "current"
+          }
+        ],
+        "message": "校验于 2026-10-11，已过各分区同步确认点。"
+      },
+      "grade_changed": false
     },
     {
       "kind": "journal",
@@ -7400,7 +10330,36 @@
           }
         }
       },
-      "verification": "not_verified_sci_q1"
+      "verification": "not_verified_sci_q1",
+      "sci_grade": {
+        "jcr_quartile": null,
+        "cas_major_base": null,
+        "cas_major_upgraded": null,
+        "cas_minor_upgraded": null,
+        "impact_factor": null
+      },
+      "freshness": {
+        "status": "current",
+        "checked_at": "2026-10-11",
+        "per_cycle": [
+          {
+            "cycle": "JCR",
+            "released_at": "2026-06-20",
+            "confirmed_at": "2026-07-20",
+            "lag_days": 30,
+            "state": "current"
+          },
+          {
+            "cycle": "CAS",
+            "released_at": "2025-12-01",
+            "confirmed_at": "2025-12-31",
+            "lag_days": 30,
+            "state": "current"
+          }
+        ],
+        "message": "校验于 2026-10-11，已过各分区同步确认点。"
+      },
+      "grade_changed": false
     },
     {
       "kind": "journal",
@@ -7473,7 +10432,36 @@
           }
         }
       },
-      "verification": "not_verified_sci_q1"
+      "verification": "not_verified_sci_q1",
+      "sci_grade": {
+        "jcr_quartile": "Q2",
+        "cas_major_base": "工程技术3区",
+        "cas_major_upgraded": "计算机科学2区",
+        "cas_minor_upgraded": "计算机：人工智能3区/计算机：控制论3区。",
+        "impact_factor": "4.4"
+      },
+      "freshness": {
+        "status": "current",
+        "checked_at": "2026-10-11",
+        "per_cycle": [
+          {
+            "cycle": "JCR",
+            "released_at": "2026-06-20",
+            "confirmed_at": "2026-07-20",
+            "lag_days": 30,
+            "state": "current"
+          },
+          {
+            "cycle": "CAS",
+            "released_at": "2025-12-01",
+            "confirmed_at": "2025-12-31",
+            "lag_days": 30,
+            "state": "current"
+          }
+        ],
+        "message": "校验于 2026-10-11，已过各分区同步确认点。"
+      },
+      "grade_changed": false
     },
     {
       "kind": "journal",
@@ -7545,7 +10533,36 @@
           }
         }
       },
-      "verification": "not_verified_sci_q1"
+      "verification": "not_verified_sci_q1",
+      "sci_grade": {
+        "jcr_quartile": "Q3",
+        "cas_major_base": "工程技术4区",
+        "cas_major_upgraded": "计算机科学4区",
+        "cas_minor_upgraded": "计算机：控制论4区/人体工程学4区。",
+        "impact_factor": "1.9"
+      },
+      "freshness": {
+        "status": "current",
+        "checked_at": "2026-10-11",
+        "per_cycle": [
+          {
+            "cycle": "JCR",
+            "released_at": "2026-06-20",
+            "confirmed_at": "2026-07-20",
+            "lag_days": 30,
+            "state": "current"
+          },
+          {
+            "cycle": "CAS",
+            "released_at": "2025-12-01",
+            "confirmed_at": "2025-12-31",
+            "lag_days": 30,
+            "state": "current"
+          }
+        ],
+        "message": "校验于 2026-10-11，已过各分区同步确认点。"
+      },
+      "grade_changed": false
     },
     {
       "kind": "journal",
@@ -7616,7 +10633,36 @@
           }
         }
       },
-      "verification": "not_verified_sci_q1"
+      "verification": "not_verified_sci_q1",
+      "sci_grade": {
+        "jcr_quartile": "Q2",
+        "cas_major_base": "工程技术2区",
+        "cas_major_upgraded": "计算机科学2区",
+        "cas_minor_upgraded": "计算机：控制论3区。",
+        "impact_factor": "4.5"
+      },
+      "freshness": {
+        "status": "current",
+        "checked_at": "2026-10-11",
+        "per_cycle": [
+          {
+            "cycle": "JCR",
+            "released_at": "2026-06-20",
+            "confirmed_at": "2026-07-20",
+            "lag_days": 30,
+            "state": "current"
+          },
+          {
+            "cycle": "CAS",
+            "released_at": "2025-12-01",
+            "confirmed_at": "2025-12-31",
+            "lag_days": 30,
+            "state": "current"
+          }
+        ],
+        "message": "校验于 2026-10-11，已过各分区同步确认点。"
+      },
+      "grade_changed": false
     },
     {
       "kind": "journal",
@@ -7684,7 +10730,36 @@
           }
         }
       },
-      "verification": "not_verified_sci_q1"
+      "verification": "not_verified_sci_q1",
+      "sci_grade": {
+        "jcr_quartile": null,
+        "cas_major_base": "工程技术1区",
+        "cas_major_upgraded": "计算机科学1区",
+        "cas_minor_upgraded": "自动化与控制系统1区/计算机：控制论1区。",
+        "impact_factor": null
+      },
+      "freshness": {
+        "status": "current",
+        "checked_at": "2026-10-11",
+        "per_cycle": [
+          {
+            "cycle": "JCR",
+            "released_at": "2026-06-20",
+            "confirmed_at": "2026-07-20",
+            "lag_days": 30,
+            "state": "current"
+          },
+          {
+            "cycle": "CAS",
+            "released_at": "2025-12-01",
+            "confirmed_at": "2025-12-31",
+            "lag_days": 30,
+            "state": "current"
+          }
+        ],
+        "message": "校验于 2026-10-11，已过各分区同步确认点。"
+      },
+      "grade_changed": false
     },
     {
       "kind": "journal",
@@ -7742,7 +10817,36 @@
           }
         }
       },
-      "verification": "not_verified_sci_q1"
+      "verification": "not_verified_sci_q1",
+      "sci_grade": {
+        "jcr_quartile": null,
+        "cas_major_base": null,
+        "cas_major_upgraded": "计算机科学4区",
+        "cas_minor_upgraded": "计算机：人工智能4区/计算机：控制论4区/计算机：信息系统4区/计算机：跨学科应用4区。",
+        "impact_factor": "1.5"
+      },
+      "freshness": {
+        "status": "current",
+        "checked_at": "2026-10-11",
+        "per_cycle": [
+          {
+            "cycle": "JCR",
+            "released_at": "2026-06-20",
+            "confirmed_at": "2026-07-20",
+            "lag_days": 30,
+            "state": "current"
+          },
+          {
+            "cycle": "CAS",
+            "released_at": "2025-12-01",
+            "confirmed_at": "2025-12-31",
+            "lag_days": 30,
+            "state": "current"
+          }
+        ],
+        "message": "校验于 2026-10-11，已过各分区同步确认点。"
+      },
+      "grade_changed": false
     },
     {
       "kind": "journal",
@@ -7816,7 +10920,36 @@
           }
         }
       },
-      "verification": "not_verified_sci_q1"
+      "verification": "not_verified_sci_q1",
+      "sci_grade": {
+        "jcr_quartile": null,
+        "cas_major_base": null,
+        "cas_major_upgraded": "心理学2区",
+        "cas_minor_upgraded": "心理学：实验2区。",
+        "impact_factor": "3.1"
+      },
+      "freshness": {
+        "status": "current",
+        "checked_at": "2026-10-11",
+        "per_cycle": [
+          {
+            "cycle": "JCR",
+            "released_at": "2026-06-20",
+            "confirmed_at": "2026-07-20",
+            "lag_days": 30,
+            "state": "current"
+          },
+          {
+            "cycle": "CAS",
+            "released_at": "2025-12-01",
+            "confirmed_at": "2025-12-31",
+            "lag_days": 30,
+            "state": "current"
+          }
+        ],
+        "message": "校验于 2026-10-11，已过各分区同步确认点。"
+      },
+      "grade_changed": false
     },
     {
       "kind": "journal",
@@ -7895,7 +11028,36 @@
           }
         }
       },
-      "verification": "not_verified_sci_q1"
+      "verification": "not_verified_sci_q1",
+      "sci_grade": {
+        "jcr_quartile": "Q3",
+        "cas_major_base": "工程技术2区",
+        "cas_major_upgraded": "计算机科学4区",
+        "cas_minor_upgraded": "计算机：人工智能4区。",
+        "impact_factor": "0.6"
+      },
+      "freshness": {
+        "status": "current",
+        "checked_at": "2026-10-11",
+        "per_cycle": [
+          {
+            "cycle": "JCR",
+            "released_at": "2026-06-20",
+            "confirmed_at": "2026-07-20",
+            "lag_days": 30,
+            "state": "current"
+          },
+          {
+            "cycle": "CAS",
+            "released_at": "2025-12-01",
+            "confirmed_at": "2025-12-31",
+            "lag_days": 30,
+            "state": "current"
+          }
+        ],
+        "message": "校验于 2026-10-11，已过各分区同步确认点。"
+      },
+      "grade_changed": false
     },
     {
       "kind": "journal",
@@ -7966,7 +11128,36 @@
           }
         }
       },
-      "verification": "not_verified_sci_q1"
+      "verification": "not_verified_sci_q1",
+      "sci_grade": {
+        "jcr_quartile": "Q3",
+        "cas_major_base": "工程技术4区",
+        "cas_major_upgraded": "计算机科学4区",
+        "cas_minor_upgraded": "计算机：硬件4区/计算机：信息系统4区/计算机：软件工程4区/计算机：理论方法4区。",
+        "impact_factor": "1.6"
+      },
+      "freshness": {
+        "status": "current",
+        "checked_at": "2026-10-11",
+        "per_cycle": [
+          {
+            "cycle": "JCR",
+            "released_at": "2026-06-20",
+            "confirmed_at": "2026-07-20",
+            "lag_days": 30,
+            "state": "current"
+          },
+          {
+            "cycle": "CAS",
+            "released_at": "2025-12-01",
+            "confirmed_at": "2025-12-31",
+            "lag_days": 30,
+            "state": "current"
+          }
+        ],
+        "message": "校验于 2026-10-11，已过各分区同步确认点。"
+      },
+      "grade_changed": false
     },
     {
       "kind": "journal",
@@ -8026,7 +11217,36 @@
           }
         }
       },
-      "verification": "not_verified_sci_q1"
+      "verification": "not_verified_sci_q1",
+      "sci_grade": {
+        "jcr_quartile": null,
+        "cas_major_base": null,
+        "cas_major_upgraded": "计算机科学2区",
+        "cas_minor_upgraded": "计算机：信息系统2区/计算机：跨学科应用2区。",
+        "impact_factor": "6.5"
+      },
+      "freshness": {
+        "status": "current",
+        "checked_at": "2026-10-11",
+        "per_cycle": [
+          {
+            "cycle": "JCR",
+            "released_at": "2026-06-20",
+            "confirmed_at": "2026-07-20",
+            "lag_days": 30,
+            "state": "current"
+          },
+          {
+            "cycle": "CAS",
+            "released_at": "2025-12-01",
+            "confirmed_at": "2025-12-31",
+            "lag_days": 30,
+            "state": "current"
+          }
+        ],
+        "message": "校验于 2026-10-11，已过各分区同步确认点。"
+      },
+      "grade_changed": false
     }
   ]
 }

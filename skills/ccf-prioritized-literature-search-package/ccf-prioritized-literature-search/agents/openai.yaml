@@ -1,6 +1,6 @@
 interface:
   display_name: "CCF 优先论文检索"
-  short_description: "优先推荐 CCF A 与 SCI 一区论文，时间段由你自定"
+  short_description: "推荐 CCF A 与 SCI 一区论文；CCF 期刊附 JCR 与中科院双标注等级，按发布节点校验时效"
   default_prompt: "Use $ccf-prioritized-literature-search to find high-quality papers on my topic."
 
 policy:

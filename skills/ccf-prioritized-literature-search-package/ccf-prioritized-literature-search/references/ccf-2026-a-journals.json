@@ -1,0 +1,528 @@
+{
+  "schema_version": 1,
+  "catalog": "第七版中国计算机学会推荐国际学术会议和期刊目录（正式版）",
+  "catalog_year": 2026,
+  "source_pdf_pages": 72,
+  "extraction_note": "Entries are extracted from the supplied official PDF. The skill matches both abbreviation and full title; source pages support later review.",
+  "purpose": "Input list for EasyScholar SCI grade cache refresh covering CCF A journals.",
+  "journals": [
+    {
+      "kind": "journal",
+      "ccf_rank": "A",
+      "short_name": "TOCS",
+      "full_name": "ACMTransactionsonComputerSystems",
+      "publisher": "ACM",
+      "url": "http://dblp.uni-trier.de/db/journals/tocs/",
+      "areas": [
+        "计算机体系结构/并行与分布计算/存储系统"
+      ],
+      "source_pages": [
+        2
+      ]
+    },
+    {
+      "kind": "journal",
+      "ccf_rank": "A",
+      "short_name": "TOS",
+      "full_name": "ACMTransactionsonStorage",
+      "publisher": "ACM",
+      "url": "http://dblp.uni-trier.de/db/journals/tos/",
+      "areas": [
+        "计算机体系结构/并行与分布计算/存储系统"
+      ],
+      "source_pages": [
+        2
+      ]
+    },
+    {
+      "kind": "journal",
+      "ccf_rank": "A",
+      "short_name": "TCAD",
+      "full_name": "IEEETransactionsonComputer-AidedDesignofIntegrated CircuitsandSystems",
+      "publisher": "IEEE",
+      "url": "http://dblp.uni-trier.de/db/journals/tcad/",
+      "areas": [
+        "计算机体系结构/并行与分布计算/存储系统"
+      ],
+      "source_pages": [
+        2
+      ]
+    },
+    {
+      "kind": "journal",
+      "ccf_rank": "A",
+      "short_name": "TC",
+      "full_name": "IEEETransactionsonComputers",
+      "publisher": "IEEE",
+      "url": "http://dblp.uni-trier.de/db/journals/tc/index.html",
+      "areas": [
+        "计算机体系结构/并行与分布计算/存储系统"
+      ],
+      "source_pages": [
+        2
+      ]
+    },
+    {
+      "kind": "journal",
+      "ccf_rank": "A",
+      "short_name": "TPDS",
+      "full_name": "IEEETransactionsonParallelandDistributedSystems",
+      "publisher": "IEEE",
+      "url": "http://dblp.uni-trier.de/db/journals/tpds/",
+      "areas": [
+        "计算机体系结构/并行与分布计算/存储系统"
+      ],
+      "source_pages": [
+        2
+      ]
+    },
+    {
+      "kind": "journal",
+      "ccf_rank": "A",
+      "short_name": "TACO",
+      "full_name": "ACMTransactionsonArchitectureandCodeOptimization",
+      "publisher": "ACM",
+      "url": "http://dblp.uni-trier.de/db/journals/taco/",
+      "areas": [
+        "计算机体系结构/并行与分布计算/存储系统"
+      ],
+      "source_pages": [
+        2
+      ]
+    },
+    {
+      "kind": "journal",
+      "ccf_rank": "A",
+      "short_name": "JSAC",
+      "full_name": "IEEEJournalonSelectedAreasinCommunications",
+      "publisher": "IEEE",
+      "url": "http://dblp.uni-trier.de/db/journals/jsac/",
+      "areas": [
+        "计算机网络"
+      ],
+      "source_pages": [
+        10
+      ]
+    },
+    {
+      "kind": "journal",
+      "ccf_rank": "A",
+      "short_name": "TMC",
+      "full_name": "IEEETransactionsonMobileComputing",
+      "publisher": "IEEE",
+      "url": "http://dblp.uni-trier.de/db/journals/tmc/",
+      "areas": [
+        "计算机网络"
+      ],
+      "source_pages": [
+        10
+      ]
+    },
+    {
+      "kind": "journal",
+      "ccf_rank": "A",
+      "short_name": "TON",
+      "full_name": "IEEETransactionsonNetworking （原IEEE/ACMTransactionsonNetworking）",
+      "publisher": "IEEE",
+      "url": "http://dblp.uni-trier.de/db/journals/ton/",
+      "areas": [
+        "计算机网络"
+      ],
+      "source_pages": [
+        10
+      ]
+    },
+    {
+      "kind": "journal",
+      "ccf_rank": "A",
+      "short_name": "TDSC",
+      "full_name": "IEEETransactionsonDependableandSecureComputing",
+      "publisher": "IEEE",
+      "url": "http://dblp.uni-trier.de/db/journals/tdsc/",
+      "areas": [
+        "网络与信息安全"
+      ],
+      "source_pages": [
+        17
+      ]
+    },
+    {
+      "kind": "journal",
+      "ccf_rank": "A",
+      "short_name": "TIFS",
+      "full_name": "IEEETransactionsonInformationForensicsandSecurity",
+      "publisher": "IEEE",
+      "url": "http://dblp.uni-trier.de/db/journals/tifs/",
+      "areas": [
+        "网络与信息安全"
+      ],
+      "source_pages": [
+        17
+      ]
+    },
+    {
+      "kind": "journal",
+      "ccf_rank": "A",
+      "short_name": "",
+      "full_name": "JournalofCryptology",
+      "publisher": "Springer",
+      "url": "http://dblp.uni-trier.de/db/journals/joc/",
+      "areas": [
+        "网络与信息安全"
+      ],
+      "source_pages": [
+        17
+      ]
+    },
+    {
+      "kind": "journal",
+      "ccf_rank": "A",
+      "short_name": "TOPLAS",
+      "full_name": "ACMTransactionsonProgrammingLanguagesand Systems",
+      "publisher": "ACM",
+      "url": "http://dblp.uni-trier.de/db/journals/toplas/",
+      "areas": [
+        "软件工程/系统软件/程序设计语言"
+      ],
+      "source_pages": [
+        24
+      ]
+    },
+    {
+      "kind": "journal",
+      "ccf_rank": "A",
+      "short_name": "TOSEM",
+      "full_name": "ACMTransactionsonSoftwareEngineeringand Methodology",
+      "publisher": "ACM",
+      "url": "http://dblp.uni-trier.de/db/journals/tosem/",
+      "areas": [
+        "软件工程/系统软件/程序设计语言"
+      ],
+      "source_pages": [
+        24
+      ]
+    },
+    {
+      "kind": "journal",
+      "ccf_rank": "A",
+      "short_name": "TSE",
+      "full_name": "IEEETransactionsonSoftwareEngineering",
+      "publisher": "IEEE",
+      "url": "http://dblp.uni-trier.de/db/journals/tse/",
+      "areas": [
+        "软件工程/系统软件/程序设计语言"
+      ],
+      "source_pages": [
+        24
+      ]
+    },
+    {
+      "kind": "journal",
+      "ccf_rank": "A",
+      "short_name": "TSC",
+      "full_name": "IEEETransactionsonServicesComputing",
+      "publisher": "IEEE",
+      "url": "http://dblp.uni-trier.de/db/journals/tsc/",
+      "areas": [
+        "软件工程/系统软件/程序设计语言"
+      ],
+      "source_pages": [
+        24
+      ]
+    },
+    {
+      "kind": "journal",
+      "ccf_rank": "A",
+      "short_name": "TODS",
+      "full_name": "ACMTransactionsonDatabaseSystems",
+      "publisher": "ACM",
+      "url": "http://dblp.uni-trier.de/db/journals/tods/",
+      "areas": [
+        "数据库/数据挖掘/内容检索"
+      ],
+      "source_pages": [
+        32
+      ]
+    },
+    {
+      "kind": "journal",
+      "ccf_rank": "A",
+      "short_name": "TOIS",
+      "full_name": "ACMTransactionsonInformationSystems",
+      "publisher": "ACM",
+      "url": "http://dblp.uni-trier.de/db/journals/tois/",
+      "areas": [
+        "数据库/数据挖掘/内容检索"
+      ],
+      "source_pages": [
+        32
+      ]
+    },
+    {
+      "kind": "journal",
+      "ccf_rank": "A",
+      "short_name": "TKDE",
+      "full_name": "IEEETransactionsonKnowledgeandDataEngineering",
+      "publisher": "IEEE",
+      "url": "http://dblp.uni-trier.de/db/journals/tkde/",
+      "areas": [
+        "数据库/数据挖掘/内容检索"
+      ],
+      "source_pages": [
+        32
+      ]
+    },
+    {
+      "kind": "journal",
+      "ccf_rank": "A",
+      "short_name": "VLDBJ",
+      "full_name": "TheVLDBJournal",
+      "publisher": "Springer",
+      "url": "http://dblp.uni-trier.de/db/journals/vldb/",
+      "areas": [
+        "数据库/数据挖掘/内容检索"
+      ],
+      "source_pages": [
+        32
+      ]
+    },
+    {
+      "kind": "journal",
+      "ccf_rank": "A",
+      "short_name": "TIT",
+      "full_name": "IEEETransactionsonInformationTheory",
+      "publisher": "IEEE",
+      "url": "http://dblp.uni-trier.de/db/journals/tit/",
+      "areas": [
+        "计算机科学理论"
+      ],
+      "source_pages": [
+        38
+      ]
+    },
+    {
+      "kind": "journal",
+      "ccf_rank": "A",
+      "short_name": "IANDC",
+      "full_name": "InformationandComputation",
+      "publisher": "Elsevier",
+      "url": "http://dblp.uni-trier.de/db/journals/iandc/",
+      "areas": [
+        "计算机科学理论"
+      ],
+      "source_pages": [
+        38
+      ]
+    },
+    {
+      "kind": "journal",
+      "ccf_rank": "A",
+      "short_name": "SICOMP",
+      "full_name": "SIAMJournalonComputing",
+      "publisher": "SIAM",
+      "url": "http://dblp.uni-trier.de/db/journals/siamcomp/",
+      "areas": [
+        "计算机科学理论"
+      ],
+      "source_pages": [
+        38
+      ]
+    },
+    {
+      "kind": "journal",
+      "ccf_rank": "A",
+      "short_name": "TOG",
+      "full_name": "ACMTransactionsonGraphics",
+      "publisher": "ACM",
+      "url": "http://dblp.uni-trier.de/db/journals/tog/",
+      "areas": [
+        "计算机图形学与多媒体"
+      ],
+      "source_pages": [
+        44
+      ]
+    },
+    {
+      "kind": "journal",
+      "ccf_rank": "A",
+      "short_name": "TIP",
+      "full_name": "IEEETransactionsonImageProcessing",
+      "publisher": "IEEE",
+      "url": "http://dblp.uni-trier.de/db/journals/tip/",
+      "areas": [
+        "计算机图形学与多媒体"
+      ],
+      "source_pages": [
+        44
+      ]
+    },
+    {
+      "kind": "journal",
+      "ccf_rank": "A",
+      "short_name": "TVCG",
+      "full_name": "IEEETransactionsonVisualizationandComputer Graphics",
+      "publisher": "IEEE",
+      "url": "http://dblp.uni-trier.de/db/journals/tvcg/",
+      "areas": [
+        "计算机图形学与多媒体"
+      ],
+      "source_pages": [
+        44
+      ]
+    },
+    {
+      "kind": "journal",
+      "ccf_rank": "A",
+      "short_name": "TMM",
+      "full_name": "IEEETransactionsonMultimedia",
+      "publisher": "IEEE",
+      "url": "http://dblp.uni-trier.de/db/journals/tmm/",
+      "areas": [
+        "计算机图形学与多媒体"
+      ],
+      "source_pages": [
+        44
+      ]
+    },
+    {
+      "kind": "journal",
+      "ccf_rank": "A",
+      "short_name": "AI",
+      "full_name": "ArtificialIntelligence",
+      "publisher": "Elsevier",
+      "url": "http://dblp.uni-trier.de/db/journals/ai/",
+      "areas": [
+        "人工智能"
+      ],
+      "source_pages": [
+        51
+      ]
+    },
+    {
+      "kind": "journal",
+      "ccf_rank": "A",
+      "short_name": "TPAMI",
+      "full_name": "IEEETransactionsonPatternAnalysisandMachine Intelligence",
+      "publisher": "IEEE",
+      "url": "http://dblp.uni-trier.de/db/journals/pami/",
+      "areas": [
+        "人工智能"
+      ],
+      "source_pages": [
+        51
+      ]
+    },
+    {
+      "kind": "journal",
+      "ccf_rank": "A",
+      "short_name": "IJCV",
+      "full_name": "InternationalJournalofComputerVision",
+      "publisher": "Springer",
+      "url": "http://dblp.uni-trier.de/db/journals/ijcv/",
+      "areas": [
+        "人工智能"
+      ],
+      "source_pages": [
+        51
+      ]
+    },
+    {
+      "kind": "journal",
+      "ccf_rank": "A",
+      "short_name": "JMLR",
+      "full_name": "JournalofMachineLearningResearch",
+      "publisher": "MITPress",
+      "url": "http://dblp.uni-trier.de/db/journals/jmlr/",
+      "areas": [
+        "人工智能"
+      ],
+      "source_pages": [
+        51
+      ]
+    },
+    {
+      "kind": "journal",
+      "ccf_rank": "A",
+      "short_name": "TOCHI",
+      "full_name": "ACMTransactionsonComputer-HumanInteraction",
+      "publisher": "ACM",
+      "url": "http://dblp.uni-trier.de/db/journals/tochi/",
+      "areas": [
+        "人机交互与普适计算"
+      ],
+      "source_pages": [
+        61
+      ]
+    },
+    {
+      "kind": "journal",
+      "ccf_rank": "A",
+      "short_name": "IJHCS",
+      "full_name": "InternationalJournalofHuman-ComputerStudies",
+      "publisher": "Elsevier",
+      "url": "http://dblp.uni-trier.de/db/journals/ijmms/",
+      "areas": [
+        "人机交互与普适计算"
+      ],
+      "source_pages": [
+        61
+      ]
+    },
+    {
+      "kind": "journal",
+      "ccf_rank": "A",
+      "short_name": "JACM",
+      "full_name": "JournaloftheACM",
+      "publisher": "ACM",
+      "url": "http://dblp.uni-trier.de/db/journals/jacm/",
+      "areas": [
+        "交叉/综合/新兴"
+      ],
+      "source_pages": [
+        67
+      ]
+    },
+    {
+      "kind": "journal",
+      "ccf_rank": "A",
+      "short_name": "Proc.IEEE",
+      "full_name": "ProceedingsoftheIEEE",
+      "publisher": "IEEE",
+      "url": "http://dblp.uni-trier.de/db/journals/pieee/",
+      "areas": [
+        "交叉/综合/新兴"
+      ],
+      "source_pages": [
+        67
+      ]
+    },
+    {
+      "kind": "journal",
+      "ccf_rank": "A",
+      "short_name": "SCIS",
+      "full_name": "ScienceChinaInformationSciences",
+      "publisher": "ScienceinChina Press/Springer",
+      "url": "http://dblp.uni-trier.de/db/journals/chinaf/",
+      "areas": [
+        "交叉/综合/新兴"
+      ],
+      "source_pages": [
+        67
+      ]
+    },
+    {
+      "kind": "journal",
+      "ccf_rank": "A",
+      "short_name": "Bioinformatics",
+      "full_name": "Bioinformatics",
+      "publisher": "OxfordUniversity Press",
+      "url": "http://dblp.uni-trier.de/db/journals/bioinformatics/",
+      "areas": [
+        "交叉/综合/新兴"
+      ],
+      "source_pages": [
+        67
+      ]
+    }
+  ]
+}

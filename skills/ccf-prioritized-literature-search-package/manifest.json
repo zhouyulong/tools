@@ -6,8 +6,8 @@
   "portable_components": [
     "skill instructions",
     "CCF 2026 A/B venue data",
-    "EasyScholar-verified CCF B SCI Q1 cache",
-    "Python standard-library query and refresh scripts"
+    "EasyScholar-verified CCF B SCI grade cache",
+    "Python standard-library query, freshness and incremental refresh scripts"
   ],
   "requirements": {
     "python": ">=3.9",
