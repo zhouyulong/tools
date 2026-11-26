@@ -6,6 +6,11 @@ type Listener = () => void
 
 class FakeElement {
   style = { opacity: '', transition: '' }
+  hovered = false
+
+  matches(selector: string) {
+    return selector === ':hover' && this.hovered
+  }
   listeners = new Map<string, Set<Listener>>()
 
   addEventListener(type: string, listener: Listener) {
@@ -58,9 +63,10 @@ function createScheduler() {
   }
 }
 
-function setup(options: { idleMs?: number; fadeOpacity?: number } = {}) {
+function setup(options: { idleMs?: number; fadeOpacity?: number } = {}, initiallyHovered = false) {
   const scheduler = createScheduler()
   const element = new FakeElement()
+  element.hovered = initiallyHovered
   const controller = createIdleFadeController({
     ...options,
     schedule: scheduler.setTimeout,
@@ -96,13 +102,43 @@ test('each supported interaction restores opacity and restarts the idle timeout'
   }
 })
 
-test('mouseenter immediately restores a faded widget and restarts the timeout', () => {
-  const { element, scheduler } = setup()
+test('mouseenter wakes a faded widget and stationary hover keeps it at full opacity', () => {
+  const { controller, element, scheduler } = setup()
   scheduler.advance(10_000)
+  assert.equal(element.style.opacity, '0.2')
 
   element.dispatch('mouseenter')
   assert.equal(element.style.opacity, '1')
+  assert.equal(scheduler.pendingCount(), 0)
   scheduler.advance(10_000)
+  assert.equal(element.style.opacity, '1')
+
+  for (const event of ['mousemove', 'mousedown', 'keydown', 'touchstart']) {
+    element.dispatch(event)
+    scheduler.advance(10_000)
+    assert.equal(element.style.opacity, '1', `${event} should not end hover`)
+  }
+  controller.reset()
+  assert.equal(scheduler.pendingCount(), 0)
+})
+
+test('binding under a stationary pointer starts in the hovered state', () => {
+  const { element, scheduler } = setup({}, true)
+  scheduler.advance(10_000)
+  assert.equal(element.style.opacity, '1')
+  assert.equal(scheduler.pendingCount(), 0)
+})
+
+test('mouseleave starts a full idle delay before fading', () => {
+  const { element, scheduler } = setup()
+  element.dispatch('mouseenter')
+  scheduler.advance(8_000)
+  element.dispatch('mouseleave')
+
+  scheduler.advance(9_999)
+  assert.equal(element.style.opacity, '1')
+  assert.equal(scheduler.pendingCount(), 1)
+  scheduler.advance(1)
   assert.equal(element.style.opacity, '0.2')
 })
 
@@ -129,7 +165,7 @@ test('reset restores opacity and replaces the pending timer', () => {
 
 test('destroy removes every listener and pending timer without later fading', () => {
   const { controller, element, scheduler } = setup()
-  assert.equal(element.listenerCount(), 5)
+  assert.equal(element.listenerCount(), 6)
   assert.equal(scheduler.pendingCount(), 1)
 
   controller.destroy()
@@ -143,7 +179,7 @@ test('rebinding the same element does not register duplicate listeners', () => {
   const { controller, element, scheduler } = setup()
   controller.bind(element as unknown as HTMLElement)
 
-  assert.equal(element.listenerCount(), 5)
+  assert.equal(element.listenerCount(), 6)
   assert.equal(scheduler.pendingCount(), 1)
 })
 

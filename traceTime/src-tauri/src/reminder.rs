@@ -145,6 +145,32 @@ impl ReminderConfig {
         self.overdue_upgrade_cutoff_net = overdue_upgrade_cutoff_net;
         self
     }
+
+    fn overdue_interval_seconds(&self) -> i128 {
+        i128::from(self.overdue_interval_minutes) * 60
+    }
+
+    fn overdue_milestone_at(&self, net: i128, due_at: i128) -> Option<i128> {
+        let interval = self.overdue_interval_seconds();
+        let anchor = i128::from(self.overdue_upgrade_cutoff_net.unwrap_or(0)).max(due_at);
+        let repeats = (net - anchor).max(0) / interval;
+        let reached = anchor + repeats * interval;
+        (repeats > 0
+            && self
+                .overdue_interval_from_net
+                .is_none_or(|from| reached >= i128::from(from)))
+        .then_some(reached)
+    }
+
+    pub(crate) fn repeat_delayed_past_recovery(&self, closed_net: i64) -> bool {
+        // Keep a schedule that already reaches a repeat by the time a reset would.
+        // Use cadence only: current reminder toggles must not hide a stale boundary.
+        let due_at = i128::from(threshold_seconds(self.est_seconds, self.due_percent));
+        let first_after_reset =
+            i128::from(closed_net).max(due_at) + self.overdue_interval_seconds();
+        self.overdue_milestone_at(first_after_reset, due_at)
+            .is_none()
+    }
 }
 
 #[derive(Debug, Serialize, Clone)]
@@ -272,17 +298,10 @@ pub fn due_reminders(net_seconds: i64, config: &ReminderConfig) -> Vec<DueRemind
     // Overdue tasks at upgrade start a fresh interval at the saved net time.
     // Otherwise the due deadline is the anchor. A late poll considers only the
     // newest reached milestone, and interval edits never backfill past nodes.
-    let interval = i128::from(config.overdue_interval_minutes) * 60;
     let due_at = i128::from(due_at);
-    let anchor = i128::from(config.overdue_upgrade_cutoff_net.unwrap_or(0)).max(due_at);
     let net = i128::from(net_seconds);
-    let repeats = (net - anchor).max(0) / interval;
-    let reached = anchor + repeats * interval;
     if config.overdue_enabled
-        && repeats > 0
-        && config
-            .overdue_interval_from_net
-            .is_none_or(|from| reached >= i128::from(from))
+        && let Some(reached) = config.overdue_milestone_at(net, due_at)
     {
         let reached_milestone = reached - due_at;
         let current_overtime = net - due_at;

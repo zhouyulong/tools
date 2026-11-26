@@ -419,6 +419,74 @@ mod tests {
         assert_next_overdue_repeats_once(&tr, 690);
     }
 
+    #[test]
+    fn v9_preserves_a_valid_schedule_after_an_anomaly_and_normal_pause() {
+        for (cutoff, interval_boundary) in [(None, 650), (Some(60), 655)] {
+            let tr = paused_after_anomaly(cutoff, interval_boundary);
+            assert!(
+                tr.recover_running_tasks(chrono::Utc::now())
+                    .unwrap()
+                    .is_empty()
+            );
+            assert_eq!(paused_schedule(&tr), (cutoff, Some(interval_boundary)));
+            tr.resume("old").unwrap();
+            set_live_work_seconds(&tr, 9);
+            assert_no_reminders(&tr);
+            set_live_work_seconds(&tr, 10);
+            assert_next_overdue_repeats_once(&tr, 600); // 660 net at the old milestone.
+        }
+    }
+
+    #[test]
+    fn v9_repairs_a_stale_interval_boundary_that_skips_the_existing_repeat() {
+        let tr = paused_after_anomaly(Some(60), 661);
+        assert!(
+            tr.recover_running_tasks(chrono::Utc::now())
+                .unwrap()
+                .is_empty()
+        );
+        assert_eq!(paused_schedule(&tr), (Some(650), None));
+        tr.resume("old").unwrap();
+        set_live_work_seconds(&tr, 599);
+        assert_no_reminders(&tr);
+        set_live_work_seconds(&tr, 600);
+        assert_next_overdue_repeats_once(&tr, 1190); // 1250 net at the repaired milestone.
+    }
+
+    fn paused_after_anomaly(
+        cutoff: Option<i64>,
+        interval_boundary: i64,
+    ) -> crate::tracker::Tracker {
+        let conn = initialize_connection(legacy_overdue_db()).unwrap();
+        conn.execute_batch(
+            "INSERT INTO events (task_id, at, kind, detail) VALUES
+                 ('old', '2026-11-26T00:00:00Z', 'paused', '{\"reason\":\"anomaly\"}'),
+                 ('old', '2026-11-26T00:00:00Z', 'anomaly_recovered', NULL),
+                 ('old', '2026-11-26T00:01:00Z', 'resumed', NULL),
+                 ('old', '2026-11-26T00:01:20Z', 'paused', '{\"reason\":\"rest\"}');
+             INSERT INTO segments (task_id, started_at, ended_at, kind)
+                 VALUES ('old', '2026-11-25T23:59:00Z', '2026-11-26T00:00:00Z', 'anomaly'),
+                        ('old', '2026-11-26T00:01:00Z', '2026-11-26T00:01:20Z', 'work');",
+        )
+        .unwrap();
+        conn.execute(
+            "UPDATE tasks SET status='paused', overdue_upgrade_cutoff_net=?1,
+                overdue_interval_changed_at_net=?2 WHERE id='old'",
+            rusqlite::params![cutoff, interval_boundary],
+        )
+        .unwrap();
+        let tr = crate::tracker::Tracker::new(conn);
+        assert_eq!(tr.task_detail("old").unwrap().task.net_seconds, 650);
+        tr
+    }
+
+    fn paused_schedule(tr: &crate::tracker::Tracker) -> (Option<i64>, Option<i64>) {
+        tr.conn.lock().unwrap().query_row(
+            "SELECT overdue_upgrade_cutoff_net, overdue_interval_changed_at_net FROM tasks WHERE id='old'",
+            [], |row| Ok((row.get(0)?, row.get(1)?)),
+        ).unwrap()
+    }
+
     fn simulate_rollback_pause_and_resume(conn: &Connection) {
         // Move the original work and fire into the past to simulate the clock
         // falling back. The next pause closes only five live seconds, then the

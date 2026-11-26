@@ -8,7 +8,7 @@ type IdleFadeOptions = {
   cancel?: (handle: TimerHandle) => void
 }
 
-const interactionEvents = ['mouseenter', 'mousemove', 'mousedown', 'keydown', 'touchstart'] as const
+const interactionEvents = ['mousemove', 'mousedown', 'keydown', 'touchstart'] as const
 const passiveListener = { passive: true }
 
 export function createIdleFadeController({
@@ -24,6 +24,7 @@ export function createIdleFadeController({
   let previousOpacity = ''
   let previousTransition = ''
   let faded = false
+  let hovered = false
   let nativeTransition = Promise.resolve()
 
   const setFaded = (value: boolean) => {
@@ -44,7 +45,7 @@ export function createIdleFadeController({
 
   const fade = () => {
     timer = undefined
-    if (!destroyed && element) {
+    if (!destroyed && element && !hovered) {
       setFaded(true)
       element.style.opacity = String(fadeOpacity)
     }
@@ -55,18 +56,28 @@ export function createIdleFadeController({
     clearTimer()
     setFaded(false)
     element.style.opacity = '1'
+    if (hovered) return
     if (idleMs <= 0) fade()
     else timer = schedule(fade, idleMs)
   }
 
-  const handleInteraction = () => reset()
+  const handleHover = (value: boolean) => () => {
+    hovered = value
+    reset()
+  }
+  const listeners = [
+    ['mouseenter', handleHover(true)],
+    ['mouseleave', handleHover(false)],
+    ...interactionEvents.map(event => [event, reset] as const),
+  ] as const
 
   const unbind = () => {
     clearTimer()
     if (!element) return
-    for (const event of interactionEvents) {
-      element.removeEventListener(event, handleInteraction)
+    for (const [event, listener] of listeners) {
+      element.removeEventListener(event, listener)
     }
+    hovered = false
     setFaded(false)
     element.style.opacity = previousOpacity
     element.style.transition = previousTransition
@@ -81,11 +92,12 @@ export function createIdleFadeController({
     }
     unbind()
     element = nextElement
+    hovered = element.matches(':hover')
     previousOpacity = element.style.opacity
     previousTransition = element.style.transition
     element.style.transition = 'opacity 300ms ease'
-    for (const event of interactionEvents) {
-      element.addEventListener(event, handleInteraction, passiveListener)
+    for (const [event, listener] of listeners) {
+      element.addEventListener(event, listener, passiveListener)
     }
     reset()
   }

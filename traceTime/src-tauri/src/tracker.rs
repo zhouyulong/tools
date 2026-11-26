@@ -573,22 +573,43 @@ impl Tracker {
             return Ok(());
         }
 
-        // Earlier builds could leave an inflated cutoff and/or interval edit on
-        // an already-paused anomaly, including after a second launch recovered it.
+        // The old recovery event identifies candidates, not damage: a later
+        // resume/pause may have brought the task into a valid reminder schedule.
         let mut stmt = tx
             .prepare(
-                "SELECT t.id FROM tasks t WHERE t.status='paused' AND EXISTS (
-                SELECT 1 FROM events e WHERE e.task_id=t.id AND e.kind='anomaly_recovered'
-             )",
+                "SELECT t.id, t.est_seconds, t.overdue_interval_changed_at_net, t.overdue_upgrade_cutoff_net
+                 FROM tasks t WHERE t.status='paused' AND EXISTS (
+                    SELECT 1 FROM events e WHERE e.task_id=t.id AND e.kind='anomaly_recovered'
+                 )",
             )
             .map_err(|e| e.to_string())?;
-        let ids = stmt
-            .query_map([], |row| row.get::<_, String>(0))
+        let schedules = stmt
+            .query_map([], |row| {
+                Ok((
+                    row.get::<_, String>(0)?,
+                    row.get(1)?,
+                    row.get(2)?,
+                    row.get(3)?,
+                ))
+            })
             .map_err(|e| e.to_string())?;
-        for id in ids {
-            let id = id.map_err(|e| e.to_string())?;
-            if !just_recovered.iter().any(|task| task.id == id) {
-                Self::reset_overdue_schedule(tx, &id, Self::closed_net_seconds(tx, &id)?)?;
+        for schedule in schedules {
+            let (id, estimate, interval_boundary, cutoff) = schedule.map_err(|e| e.to_string())?;
+            if just_recovered.iter().any(|task| task.id == id) {
+                continue;
+            }
+            let closed_net = Self::closed_net_seconds(tx, &id)?;
+            let boundary_ahead = [interval_boundary, cutoff]
+                .into_iter()
+                .flatten()
+                .any(|boundary| boundary > closed_net);
+            if !boundary_ahead {
+                continue;
+            }
+            let schedule =
+                Self::reminder_config_from_conn(tx)?.for_task(estimate, interval_boundary, cutoff);
+            if schedule.repeat_delayed_past_recovery(closed_net) {
+                Self::reset_overdue_schedule(tx, &id, closed_net)?;
             }
         }
         tx.execute(
