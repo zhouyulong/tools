@@ -14,8 +14,15 @@ export const REMINDER_SETTING_KEYS = [
   'reminder_overdue_interval_minutes',
 ] as const
 
+export const BACKGROUND_MODES = ['glass', 'translucent', 'opaque'] as const
+export const DEFAULT_BACKGROUND_MODE = 'glass' as const
+export const BACKGROUND_MODE_KEY = 'background_mode' as const
+
 export type ReminderSettingKey = typeof REMINDER_SETTING_KEYS[number]
 export type ReminderSettingValues = Record<ReminderSettingKey, string>
+export type BackgroundMode = typeof BACKGROUND_MODES[number]
+export type SettingKey = ReminderSettingKey | typeof BACKGROUND_MODE_KEY
+export type SettingValues = ReminderSettingValues & Record<typeof BACKGROUND_MODE_KEY, BackgroundMode>
 
 export type SettingSpec = {
   key: ReminderSettingKey
@@ -46,6 +53,21 @@ const SPEC_BY_KEY = new Map(SETTINGS.map(spec => [spec.key, spec]))
 
 export function defaultReminderSettings(): ReminderSettingValues {
   return Object.fromEntries(SETTINGS.map(spec => [spec.key, spec.default])) as ReminderSettingValues
+}
+
+export function defaultSettings(): SettingValues {
+  return { ...defaultReminderSettings(), background_mode: DEFAULT_BACKGROUND_MODE }
+}
+
+export function normalizeBackgroundMode(value: unknown): BackgroundMode {
+  const normalized = String(value ?? '').trim()
+  return BACKGROUND_MODES.includes(normalized as BackgroundMode)
+    ? normalized as BackgroundMode
+    : DEFAULT_BACKGROUND_MODE
+}
+
+export function backgroundClass(mode: BackgroundMode): `background-${BackgroundMode}` {
+  return `background-${mode}`
 }
 
 export function normalizeReminderSettings(
@@ -86,4 +108,18 @@ export function normalizeReminderSettings(
   }
 
   return { values, errors }
+}
+
+export function normalizeSettings(
+  input: Partial<Record<SettingKey, string>>,
+): { values: SettingValues; errors: string[] } {
+  const reminder = normalizeReminderSettings(input)
+  const rawBackground = input.background_mode
+  const background = normalizeBackgroundMode(rawBackground)
+  const errors = [...reminder.errors]
+  if (rawBackground !== undefined && String(rawBackground).trim() !== background) {
+    errors.push('背景模式必须为 glass、translucent 或 opaque')
+  }
+  if (errors.length > 0) return { values: defaultSettings(), errors }
+  return { values: { ...reminder.values, background_mode: background }, errors }
 }

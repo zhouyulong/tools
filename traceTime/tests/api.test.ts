@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import { afterEach, test } from 'node:test'
 import { clearMocks, mockIPC } from '@tauri-apps/api/mocks'
-import { finishTask, abandonTask, resume, deleteTask, deleteTasks, saveSettings, sendReminderNotification, setWidgetHeight } from '../src/lib/api.ts'
+import { applyBackgroundMode, finishTask, abandonTask, resume, deleteTask, deleteTasks, saveSettings, sendReminderNotification, setWidgetHeight } from '../src/lib/api.ts'
 
 globalThis.window = {} as Window & typeof globalThis
 afterEach(clearMocks)
@@ -50,4 +50,18 @@ test('reminder notification IPC includes its task, persisted node and level', as
   assert.deepEqual(calls, [['send_reminder_notification', {
     taskId: 'task-B', node: 'overdue:at:600', level: 'overdue', title: 'Title', body: 'Body',
   }]])
+})
+
+test('background mode IPC returns requested and effective modes', async () => {
+  const calls: unknown[] = []
+  mockIPC((command, payload) => {
+    calls.push([command, payload])
+    return { requested: 'glass', effective: 'translucent' }
+  })
+
+  assert.deepEqual(await applyBackgroundMode('glass'), {
+    requested: 'glass',
+    effective: 'translucent',
+  })
+  assert.deepEqual(calls, [['apply_background_mode', { mode: 'glass' }]])
 })

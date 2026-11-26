@@ -1,6 +1,8 @@
 <script lang="ts">
   import { onDestroy, onMount } from 'svelte'
+  import { listen } from '@tauri-apps/api/event'
   import {
+    applyBackgroundMode,
     checkReminders,
     currentTask,
     getSetting,
@@ -8,11 +10,13 @@
     sendReminderNotification,
     setReminderMuted,
     setWidgetHeight,
+    type BackgroundModeResult,
     type ReminderConfig,
     type Task,
   } from '../lib/api'
   import { createReminderPulseQueue, playReminderChime, type ReminderPulse } from '../lib/reminder'
   import { createWidgetHeightObserver } from '../lib/widgetHeight'
+  import { backgroundClass, normalizeBackgroundMode, type BackgroundMode } from '../lib/settings'
   import LongPauseBanner from './LongPauseBanner.svelte'
   import TaskForm from './TaskForm.svelte'
   import WidgetRunning from './WidgetRunning.svelte'
@@ -31,6 +35,9 @@
   const pulses = createReminderPulseQueue(next => { pulse = next })
   let reminderTaskId: string | null = null
   let processedReminderKeys = new Set<string>()
+  let effectiveBackground: BackgroundMode = 'translucent'
+  let stopBackgroundListener: (() => void) | undefined
+  let destroyed = false
 
   function resetReminderState(nextTaskId: string | null) {
     if (reminderTaskId === nextTaskId) return
@@ -79,6 +86,16 @@
     if (pausedResult.status === 'fulfilled') paused = pausedResult.value
   }
 
+  async function loadBackgroundMode() {
+    try {
+      const requested = normalizeBackgroundMode(await getSetting('background_mode'))
+      const result = await applyBackgroundMode(requested)
+      effectiveBackground = result.effective
+    } catch {
+      effectiveBackground = 'translucent'
+    }
+  }
+
   async function loadLongPauseHours() {
     try {
       const value = await getSetting('long_pause_hours')
@@ -104,6 +121,13 @@
   }
 
   onMount(() => {
+    void listen<BackgroundModeResult>('background-mode-changed', event => {
+      effectiveBackground = event.payload.effective
+    }).then(unlisten => {
+      if (destroyed) unlisten()
+      else stopBackgroundListener = unlisten
+    })
+    void loadBackgroundMode()
     void loadLongPauseHours()
     void refreshAll()
     interval = setInterval(refreshAll, 1000)
@@ -115,13 +139,16 @@
     return observer.cleanup
   })
   onDestroy(() => {
+    destroyed = true
+    stopBackgroundListener?.()
     if (interval !== undefined) clearInterval(interval)
     reminderTaskId = null
     pulses.clear()
   })
 </script>
 
-<main class="widget-shell" bind:this={main}>
+<main class={`widget-shell ${backgroundClass(effectiveBackground)}`} bind:this={main}>
+  <div class="drag-region" data-tauri-drag-region aria-hidden="true"></div>
   {#if task?.status === 'paused' && !switchingTask}
     {#key task.id}
       <LongPauseBanner {task} {thresholdHours} {nowTick} {refreshAll} getCurrentTask={() => task} />
@@ -147,5 +174,10 @@
 </main>
 
 <style>
-  main { display: flex; flex-direction: column; width: 100%; height: auto; min-height: 140px; overflow: hidden; background: rgba(30, 30, 34, 0.85); color: #f0f0f0; }
+  main { display: flex; flex-direction: column; width: 100%; height: auto; min-height: 140px; overflow: hidden; color: #f0f0f0; }
+  .drag-region { flex: none; width: 100%; height: 8px; cursor: grab; user-select: none; }
+  .drag-region:active { cursor: grabbing; }
+  .background-glass { background: rgba(24, 24, 28, 0.52); }
+  .background-translucent { background: rgba(24, 24, 28, 0.78); }
+  .background-opaque { background: #18181c; }
 </style>

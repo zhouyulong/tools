@@ -1,15 +1,24 @@
 <script lang="ts">
   import { onMount } from 'svelte'
-  import { getSetting, saveSettings } from '../lib/api'
+  import { applyBackgroundMode, getSetting, saveSettings } from '../lib/api'
   import {
+    BACKGROUND_MODE_KEY,
     SETTINGS,
-    defaultReminderSettings,
-    normalizeReminderSettings,
+    defaultSettings,
+    normalizeSettings,
+    type BackgroundMode,
     type ReminderSettingKey,
-    type ReminderSettingValues,
+    type SettingKey,
+    type SettingValues,
   } from '../lib/settings'
 
-  let values: ReminderSettingValues = defaultReminderSettings()
+  const backgroundChoices: { value: BackgroundMode; label: string }[] = [
+    { value: 'glass', label: '毛玻璃（默认）' },
+    { value: 'translucent', label: '半透明纯色' },
+    { value: 'opaque', label: '不透明' },
+  ]
+
+  let values: SettingValues = defaultSettings()
   let loading = true
   let saving = false
   let errors: string[] = []
@@ -17,9 +26,9 @@
 
   const spec = (key: ReminderSettingKey) => SETTINGS.find(item => item.key === key)!
 
-  function edit(key: ReminderSettingKey, value: string) {
+  function edit(key: SettingKey, value: string) {
     if (saving) return
-    values = { ...values, [key]: value }
+    values = { ...values, [key]: value } as SettingValues
     saved = false
     errors = []
   }
@@ -28,11 +37,14 @@
     loading = true
     errors = []
     try {
-      const loaded = await Promise.all(SETTINGS.map(async item => [
-        item.key,
-        (await getSetting(item.key)) ?? item.default,
-      ] as const))
-      values = normalizeReminderSettings(Object.fromEntries(loaded)).values
+      const loaded = await Promise.all([
+        ...SETTINGS.map(async item => [
+          item.key,
+          (await getSetting(item.key)) ?? item.default,
+        ] as const),
+        getSetting(BACKGROUND_MODE_KEY).then(value => [BACKGROUND_MODE_KEY, value ?? 'glass'] as const),
+      ])
+      values = normalizeSettings(Object.fromEntries(loaded)).values
     } catch (error) {
       errors = [`读取设置失败：${String(error)}`]
     } finally {
@@ -42,7 +54,7 @@
 
   async function save() {
     if (saving) return
-    const normalized = normalizeReminderSettings(values)
+    const normalized = normalizeSettings(values)
     if (normalized.errors.length > 0) {
       errors = normalized.errors
       saved = false
@@ -55,6 +67,7 @@
     values = normalized.values
     try {
       await saveSettings(normalized.values)
+      await applyBackgroundMode(normalized.values.background_mode)
       saved = true
     } catch (error) {
       errors = [`保存失败：${String(error)}`]
@@ -69,8 +82,8 @@
 <main class="settings-view">
   <header>
     <div>
-      <h1>提醒设置</h1>
-      <p>修改后将用于后续提醒判定</p>
+      <h1>设置</h1>
+      <p>修改后将立即用于主窗口</p>
     </div>
     <button type="button" disabled={loading || saving} on:click={save}>保存</button>
   </header>
@@ -78,6 +91,25 @@
   {#if loading}
     <p class="state">加载中…</p>
   {:else}
+    <section>
+      <h2>背景</h2>
+      <div class="choice-group">
+        {#each backgroundChoices as choice}
+          <label class="choice-row">
+            <input
+              type="radio"
+              name="background-mode"
+              value={choice.value}
+              disabled={saving}
+              checked={values.background_mode === choice.value}
+              on:change={() => edit('background_mode', choice.value)}
+            />
+            <span>{choice.label}</span>
+          </label>
+        {/each}
+      </div>
+    </section>
+
     <section>
       <label class="switch-row">
         <span>{spec('reminder_enabled').label}</span>
@@ -176,6 +208,9 @@
   .switch-row, .number-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
   .switch-row input { width: 16px; height: 16px; }
   .number-row input { width: 72px; height: 22px; padding: 1px 4px; }
+  .choice-group { display: grid; gap: 3px; }
+  .choice-row { display: flex; align-items: center; gap: 7px; cursor: pointer; }
+  .choice-row input { width: 14px; height: 14px; margin: 0; }
   .state { color: #aaaeb5; }
   .errors { margin: 6px 0 0; padding-left: 18px; color: #ff8177; }
   .saved { margin: 6px 0 0; color: #7bd88f; font-weight: 600; }

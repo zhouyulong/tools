@@ -9,6 +9,7 @@ use serde::Serialize;
 use std::sync::Mutex;
 
 const PAUSE_REASONS: [&str; 4] = ["rest", "disturbance", "switch", "other"];
+pub const BACKGROUND_MODE_KEY: &str = "background_mode";
 const WIDGET_POSITION_X_KEY: &str = "widget_position_x";
 const WIDGET_POSITION_Y_KEY: &str = "widget_position_y";
 const TASK_COLUMNS: &str = "id, name, est_seconds, status, tag, COALESCE(net_seconds, 0) AS net_seconds, created_at, finished_at, reminder_muted";
@@ -47,6 +48,36 @@ pub struct TaskDetailDto {
     pub task: TaskDto,
     pub segments: Vec<SegmentDto>,
     pub events: Vec<EventDto>,
+}
+
+#[derive(Debug, Serialize, Clone, Copy, PartialEq, Eq)]
+#[serde(rename_all = "lowercase")]
+pub enum BackgroundMode {
+    Glass,
+    Translucent,
+    Opaque,
+}
+
+impl BackgroundMode {
+    pub fn parse(value: &str) -> Result<Self, String> {
+        match value.trim() {
+            "glass" => Ok(Self::Glass),
+            "translucent" => Ok(Self::Translucent),
+            "opaque" => Ok(Self::Opaque),
+            _ => Err("background mode must be glass, translucent, or opaque".into()),
+        }
+    }
+}
+
+pub fn effective_background_mode(
+    requested: BackgroundMode,
+    native_glass_applied: bool,
+) -> BackgroundMode {
+    if requested == BackgroundMode::Glass && !native_glass_applied {
+        BackgroundMode::Translucent
+    } else {
+        requested
+    }
 }
 
 pub struct Tracker {
@@ -677,6 +708,13 @@ impl Tracker {
         }
     }
 
+    pub fn background_mode(&self) -> Result<BackgroundMode, String> {
+        match self.get_setting(BACKGROUND_MODE_KEY)? {
+            Some(value) => BackgroundMode::parse(&value),
+            None => Ok(BackgroundMode::Glass),
+        }
+    }
+
     pub fn get_setting(&self, key: &str) -> Result<Option<String>, String> {
         let conn = self.conn.lock().map_err(|_| "lock poisoned")?;
         Self::get_setting_from_conn(&conn, key)
@@ -692,6 +730,9 @@ impl Tracker {
     ) -> Result<(), String> {
         if values.contains_key(OVERDUE_UPGRADE_CUTOFF_KEY) {
             return Err("overdue upgrade cutoff is migration-owned".into());
+        }
+        if let Some(value) = values.get(BACKGROUND_MODE_KEY) {
+            BackgroundMode::parse(value)?;
         }
         let mut conn = self.conn.lock().map_err(|_| "lock poisoned")?;
         let tx = conn.transaction().map_err(|e| e.to_string())?;
@@ -1790,6 +1831,50 @@ mod tests {
         assert_eq!(
             tr.get_setting("widget_position_y").unwrap().as_deref(),
             Some("-80")
+        );
+    }
+
+    #[test]
+    fn background_mode_defaults_and_valid_values_roundtrip() {
+        let tr = t();
+        assert_eq!(tr.background_mode().unwrap(), BackgroundMode::Glass);
+
+        for (value, mode) in [
+            ("glass", BackgroundMode::Glass),
+            ("translucent", BackgroundMode::Translucent),
+            ("opaque", BackgroundMode::Opaque),
+        ] {
+            tr.set_setting(BACKGROUND_MODE_KEY, value).unwrap();
+            assert_eq!(tr.background_mode().unwrap(), mode);
+        }
+    }
+
+    #[test]
+    fn invalid_background_mode_rejects_the_entire_settings_batch() {
+        let tr = t();
+        let values = std::collections::BTreeMap::from([
+            ("reminder_warn_percent".to_string(), "90".to_string()),
+            (BACKGROUND_MODE_KEY.to_string(), "transparent".to_string()),
+        ]);
+
+        assert!(tr.set_settings(&values).is_err());
+        assert_eq!(tr.get_setting("reminder_warn_percent").unwrap(), None);
+        assert_eq!(tr.get_setting(BACKGROUND_MODE_KEY).unwrap(), None);
+    }
+
+    #[test]
+    fn glass_falls_back_to_translucent_when_native_effect_fails() {
+        assert_eq!(
+            effective_background_mode(BackgroundMode::Glass, false),
+            BackgroundMode::Translucent
+        );
+        assert_eq!(
+            effective_background_mode(BackgroundMode::Glass, true),
+            BackgroundMode::Glass
+        );
+        assert_eq!(
+            effective_background_mode(BackgroundMode::Opaque, false),
+            BackgroundMode::Opaque
         );
     }
 

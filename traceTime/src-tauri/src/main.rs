@@ -7,7 +7,7 @@ mod tracker;
 
 use chrono::Utc;
 use tauri::Manager;
-use tracker::Tracker;
+use tracker::{BackgroundMode, Tracker};
 
 fn persist_widget_positions(
     receiver: std::sync::mpsc::Receiver<(i32, i32)>,
@@ -32,6 +32,7 @@ fn main() {
     let widget_position = tracker
         .widget_position()
         .expect("cannot read widget position");
+    let background_mode = tracker.background_mode().unwrap_or(BackgroundMode::Glass);
     let (position_sender, position_receiver) = std::sync::mpsc::channel();
 
     tauri::Builder::default()
@@ -51,12 +52,13 @@ fn main() {
                     });
                 })?;
 
+            let window = app
+                .get_webview_window("main")
+                .ok_or("main window not found")?;
             if let Some((x, y)) = widget_position {
-                let window = app
-                    .get_webview_window("main")
-                    .ok_or("main window not found")?;
                 window.set_position(tauri::PhysicalPosition::new(x, y))?;
             }
+            commands::apply_background_mode_to_window(&window, background_mode);
             Ok(())
         })
         .on_window_event(move |window, event| {
@@ -82,6 +84,7 @@ fn main() {
             commands::get_setting,
             commands::set_setting,
             commands::set_settings,
+            commands::apply_background_mode,
             commands::check_reminders,
             commands::set_reminder_muted,
             commands::send_reminder_notification,

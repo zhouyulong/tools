@@ -1,5 +1,11 @@
 import { invoke } from '@tauri-apps/api/core'
 
+export type BackgroundMode = 'glass' | 'translucent' | 'opaque'
+export interface BackgroundModeResult {
+  requested: BackgroundMode
+  effective: BackgroundMode
+}
+
 export interface Task {
   id: string
   name: string
@@ -96,6 +102,8 @@ export const setSetting = (key: string, value: string) =>
   invoke<void>('set_setting', { key, value })
 export const saveSettings = (values: Record<string, string>) =>
   invoke<void>('set_settings', { values })
+export const applyBackgroundMode = (mode: BackgroundMode) =>
+  invoke<BackgroundModeResult>('apply_background_mode', { mode })
 
 export const setWidgetHeight = (height: number) => invoke<void>('set_widget_height', { height })
 export const deleteTask = (taskId: string) => invoke<void>('delete_task', { taskId })
