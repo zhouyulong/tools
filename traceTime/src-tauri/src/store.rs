@@ -46,13 +46,15 @@ const MIGRATIONS: &[&str] = &[
 ];
 
 pub fn open(path: &Path) -> rusqlite::Result<Connection> {
-    let conn = Connection::open(path)?;
-    migrate(&conn)?;
-    Ok(conn)
+    initialize_connection(Connection::open(path)?)
 }
 
 pub fn open_in_memory() -> rusqlite::Result<Connection> {
-    let conn = Connection::open_in_memory()?;
+    initialize_connection(Connection::open_in_memory()?)
+}
+
+fn initialize_connection(conn: Connection) -> rusqlite::Result<Connection> {
+    conn.execute_batch("PRAGMA foreign_keys = ON;")?;
     migrate(&conn)?;
     Ok(conn)
 }
@@ -96,6 +98,39 @@ mod tests {
                 .unwrap();
             assert_eq!(n, 1, "table {table} missing");
         }
+    }
+
+    #[test]
+    fn foreign_keys_reject_orphan_segments_and_events() {
+        let conn = Connection::open_in_memory().unwrap();
+        conn.execute_batch("PRAGMA foreign_keys = OFF;").unwrap();
+        let conn = initialize_connection(conn).unwrap();
+
+        let segment_err = conn
+            .execute(
+                "INSERT INTO segments (task_id, started_at) VALUES (?1, ?2)",
+                ["missing-task", "2026-11-26T00:00:00Z"],
+            )
+            .unwrap_err();
+        assert!(
+            segment_err
+                .to_string()
+                .contains("FOREIGN KEY constraint failed"),
+            "unexpected segment error: {segment_err}"
+        );
+
+        let event_err = conn
+            .execute(
+                "INSERT INTO events (task_id, at, kind) VALUES (?1, ?2, ?3)",
+                ["missing-task", "2026-11-26T00:00:00Z", "pause"],
+            )
+            .unwrap_err();
+        assert!(
+            event_err
+                .to_string()
+                .contains("FOREIGN KEY constraint failed"),
+            "unexpected event error: {event_err}"
+        );
     }
 
     #[test]
