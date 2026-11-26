@@ -1,13 +1,13 @@
 import assert from 'node:assert/strict'
 import { afterEach, test } from 'node:test'
 import { clearMocks, mockIPC } from '@tauri-apps/api/mocks'
-import { finishTask, abandonTask } from '../src/lib/api.ts'
+import { finishTask, abandonTask, resume } from '../src/lib/api.ts'
 
 globalThis.window = {} as Window & typeof globalThis
 afterEach(clearMocks)
 
 for (const [command, action] of [
-  ['finish_task', finishTask], ['abandon_task', abandonTask],
+  ['finish_task', finishTask], ['abandon_task', abandonTask], ['resume', resume],
 ] as const) {
   test(`${command} binds the clicked task id and propagates a stale-task rejection`, async () => {
     const calls: unknown[] = []

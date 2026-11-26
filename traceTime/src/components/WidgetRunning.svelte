@@ -70,6 +70,11 @@
     dispatch('switched')
   }
 
+  function doResume() {
+    const expectedTaskId = task.id
+    void act(() => resume(expectedTaskId))
+  }
+
   function doFinish() {
     const expectedTaskId = task.id
     void act(() => finishTask(expectedTaskId))
@@ -101,6 +106,13 @@
       on:success={completeSwitch}
       on:cancel={cancelSwitch}
     />
+  {:else if mode === 'pause-menu'}
+    <div class="pause-menu">
+      {#each PAUSE_REASONS as reason}
+        <button disabled={busy} on:click={() => doPause(reason.value)}>{reason.label}</button>
+      {/each}
+      <button disabled={busy} class="cancel" on:click={() => (mode = 'normal')}>取消</button>
+    </div>
   {:else if task.status === 'running'}
     <div class="foot">
       {#if overdue}
@@ -118,7 +130,7 @@
     <div class="foot">
       <span class="rem paused">已暂停</span>
       <span class="actions">
-        <button disabled={busy} title="继续" on:click={() => act(resume)}>▶</button>
+        <button disabled={busy} title="继续" on:click={doResume}>▶</button>
         <button disabled={busy} title="完成" on:click={doFinish}>✔</button>
         <button disabled={busy} title="放弃" on:click={doAbandon}>{confirmAbandon ? '确认放弃?' : '✕'}</button>
       </span>
@@ -126,39 +138,33 @@
     {#if paused.length > 1}
       <div class="chips" aria-label="其他暂停任务">
         {#each paused.filter(item => item.id !== task.id) as item (item.id)}
-          <span class="chip" title={item.name}>{item.name} · 已暂停 {fmtHMS(pausedFor(item))}</span>
+          <span class="chip" title={`${item.name} · 已暂停 ${fmtHMS(pausedFor(item))}`}>{item.name} · 已暂停 {fmtHMS(pausedFor(item))}</span>
         {/each}
       </div>
     {/if}
   {/if}
 
-  {#if mode === 'pause-menu'}
-    <div class="pause-menu">
-      {#each PAUSE_REASONS as reason}
-        <button disabled={busy} on:click={() => doPause(reason.value)}>{reason.label}</button>
-      {/each}
-      <button disabled={busy} class="cancel" on:click={() => (mode = 'normal')}>取消</button>
-    </div>
-  {/if}
-  {#if error}<p class="error">{error}</p>{/if}
+  {#if error}<p class="error" title={error}>{error}</p>{/if}
 </div>
 
 <style>
-  .widget { padding: 10px; position: relative; }
-  .head { display: flex; justify-content: space-between; align-items: baseline; }
-  .name { font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 150px; }
-  .tag { font-size: 10px; opacity: 0.6; }
-  .time { font-size: 34px; font-variant-numeric: tabular-nums; text-align: center; }
+  .widget { flex: 1; min-width: 0; min-height: 0; padding: 3px 6px; overflow: hidden; }
+  .head { display: flex; height: 14px; line-height: 14px; justify-content: space-between; align-items: baseline; gap: 4px; overflow: hidden; }
+  .name { min-width: 0; font-size: 11px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .tag { flex: none; max-width: 60px; overflow: hidden; text-overflow: ellipsis; font-size: 10px; opacity: 0.6; }
+  .time { height: 28px; line-height: 28px; font-size: 26px; font-variant-numeric: tabular-nums; text-align: center; }
   .time.overdue, .widget.overdue .rem { color: #c0392b; }
-  .widget.overdue { outline: 2px solid #c0392b; }
-  .foot { display: flex; justify-content: space-between; align-items: center; font-size: 12px; }
+  .widget.overdue { box-shadow: inset 0 0 0 2px #c0392b; }
+  .foot { display: flex; height: 20px; justify-content: space-between; align-items: center; gap: 2px; font-size: 10px; }
+  .rem { min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .paused { opacity: 0.6; }
-  .actions button { border: none; background: none; cursor: pointer; font-size: 13px; padding: 2px 4px; }
-  .pause-menu { position: absolute; inset: auto 8px 8px 8px; display: flex; gap: 4px; }
-  .pause-menu button { flex: 1; font-size: 10px; padding: 4px 2px; cursor: pointer; }
+  .actions { display: flex; flex: none; }
+  .actions button { height: 20px; border: none; background: none; cursor: pointer; font-size: 12px; padding: 1px 3px; }
+  .pause-menu { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); grid-auto-rows: 20px; height: 44px; margin-top: 6px; gap: 4px; }
+  .pause-menu button { width: 100%; min-width: 0; height: 20px; font-size: 10px; padding: 1px 2px; cursor: pointer; }
   .pause-menu button.cancel { opacity: 0.6; }
   .actions button:disabled, .pause-menu button:disabled { cursor: default; opacity: 0.45; }
-  .chips { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 6px; }
-  .chip { max-width: 100%; padding: 3px 6px; border-radius: 999px; background: rgba(255, 255, 255, 0.1); font-size: 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .error { color: #c0392b; font-size: 10px; }
+  .chips { display: flex; gap: 4px; height: 18px; margin-top: 4px; overflow: hidden; }
+  .chip { flex: 1; min-width: 0; padding: 2px 4px; line-height: 14px; border-radius: 999px; background: rgba(255, 255, 255, 0.1); font-size: 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .error { height: 12px; line-height: 12px; margin: 2px 0 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: #c0392b; font-size: 10px; }
 </style>

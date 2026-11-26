@@ -1,5 +1,7 @@
 :root {
   font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-size: 11px;
+  line-height: 1.2;
   color-scheme: dark;
   background: transparent;
 }
@@ -11,7 +13,9 @@
 html,
 body,
 #app {
-  min-height: 100%;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
   margin: 0;
 }
 
@@ -19,4 +23,14 @@ button,
 input,
 select {
   font: inherit;
+}
+
+/* Compact only the widget; history rows keep their content-driven height. */
+.widget-shell :is(button, input, select) {
+  min-width: 0;
+  max-width: 100%;
+  border-width: 1px;
+  height: 20px;
+  padding: 1px 4px;
+  line-height: 16px;
 }

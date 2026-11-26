@@ -47,9 +47,11 @@
   })
 </script>
 
-<main>
+<main class="widget-shell">
   {#if task?.status === 'paused' && !switchingTask}
-    <LongPauseBanner {task} {thresholdHours} {nowTick} {refreshAll} />
+    {#key task.id}
+      <LongPauseBanner {task} {thresholdHours} {nowTick} {refreshAll} getCurrentTask={() => task} />
+    {/key}
   {/if}
 
   {#if task}
@@ -66,5 +68,5 @@
 </main>
 
 <style>
-  main { background: rgba(30, 30, 34, 0.85); color: #f0f0f0; min-height: 100vh; }
+  main { display: flex; flex-direction: column; width: 100%; height: 100%; min-height: 0; overflow: hidden; background: rgba(30, 30, 34, 0.85); color: #f0f0f0; }
 </style>

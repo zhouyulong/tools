@@ -52,3 +52,12 @@ test('timeline bounds include a trailing pause, not just work intervals', () => 
   assert.match(body, /left: 0%; width: 25%/)
   assert.match(body, /left: 25%; width: 75%/)
 })
+
+test('zero-duration rollback pause is not painted as a positive-width interval over work', () => {
+  const { body } = render(TimelineBar, { props: { segments: [
+    { kind: 'work', started_at: '2026-11-26T00:00:10Z', ended_at: '2026-11-26T00:00:40Z' },
+    { kind: 'pause', started_at: '2026-11-26T00:00:20Z', ended_at: '2026-11-26T00:00:20Z' },
+  ] } })
+  assert.doesNotMatch(body, /title="pause:/)
+  assert.match(body, /left: 0%; width: 100%/)
+})

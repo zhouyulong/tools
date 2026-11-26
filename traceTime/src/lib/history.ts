@@ -8,6 +8,7 @@ export function historyTimeline(detail: TaskDetail | null): {
   const pauses: Segment[] = []
   let pauseCount = 0
   let pauseSeconds = 0
+  // task_detail returns append order (events.id), not wall-clock order. Never sort events by at.
   for (const [index, event] of detail.events.entries()) {
     if (event.kind !== 'paused') continue
     pauseCount++

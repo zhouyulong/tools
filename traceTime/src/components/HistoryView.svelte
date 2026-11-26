@@ -182,12 +182,15 @@
   .history {
     display: grid;
     grid-template-columns: 190px minmax(0, 1fr);
-    min-height: 100vh;
+    height: 100%;
+    min-height: 0;
+    overflow: hidden;
     color: #f0f0f0;
     background: #1e1e22;
   }
   aside {
     min-width: 0;
+    min-height: 0;
     padding: 14px 10px;
     overflow-y: auto;
     border-right: 1px solid rgba(255, 255, 255, 0.1);
@@ -216,7 +219,7 @@
   em { color: #7fc89a; font-style: normal; }
   .over { color: #ef7b70 !important; }
   .badge { flex: none; padding: 2px 5px; border-radius: 999px; color: #f0aaa4; background: rgba(207, 87, 77, 0.2); font-size: 9px; }
-  section { min-width: 0; padding: 18px; overflow-y: auto; }
+  section { min-width: 0; min-height: 0; padding: 18px; overflow-y: auto; }
   h3 { margin: 0; font-size: 18px; }
   .stats { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin-top: 14px; }
   .stats span { padding: 8px; border-radius: 6px; background: rgba(255, 255, 255, 0.055); font-size: 12px; }

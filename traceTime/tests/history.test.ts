@@ -4,7 +4,8 @@ import { historyTimeline } from '../src/lib/history.ts'
 import type { TaskDetail, Event } from '../src/lib/api.ts'
 
 const at = (s: number) => new Date(Date.UTC(2026, 10, 26, 0, 0, s)).toISOString()
-const event = (s: number, kind: string): Event => ({ at: at(s), kind, detail: null })
+let eventId = 0
+const event = (s: number, kind: string): Event => ({ id: ++eventId, at: at(s), kind, detail: null })
 function detail(events: Event[], status = 'done', finished_at: string | null = at(50)): TaskDetail {
   return {
     task: { id: 'A', name: 'A', est_seconds: 60, status, tag: null, net_seconds: 10,
@@ -52,4 +53,17 @@ test('empty detail and clock rollback never yield negative pause duration', () =
   const result = historyTimeline(detail([event(20, 'paused'), event(10, 'resumed')]))
   assert.equal(result.pauseSeconds, 0)
   assert.equal(result.segments.at(-1)?.ended_at, at(20))
+})
+
+
+test('append order pairs pause @20 with resume @10, not finish @40 after clock rollback', () => {
+  const input = detail([event(20, 'paused'), event(10, 'resumed'), event(40, 'finished')], 'done', at(40))
+  input.segments = [{ kind: 'work', started_at: at(10), ended_at: at(40) }]
+  const before = structuredClone(input)
+  const result = historyTimeline(input)
+  const pauses = result.segments.filter(s => s.kind === 'pause')
+  assert.equal(result.pauseCount, 1)
+  assert.equal(result.pauseSeconds, 0)
+  assert.deepEqual(pauses, [{ kind: 'pause', started_at: at(20), ended_at: at(20) }])
+  assert.deepEqual(input, before)
 })

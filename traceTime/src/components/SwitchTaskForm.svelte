@@ -59,16 +59,16 @@
     <button type="submit" disabled={busy || !name.trim()}>开始新任务</button>
     <button type="button" class="ghost" on:click={() => dispatch('cancel')}>取消</button>
   </div>
-  {#if error}<p class="error">{error}</p>{/if}
+  {#if error}<p class="error" title={error}>{error}</p>{/if}
 </form>
 
 <style>
-  .switch-form { display: flex; flex-direction: column; gap: 6px; padding-top: 8px; }
-  .name { width: 100%; }
-  .row { display: flex; gap: 6px; }
+  .switch-form { display: flex; flex-direction: column; gap: 4px; padding-top: 4px; min-width: 0; overflow: hidden; }
+  .name { width: 100%; height: 20px; }
+  .row { display: flex; gap: 4px; height: 20px; }
   .row > * { flex: 1; min-width: 0; }
   .duration { width: 70px; }
   .actions button { cursor: pointer; }
   .ghost { opacity: 0.65; }
-  .error { color: #c0392b; font-size: 10px; margin: 0; }
+  .error { color: #c0392b; font-size: 10px; height: 12px; line-height: 12px; margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 </style>

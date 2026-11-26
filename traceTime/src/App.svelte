@@ -5,8 +5,14 @@
   const isHistory = location.hash === '#history'
 </script>
 
-{#if isHistory}
-  <HistoryView />
-{:else}
-  <WidgetView />
-{/if}
+<div class="app-shell">
+  {#if isHistory}
+    <HistoryView />
+  {:else}
+    <WidgetView />
+  {/if}
+</div>
+
+<style>
+  .app-shell { width: 100%; height: 100%; overflow: hidden; }
+</style>

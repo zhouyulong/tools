@@ -19,6 +19,7 @@ export interface Segment {
 }
 
 export interface Event {
+  id: number
   at: string
   kind: string
   detail: string | null
@@ -48,7 +49,7 @@ export const createTask = (name: string, estSeconds: number, tag?: string | null
     parentTaskId: parentTaskId ?? null,
   })
 export const pause = (reason: string) => invoke<Task>('pause', { reason })
-export const resume = (): Promise<Task> => invoke<Task>('resume')
+export const resume = (expectedTaskId: string): Promise<Task> => invoke<Task>('resume', { expectedTaskId })
 export const finishTask = (expectedTaskId: string): Promise<Task> => invoke<Task>('finish_task', { expectedTaskId })
 export const abandonTask = (expectedTaskId: string): Promise<Task> => invoke<Task>('abandon_task', { expectedTaskId })
 export const currentTask = () => invoke<Task | null>('current_task')

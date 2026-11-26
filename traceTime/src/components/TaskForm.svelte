@@ -70,14 +70,15 @@
 </div>
 
 <style>
-  .task-form { padding: 10px; }
-  .form-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; color: #aaaeb5; font-size: 11px; }
-  .ghost { padding: 2px 7px; border: 1px solid rgba(255, 255, 255, 0.16); border-radius: 4px; color: #d8d8da; background: transparent; cursor: pointer; }
+  .task-form { height: 100%; min-width: 0; overflow: hidden; padding: 4px 6px; }
+  .form-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px; color: #aaaeb5; font-size: 11px; }
+  .ghost { padding: 1px 5px; border: 1px solid rgba(255, 255, 255, 0.16); border-radius: 4px; color: #d8d8da; background: transparent; cursor: pointer; }
   .ghost:hover { background: rgba(255, 255, 255, 0.08); }
-  .form { display: flex; flex-direction: column; gap: 6px; }
-  .row { display: flex; gap: 6px; }
+  .form { display: flex; flex-direction: column; gap: 4px; }
+  .row { display: flex; gap: 4px; }
+  .row > * { flex: 1; min-width: 0; }
   .name { width: 100%; box-sizing: border-box; }
-  .custom-duration { display: flex; align-items: center; gap: 6px; font-size: 12px; }
+  .custom-duration { display: flex; align-items: center; gap: 4px; font-size: 11px; }
   .custom-duration input { width: 70px; }
   .error { color: #c0392b; font-size: 11px; margin: 0; }
 </style>

@@ -15,7 +15,7 @@
       {
         "title": "traceTime",
         "width": 260,
-        "height": 120,
+        "height": 160,
         "resizable": false,
         "alwaysOnTop": true,
         "focus": false,

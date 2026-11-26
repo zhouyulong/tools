@@ -27,6 +27,7 @@ pub struct SegmentDto {
 
 #[derive(Debug, Serialize, Clone)]
 pub struct EventDto {
+    pub id: i64,
     pub at: String,
     pub kind: String,
     pub detail: Option<String>,
@@ -319,10 +320,13 @@ impl Tracker {
         Ok(task)
     }
 
-    pub fn resume(&self) -> Result<TaskDto, String> {
+    pub fn resume(&self, expected_task_id: &str) -> Result<TaskDto, String> {
         let mut conn = self.conn.lock().map_err(|_| "lock poisoned")?;
         let tx = conn.transaction().map_err(|e| e.to_string())?;
         let task = Self::require_active(&tx)?;
+        if task.id != expected_task_id {
+            return Err("task changed, please refresh".into());
+        }
         if task.status != "paused" {
             return Err(format!("cannot resume task in status {}", task.status));
         }
@@ -420,12 +424,6 @@ impl Tracker {
         Ok(())
     }
 
-    pub fn setting_or(&self, key: &str, default: &str) -> Result<String, String> {
-        Ok(self
-            .get_setting(key)?
-            .unwrap_or_else(|| default.to_string()))
-    }
-
     pub fn task_detail(&self, task_id: &str) -> Result<TaskDetailDto, String> {
         let conn = self.conn.lock().map_err(|_| "lock poisoned")?;
         let task = match Self::get_task(&conn, task_id)? {
@@ -449,14 +447,15 @@ impl Tracker {
             .collect::<Result<Vec<_>, _>>()
             .map_err(|e| e.to_string())?;
         let mut stmt = conn
-            .prepare("SELECT at, kind, detail FROM events WHERE task_id=?1 ORDER BY at, id")
+            .prepare("SELECT id, at, kind, detail FROM events WHERE task_id=?1 ORDER BY id")
             .map_err(|e| e.to_string())?;
         let events = stmt
             .query_map([task_id], |r| {
                 Ok(EventDto {
-                    at: r.get(0)?,
-                    kind: r.get(1)?,
-                    detail: r.get(2)?,
+                    id: r.get(0)?,
+                    at: r.get(1)?,
+                    kind: r.get(2)?,
+                    detail: r.get(3)?,
                 })
             })
             .map_err(|e| e.to_string())?
@@ -488,6 +487,43 @@ mod tests {
 
     fn t() -> Tracker {
         Tracker::new(store::open_in_memory().unwrap())
+    }
+
+    #[test]
+    fn stale_resume_does_not_resume_a_different_paused_task() {
+        let tr = t();
+        let a = tr.create_task("A", 60, None, None).unwrap();
+        tr.pause("switch").unwrap();
+        let b = tr.create_task("B", 60, None, Some(&a.id)).unwrap();
+        tr.pause("rest").unwrap();
+        assert_eq!(tr.resume(&a.id).unwrap_err(), "task changed, please refresh");
+        assert_eq!(tr.task_detail(&a.id).unwrap().task.status, "paused");
+        assert_eq!(tr.task_detail(&b.id).unwrap().task.status, "paused");
+    }
+
+    #[test]
+    fn task_detail_preserves_event_append_order_when_clock_rolls_back() {
+        let tr = t();
+        let task = tr.create_task("clock rollback history", 60, None, None).unwrap();
+        {
+            let conn = tr.conn.lock().unwrap();
+            conn.execute("DELETE FROM events WHERE task_id=?1", [&task.id]).unwrap();
+            for (at, kind) in [
+                ("2026-11-26T00:00:20Z", "paused"),
+                ("2026-11-26T00:00:10Z", "resumed"),
+                ("2026-11-26T00:00:40Z", "finished"),
+            ] {
+                conn.execute(
+                    "INSERT INTO events (task_id, at, kind) VALUES (?1, ?2, ?3)",
+                    rusqlite::params![task.id, at, kind],
+                ).unwrap();
+            }
+        }
+        let detail = tr.task_detail(&task.id).unwrap();
+        assert_eq!(detail.events.iter().map(|e| e.kind.as_str()).collect::<Vec<_>>(),
+            vec!["paused", "resumed", "finished"]);
+        assert!(detail.events.windows(2).all(|pair| pair[0].id < pair[1].id));
+        assert!(detail.events[0].id > 0);
     }
 
     #[test]
@@ -739,7 +775,7 @@ mod tests {
     #[test]
     fn pause_resume_accumulates_only_work_segments() {
         let tr = t();
-        tr.create_task("A", 100, None, None).unwrap();
+        let task = tr.create_task("A", 100, None, None).unwrap();
         std::thread::sleep(std::time::Duration::from_millis(1100));
         tr.pause("rest").unwrap();
         let paused = tr.current().unwrap().unwrap();
@@ -748,7 +784,7 @@ mod tests {
         std::thread::sleep(std::time::Duration::from_millis(1200));
         let still_paused = tr.current().unwrap().unwrap();
         assert_eq!(still_paused.net_seconds, paused.net_seconds);
-        tr.resume().unwrap();
+        tr.resume(&task.id).unwrap();
         std::thread::sleep(std::time::Duration::from_millis(1100));
         let running = tr.current().unwrap().unwrap();
         // 第二段至少 1 秒；暂停的 1.2 秒不得计入
@@ -891,12 +927,11 @@ mod tests {
     }
 
     #[test]
-    fn settings_roundtrip_and_default() {
+    fn settings_roundtrip() {
         let tr = t();
         assert_eq!(tr.get_setting("long_pause_hours").unwrap(), None);
-        assert_eq!(tr.setting_or("long_pause_hours", "2").unwrap(), "2");
         tr.set_setting("long_pause_hours", "1").unwrap();
-        assert_eq!(tr.setting_or("long_pause_hours", "2").unwrap(), "1");
+        assert_eq!(tr.get_setting("long_pause_hours").unwrap().as_deref(), Some("1"));
     }
 
     #[test]
@@ -906,7 +941,7 @@ mod tests {
         std::thread::sleep(std::time::Duration::from_millis(1100));
         tr.pause("rest").unwrap();
         std::thread::sleep(std::time::Duration::from_millis(1100));
-        tr.resume().unwrap();
+        tr.resume(&task.id).unwrap();
         std::thread::sleep(std::time::Duration::from_millis(1100));
         tr.finish(&task.id).unwrap();
         let d = tr.task_detail(&task.id).unwrap();

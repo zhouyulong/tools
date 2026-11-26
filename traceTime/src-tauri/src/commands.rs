@@ -25,8 +25,8 @@ pub fn pause(state: State<'_, Tracker>, reason: String) -> R<TaskDto> {
 }
 
 #[tauri::command]
-pub fn resume(state: State<'_, Tracker>) -> R<TaskDto> {
-    state.resume()
+pub fn resume(state: State<'_, Tracker>, expected_task_id: String) -> R<TaskDto> {
+    state.resume(&expected_task_id)
 }
 
 #[tauri::command]

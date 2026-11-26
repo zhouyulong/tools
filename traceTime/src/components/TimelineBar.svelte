@@ -9,7 +9,10 @@
       start: new Date(segment.started_at).getTime(),
       end: new Date(segment.ended_at).getTime(),
     }))
-    .filter(({ start, end }) => Number.isFinite(start) && Number.isFinite(end) && end >= start)
+    .filter(({ segment, start, end }) =>
+      Number.isFinite(start) && Number.isFinite(end) && end >= start &&
+      // A clamped rollback pause must not become a minimum-width grey work overlap.
+      (segment.kind !== 'pause' || end > start))
   $: first = positioned.length ? Math.min(...positioned.map(({ start }) => start)) : 0
   $: last = positioned.length ? Math.max(...positioned.map(({ end }) => end)) : 0
   $: span = Math.max(1, last - first)
