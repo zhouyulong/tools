@@ -1,7 +1,7 @@
 <script lang="ts">
   import { onMount } from 'svelte'
   import { listFinished, taskDetail, deleteTask, deleteTasks, type Task, type TaskDetail } from '../lib/api'
-  import { exportTaskDetail } from '../lib/taskExport'
+  import { exportTaskDetail, exportTaskDetails } from '../lib/taskExport'
   import { historyTimeline, wallClockSeconds, segmentSeconds, durationPercent } from '../lib/history'
   import { fmtHMS } from '../lib/format'
   import TimelineBar from './TimelineBar.svelte'
@@ -177,6 +177,22 @@
     }
   }
 
+  async function exportMany() {
+    if (deleting || exporting || selectedIds.length === 0) return
+    const ids = [...selectedIds]
+    exporting = true
+    error = ''
+    try {
+      const details = await Promise.all(ids.map(id => taskDetail(id)))
+      const saved = await exportTaskDetails(details)
+      if (!saved) error = '已取消导出'
+    } catch (e) {
+      error = String(e)
+    } finally {
+      exporting = false
+    }
+  }
+
   async function exportSelected() {
     if (!selected || exporting || detailLoading) return
     exporting = true
@@ -211,7 +227,10 @@
     </div>
     {#if selectedIds.length > 0}
       <div class="batch-actions">
-        <button disabled={deleting} on:click={removeMany}>
+        <button disabled={deleting || exporting} on:click={exportMany}>
+          {exporting ? '正在导出…' : `导出所选（${selectedIds.length}）`}
+        </button>
+        <button disabled={deleting || exporting} on:click={removeMany}>
           {deleting ? '正在删除…' : confirmBatchDelete ? `确认删除所选（${selectedIds.length}）` : `删除所选（${selectedIds.length}）`}
         </button>
         {#if confirmBatchDelete}<button disabled={deleting} on:click={() => (confirmBatchDelete = false)}>取消</button>{/if}
@@ -223,17 +242,25 @@
       {#each groups as group}
         <p class="day">{group.day}</p>
         {#each group.items as task}
-          <button disabled={deleting} class:on={selected?.task.id === task.id} on:click={() => select(task)}>
+          <button
+            disabled={deleting}
+            class:on={selected?.task.id === task.id}
+            class:batch-selected={selectedIds.includes(task.id)}
+            on:click={() => select(task)}
+          >
+            <input
+              class="row-select"
+              type="checkbox"
+              checked={selectedIds.includes(task.id)}
+              value={task.id}
+              bind:group={selectedIds}
+              disabled={deleting}
+              on:click|stopPropagation
+              on:change={() => (confirmBatchDelete = false)}
+              aria-label={`选择 ${task.name}`}
+            />
             <span class="task-line">
-              <input
-                type="checkbox"
-                checked={selectedIds.includes(task.id)}
-                value={task.id}
-                bind:group={selectedIds}
-                disabled={deleting}
-                on:click|stopPropagation
-                aria-label={`选择 ${task.name}`}
-              />
+              <span class="checkbox-mark" class:checked={selectedIds.includes(task.id)} aria-hidden="true"></span>
               <strong>{task.name}</strong>
               {#if task.status === 'abandoned'}<span class="badge">已放弃</span>{/if}
             </span>
@@ -319,6 +346,7 @@
   .batch-actions button { cursor: pointer; font-size: 10px; }
   .day { margin: 12px 6px 5px; color: #9398a0; font-size: 10px; font-weight: 700; }
   aside button {
+    position: relative;
     display: flex;
     width: 100%;
     flex-direction: column;
@@ -333,6 +361,28 @@
   }
   aside button:hover { background: rgba(255, 255, 255, 0.06); }
   aside button.on { background: rgba(75, 142, 100, 0.25); }
+  aside button.batch-selected { box-shadow: inset 2px 0 0 #39a96b; }
+  .row-select {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 20%;
+    height: 100%;
+    margin: 0;
+    opacity: 0;
+    cursor: pointer;
+    z-index: 1;
+  }
+  .row-select:focus-visible + .task-line { outline: 1px solid rgba(255, 255, 255, 0.55); outline-offset: 1px; }
+  .checkbox-mark {
+    flex: none;
+    width: 10px;
+    height: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.45);
+    border-radius: 2px;
+    background: transparent;
+  }
+  .checkbox-mark.checked { border-color: #39a96b; background: #39a96b; }
   .task-line, .heading { display: flex; min-width: 0; align-items: center; gap: 6px; }
   .task-line strong { overflow: hidden; font-size: 12px; text-overflow: ellipsis; white-space: nowrap; }
   .task-meta { display: flex; flex-wrap: wrap; gap: 3px; width: 100%; justify-content: space-between; color: #aeb2b8; font-size: 10px; }

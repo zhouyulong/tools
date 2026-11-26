@@ -108,3 +108,21 @@ test('export payload preserves the full DTO and derived pause intervals', async 
   const task = input.task
   assert.equal(exportFileName(task), `tracetime-${encodeURIComponent(task.name)}-${task.id.slice(0, 8)}.json`)
 })
+
+test('batch export keeps single-task items and uses a stable local-date filename', async () => {
+  const { buildTasksExport, batchExportFileName } = await import('../src/lib/history.ts')
+  const input = detail([event(10, 'paused'), event(20, 'resumed'), event(30, 'finished')], 'done', at(30))
+  const exportedAt = '2026-11-26T10:00:00.000Z'
+  assert.deepEqual(buildTasksExport([input], exportedAt), [
+    {
+      version: 1,
+      task: input.task,
+      segments: input.segments,
+      events: input.events,
+      pause_intervals: [{ kind: 'pause', started_at: at(10), ended_at: at(20) }],
+      exported_at: exportedAt,
+    },
+  ])
+  assert.deepEqual(buildTasksExport([], exportedAt), [])
+  assert.equal(batchExportFileName(3, new Date('2026-11-26T10:00:00Z')), 'tracetime-tasks-3-2026-11-26.json')
+})

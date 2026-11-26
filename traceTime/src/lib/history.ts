@@ -71,6 +71,27 @@ export function buildTaskExport(detail: TaskDetail): TaskExport {
   }
 }
 
+export interface BatchTaskExport extends TaskExport {
+  exported_at?: string
+}
+
+export function buildTasksExport(
+  details: TaskDetail[],
+  exportedAt: string | null = new Date().toISOString(),
+): BatchTaskExport[] {
+  return details.map(detail => {
+    const item = buildTaskExport(detail)
+    return exportedAt === null ? item : { ...item, exported_at: exportedAt }
+  })
+}
+
+export function batchExportFileName(count: number, date: Date = new Date()): string {
+  const day = new Intl.DateTimeFormat('en-CA', {
+    year: 'numeric', month: '2-digit', day: '2-digit',
+  }).format(date)
+  return `tracetime-tasks-${count}-${day}.json`
+}
+
 export function exportFileName(task: Task): string {
   return `tracetime-${encodeURIComponent(task.name)}-${task.id.slice(0, 8)}.json`
 }
