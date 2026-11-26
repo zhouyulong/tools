@@ -431,33 +431,23 @@ impl Tracker {
         let mut recovered = Vec::with_capacity(running_ids.len());
 
         for task_id in running_ids {
-            let already_recovered: bool = tx
-                .query_row(
-                    "SELECT EXISTS(SELECT 1 FROM events WHERE task_id=?1 AND kind='anomaly_recovered')",
-                    [&task_id],
-                    |row| row.get(0),
-                )
-                .map_err(|e| e.to_string())?;
-
-            if !already_recovered {
-                let started_at = Self::latest_start_at(&tx, &task_id)?
-                    .ok_or_else(|| "running task has no start event".to_string())?;
-                let start = Self::parse_timestamp(&started_at)?;
-                let ended_at = if recovered_at_fixed <= start {
-                    started_at.clone()
-                } else {
-                    recovered_at_text.clone()
-                };
-                tx.execute(
-                    "INSERT INTO segments (task_id, started_at, ended_at, kind)
-                     VALUES (?1, ?2, ?3, 'anomaly')",
-                    rusqlite::params![task_id, started_at, ended_at],
-                )
-                .map_err(|e| e.to_string())?;
-                let detail = serde_json::json!({ "reason": "anomaly" }).to_string();
-                Self::add_event_at(&tx, &task_id, &recovered_at_text, "paused", Some(&detail))?;
-                Self::add_event_at(&tx, &task_id, &recovered_at_text, "anomaly_recovered", None)?;
-            }
+            let started_at = Self::latest_start_at(&tx, &task_id)?
+                .ok_or_else(|| "running task has no start event".to_string())?;
+            let start = Self::parse_timestamp(&started_at)?;
+            let ended_at = if recovered_at_fixed <= start {
+                started_at.clone()
+            } else {
+                recovered_at_text.clone()
+            };
+            tx.execute(
+                "INSERT INTO segments (task_id, started_at, ended_at, kind)
+                 VALUES (?1, ?2, ?3, 'anomaly')",
+                rusqlite::params![task_id, started_at, ended_at],
+            )
+            .map_err(|e| e.to_string())?;
+            let detail = serde_json::json!({ "reason": "anomaly" }).to_string();
+            Self::add_event_at(&tx, &task_id, &recovered_at_text, "paused", Some(&detail))?;
+            Self::add_event_at(&tx, &task_id, &recovered_at_text, "anomaly_recovered", None)?;
 
             tx.execute("UPDATE tasks SET status='paused' WHERE id=?1", [&task_id])
                 .map_err(|e| e.to_string())?;
@@ -1720,39 +1710,71 @@ mod tests {
     }
 
     #[test]
-    fn recovery_completes_existing_anomaly_transition_without_duplicate_history() {
+    fn resumed_task_records_a_new_anomaly_on_a_second_crash() {
         let tr = t();
-        let task = tr.create_task("partial recovery", 60, None, None).unwrap();
+        let task = tr.create_task("repeat crash", 60, None, None).unwrap();
         {
             let conn = tr.conn.lock().unwrap();
             conn.execute(
-                "INSERT INTO events (task_id, at, kind) VALUES (?1, '2026-11-26T00:01:00Z', 'anomaly_recovered')",
+                "UPDATE events SET at='2026-11-26T00:00:00Z' WHERE task_id=?1 AND kind='started'",
                 [&task.id],
             )
             .unwrap();
         }
+        tr.recover_running_tasks(
+            DateTime::parse_from_rfc3339("2026-11-26T00:01:00Z")
+                .unwrap()
+                .with_timezone(&Utc),
+        )
+        .unwrap();
 
-        let recovered = tr
-            .recover_running_tasks(
-                DateTime::parse_from_rfc3339("2026-11-26T00:02:00Z")
-                    .unwrap()
-                    .with_timezone(&Utc),
+        tr.resume(&task.id).unwrap();
+        {
+            let conn = tr.conn.lock().unwrap();
+            conn.execute(
+                "UPDATE events SET at='2026-11-26T00:02:00Z' WHERE task_id=?1 AND kind='resumed'",
+                [&task.id],
             )
             .unwrap();
+        }
+        let second_recovery = DateTime::parse_from_rfc3339("2026-11-26T00:03:00Z")
+            .unwrap()
+            .with_timezone(&Utc);
+        tr.recover_running_tasks(second_recovery).unwrap();
+        assert!(
+            tr.recover_running_tasks(second_recovery)
+                .unwrap()
+                .is_empty()
+        );
 
-        assert_eq!(recovered.len(), 1);
-        assert_eq!(recovered[0].status, "paused");
         let detail = tr.task_detail(&task.id).unwrap();
-        assert!(detail.segments.is_empty());
+        assert_eq!(
+            detail
+                .segments
+                .iter()
+                .filter(|segment| segment.kind == "anomaly")
+                .count(),
+            2
+        );
+        assert_eq!(
+            detail
+                .events
+                .iter()
+                .filter(|event| {
+                    event.kind == "paused"
+                        && event.detail.as_deref() == Some(r#"{"reason":"anomaly"}"#)
+                })
+                .count(),
+            2
+        );
         assert_eq!(
             detail
                 .events
                 .iter()
                 .filter(|event| event.kind == "anomaly_recovered")
                 .count(),
-            1
+            2
         );
-        assert!(detail.events.iter().all(|event| event.kind != "paused"));
     }
 
     #[test]
