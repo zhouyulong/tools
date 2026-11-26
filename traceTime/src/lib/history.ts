@@ -1,4 +1,4 @@
-import type { Segment, Task, TaskDetail } from './api'
+import type { Event as TraceEvent, Segment, Task, TaskDetail } from './api'
 
 /** Derived display data only: never persist pause intervals or mutate the detail DTO. */
 export function historyTimeline(detail: TaskDetail | null): {
@@ -51,4 +51,26 @@ export function wallClockSeconds(task: Task, segments: Segment[]): number {
 export function durationPercent(seconds: number, wallSeconds: number): number {
   if (!Number.isFinite(seconds) || !Number.isFinite(wallSeconds) || wallSeconds <= 0) return 0
   return Math.round(Math.max(0, seconds) / wallSeconds * 100)
+}
+
+export interface TaskExport {
+  version: number
+  task: Task
+  segments: Segment[]
+  events: TraceEvent[]
+  pause_intervals: Segment[]
+}
+
+export function buildTaskExport(detail: TaskDetail): TaskExport {
+  return {
+    version: 1,
+    task: detail.task,
+    segments: detail.segments,
+    events: detail.events,
+    pause_intervals: historyTimeline(detail).segments.filter(segment => segment.kind === 'pause'),
+  }
+}
+
+export function exportFileName(task: Task): string {
+  return `tracetime-${encodeURIComponent(task.name)}-${task.id.slice(0, 8)}.json`
 }

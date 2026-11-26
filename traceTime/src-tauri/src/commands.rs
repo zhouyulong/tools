@@ -97,6 +97,11 @@ pub fn delete_task(state: State<'_, Tracker>, task_id: String) -> R<()> {
 }
 
 #[tauri::command]
+pub fn delete_tasks(state: State<'_, Tracker>, ids: Vec<String>) -> R<()> {
+    state.delete_tasks(&ids)
+}
+
+#[tauri::command]
 pub fn set_widget_height(app: tauri::AppHandle, height: f64) -> R<()> {
     if !height.is_finite() {
         return Err("invalid widget height".into());

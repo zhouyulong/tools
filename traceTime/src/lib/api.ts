@@ -64,3 +64,4 @@ export const setSetting = (key: string, value: string) =>
 
 export const setWidgetHeight = (height: number) => invoke<void>('set_widget_height', { height })
 export const deleteTask = (taskId: string) => invoke<void>('delete_task', { taskId })
+export const deleteTasks = (ids: string[]) => invoke<void>('delete_tasks', { ids })

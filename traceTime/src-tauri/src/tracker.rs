@@ -482,6 +482,25 @@ impl Tracker {
         tx.commit().map_err(|e| e.to_string())
     }
 
+    /// Transactional, all-or-nothing deletion. An empty list is a deliberate no-op.
+    pub fn delete_tasks(&self, ids: &[String]) -> Result<(), String> {
+        if ids.is_empty() {
+            return Ok(());
+        }
+        let mut conn = self.conn.lock().map_err(|_| "lock poisoned")?;
+        let tx = conn.transaction().map_err(|e| e.to_string())?;
+        for task_id in ids {
+            let task = Self::get_task(&tx, task_id)?.ok_or("task not found")?;
+            if task.status != "done" && task.status != "abandoned" {
+                // Dropping tx without commit rolls back any ids already updated.
+                return Err("only finished tasks can be deleted".into());
+            }
+            tx.execute("UPDATE tasks SET hidden=1 WHERE id=?1", [task_id])
+                .map_err(|e| e.to_string())?;
+        }
+        tx.commit().map_err(|e| e.to_string())
+    }
+
     pub fn list_finished(&self) -> Result<Vec<TaskDto>, String> {
         let conn = self.conn.lock().map_err(|_| "lock poisoned")?;
         let sql = format!(
@@ -501,6 +520,71 @@ mod tests {
 
     fn t() -> Tracker {
         Tracker::new(store::open_in_memory().unwrap())
+    }
+
+    #[test]
+    fn bulk_soft_delete_applies_every_finished_id_and_rejects_as_a_whole() {
+        let tr = t();
+        let a = tr.create_task("bulk-a", 60, None, None).unwrap();
+        tr.finish(&a.id).unwrap();
+        let b = tr.create_task("bulk-b", 60, None, None).unwrap();
+        tr.abandon(&b.id).unwrap();
+        tr.delete_tasks(&[a.id.clone(), b.id.clone()]).unwrap();
+        let finished = tr.list_finished().unwrap();
+        assert!(
+            !finished
+                .iter()
+                .any(|task| [a.id.clone(), b.id.clone()].contains(&task.id))
+        );
+        let conn = tr.conn.lock().unwrap();
+        for id in [a.id, b.id] {
+            assert_eq!(
+                conn.query_row("SELECT hidden FROM tasks WHERE id=?1", [&id], |r| r
+                    .get::<_, i64>(0))
+                    .unwrap(),
+                1
+            );
+        }
+    }
+
+    #[test]
+    fn bulk_soft_delete_with_nonterminal_id_rejects_and_hides_nothing() {
+        let tr = t();
+        let done = tr.create_task("done", 60, None, None).unwrap();
+        tr.finish(&done.id).unwrap();
+        let running = tr.create_task("running", 60, None, None).unwrap();
+        assert_eq!(
+            tr.delete_tasks(&[done.id.clone(), running.id.clone()])
+                .unwrap_err(),
+            "only finished tasks can be deleted"
+        );
+        assert!(
+            tr.list_finished()
+                .unwrap()
+                .iter()
+                .any(|task| task.id == done.id)
+        );
+        let conn = tr.conn.lock().unwrap();
+        assert_eq!(
+            conn.query_row("SELECT hidden FROM tasks WHERE id=?1", [&done.id], |r| r
+                .get::<_, i64>(0))
+                .unwrap(),
+            0
+        );
+    }
+
+    #[test]
+    fn empty_bulk_soft_delete_is_a_no_op() {
+        let tr = t();
+        let task = tr.create_task("keep", 60, None, None).unwrap();
+        tr.finish(&task.id).unwrap();
+        tr.delete_tasks(&[]).unwrap();
+        assert!(
+            tr.list_finished()
+                .unwrap()
+                .iter()
+                .any(|item| item.id == task.id)
+        );
     }
 
     #[test]

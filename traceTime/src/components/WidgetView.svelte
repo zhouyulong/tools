@@ -1,7 +1,7 @@
 <script lang="ts">
   import { onDestroy, onMount } from 'svelte'
   import { currentTask, getSetting, listPaused, setWidgetHeight, type Task } from '../lib/api'
-  import { observeWidgetHeight } from '../lib/widgetHeight'
+  import { createWidgetHeightObserver } from '../lib/widgetHeight'
   import LongPauseBanner from './LongPauseBanner.svelte'
   import TaskForm from './TaskForm.svelte'
   import WidgetRunning from './WidgetRunning.svelte'
@@ -13,6 +13,8 @@
   let nowTick = Date.now()
   let switchingTask = false
   let interval: ReturnType<typeof setInterval> | undefined
+  let measureNow: () => void = () => {}
+  let widgetHeight = 0
 
   async function refreshAll() {
     nowTick = Date.now()
@@ -43,7 +45,12 @@
     void loadLongPauseHours()
     void refreshAll()
     interval = setInterval(refreshAll, 1000)
-    return observeWidgetHeight(main, setWidgetHeight)
+    const observer = createWidgetHeightObserver(main, async height => {
+      widgetHeight = height
+      await setWidgetHeight(height)
+    })
+    measureNow = observer.measureNow
+    return observer.cleanup
   })
   onDestroy(() => {
     if (interval !== undefined) clearInterval(interval)
@@ -62,8 +69,10 @@
       {task}
       {paused}
       {nowTick}
+      {widgetHeight}
       on:switching={(event) => (switchingTask = event.detail)}
       on:switched={handleSwitched}
+      on:layout={() => measureNow()}
     />
   {:else}
     <TaskForm {refreshAll} />

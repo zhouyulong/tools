@@ -91,3 +91,20 @@ test('zero, invalid and rollback wall-clock/interval durations have zero percent
   assert.equal(durationPercent(-1, 10), 0)
   assert.equal(durationPercent(10, NaN), 0)
 })
+
+test('export payload preserves the full DTO and derived pause intervals', async () => {
+  const { buildTaskExport, exportFileName } = await import('../src/lib/history.ts')
+  const input = detail([event(10, 'paused'), event(20, 'resumed'), event(30, 'finished')], 'done', at(30))
+  input.segments.push({ kind: 'work', started_at: at(20), ended_at: at(30) })
+  const result = buildTaskExport(input)
+  assert.deepEqual(result, {
+    version: 1,
+    task: input.task,
+    segments: input.segments,
+    events: input.events,
+    pause_intervals: [{ kind: 'pause', started_at: at(10), ended_at: at(20) }],
+  })
+  assert.deepEqual(structuredClone(input), structuredClone(input))
+  const task = input.task
+  assert.equal(exportFileName(task), `tracetime-${encodeURIComponent(task.name)}-${task.id.slice(0, 8)}.json`)
+})

@@ -9,8 +9,9 @@
   export let task: Task
   export let paused: Task[] = []
   export let nowTick = Date.now()
+  export let widgetHeight = 0
 
-  const dispatch = createEventDispatcher<{ switching: boolean; switched: void }>()
+  const dispatch = createEventDispatcher<{ switching: boolean; switched: void; layout: void }>()
 
   let mode: 'normal' | 'pause-menu' | 'switch-form' = 'normal'
   let confirmAbandon = false
@@ -18,10 +19,12 @@
   let busy = false
   let switchParentId: string | null = null
   let confirmationTaskId = task.id
-  let widgetHeight = 0 // Conservative one-row layout until clientHeight is measured.
+
 
   $: chips = pausedChipLayout(paused.filter(item => item.id !== task.id), widgetHeight, Boolean(error))
 
+  $: layoutSignature = [mode, chips.rows, chips.hiddenCount, Boolean(error), task.id, task.status].join('|')
+  $: if (typeof layoutSignature === 'string') dispatch('layout')
   $: remaining = task.est_seconds - task.net_seconds
   $: pct = Math.min(100, Math.round((task.net_seconds / task.est_seconds) * 100))
   $: overdue = remaining < 0
@@ -97,7 +100,7 @@
   onDestroy(() => dispatch('switching', false))
 </script>
 
-<div class="widget" class:overdue bind:clientHeight={widgetHeight}>
+<div class="widget" class:overdue>
   <div class="head">
     <span class="name">{task.name}</span>
     <span class="tag">{task.tag ?? ''}</span>

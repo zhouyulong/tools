@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import { afterEach, test } from 'node:test'
 import { clearMocks, mockIPC } from '@tauri-apps/api/mocks'
-import { finishTask, abandonTask, resume, deleteTask, setWidgetHeight } from '../src/lib/api.ts'
+import { finishTask, abandonTask, resume, deleteTask, deleteTasks, setWidgetHeight } from '../src/lib/api.ts'
 
 globalThis.window = {} as Window & typeof globalThis
 afterEach(clearMocks)
@@ -25,9 +25,11 @@ test('soft deletion and resizing call registered commands with the explicit id/h
   const calls: unknown[] = []
   mockIPC((command, payload) => { calls.push([command, payload]) })
   await deleteTask('finished-A')
+  await deleteTasks(['A', 'B'])
   await setWidgetHeight(180)
   assert.deepEqual(calls, [
     ['delete_task', { taskId: 'finished-A' }],
+    ['delete_tasks', { ids: ['A', 'B'] }],
     ['set_widget_height', { height: 180 }],
   ])
 })

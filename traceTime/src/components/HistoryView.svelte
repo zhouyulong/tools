@@ -1,6 +1,7 @@
 <script lang="ts">
   import { onMount } from 'svelte'
-  import { listFinished, taskDetail, deleteTask, type Task, type TaskDetail } from '../lib/api'
+  import { listFinished, taskDetail, deleteTask, deleteTasks, type Task, type TaskDetail } from '../lib/api'
+  import { exportTaskDetail } from '../lib/taskExport'
   import { historyTimeline, wallClockSeconds, segmentSeconds, durationPercent } from '../lib/history'
   import { fmtHMS } from '../lib/format'
   import TimelineBar from './TimelineBar.svelte'
@@ -16,10 +17,14 @@
   let selectedId: string | null = null
   let confirmDeleteId: string | null = null
   let deleting = false
+  let selectedIds: string[] = []
+  let confirmBatchDelete = false
+  let exporting = false
   const deletedIds = new Set<string>()
 
   $: timeline = historyTimeline(selected)
   $: wallSeconds = selected ? wallClockSeconds(selected.task, timeline.segments) : 0
+  $: allSelected = tasks.length > 0 && selectedIds.length === tasks.length
 
   function dayOf(task: Task): string {
     return new Date(task.finished_at!).toLocaleDateString('zh-CN')
@@ -63,11 +68,19 @@
     return kind
   }
 
+  function toggleAll(event: Event) {
+    const checked = (event.currentTarget as HTMLInputElement).checked
+    selectedIds = checked ? tasks.map(task => task.id) : []
+    confirmBatchDelete = false
+  }
+
   async function select(task: Task) {
     if (deleting) return
     confirmDeleteId = null
+    confirmBatchDelete = false
     selected = null
     selectedId = task.id
+    selectedIds = selectedIds.filter(id => id !== task.id)
     const seq = ++selectSeq
     detailLoading = true
     error = ''
@@ -90,11 +103,14 @@
       const result = await listFinished()
       if (seq !== listSeq) return
       tasks = result.filter(task => !deletedIds.has(task.id))
+      selectedIds = selectedIds.filter(id => tasks.some(task => task.id === id))
+      if (selectedIds.length === 0) confirmBatchDelete = false
       regroup()
       if (selectedId && !tasks.some(task => task.id === selectedId)) {
         selectedId = null
         selected = null
         confirmDeleteId = null
+        selectedIds = selectedIds.filter(id => id !== selectedId)
         ++selectSeq // Invalidate an outstanding detail request as well.
         detailLoading = false
       }
@@ -131,6 +147,50 @@
     }
   }
 
+  async function removeMany() {
+    if (deleting || selectedIds.length === 0) return
+    if (!confirmBatchDelete) {
+      confirmBatchDelete = true
+      return
+    }
+    deleting = true
+    error = ''
+    const ids = [...selectedIds]
+    try {
+      await deleteTasks(ids)
+      for (const id of ids) deletedIds.add(id)
+      selectedIds = []
+      confirmBatchDelete = false
+      tasks = tasks.filter(task => !ids.includes(task.id))
+      regroup()
+      if (selectedId && ids.includes(selectedId)) {
+        ++selectSeq
+        selectedId = null
+        selected = null
+        detailLoading = false
+        confirmDeleteId = null
+      }
+    } catch (e) {
+      error = String(e)
+    } finally {
+      deleting = false
+    }
+  }
+
+  async function exportSelected() {
+    if (!selected || exporting || detailLoading) return
+    exporting = true
+    error = ''
+    try {
+      const saved = await exportTaskDetail(selected)
+      if (!saved) error = '已取消导出'
+    } catch (e) {
+      error = String(e)
+    } finally {
+      exporting = false
+    }
+  }
+
   onMount(() => {
     const onFocus = () => { void reload() }
     window.addEventListener('focus', onFocus)
@@ -145,7 +205,18 @@
 
 <div class="history">
   <aside>
-    <h2>历史任务</h2>
+    <div class="list-header">
+      <h2>历史任务</h2>
+      <label class="batch-select"><input type="checkbox" checked={allSelected} disabled={deleting || tasks.length === 0} on:change={toggleAll} />全选</label>
+    </div>
+    {#if selectedIds.length > 0}
+      <div class="batch-actions">
+        <button disabled={deleting} on:click={removeMany}>
+          {deleting ? '正在删除…' : confirmBatchDelete ? `确认删除所选（${selectedIds.length}）` : `删除所选（${selectedIds.length}）`}
+        </button>
+        {#if confirmBatchDelete}<button disabled={deleting} on:click={() => (confirmBatchDelete = false)}>取消</button>{/if}
+      </div>
+    {/if}
     {#if loading}
       <p class="empty">正在加载…</p>
     {:else}
@@ -154,6 +225,15 @@
         {#each group.items as task}
           <button disabled={deleting} class:on={selected?.task.id === task.id} on:click={() => select(task)}>
             <span class="task-line">
+              <input
+                type="checkbox"
+                checked={selectedIds.includes(task.id)}
+                value={task.id}
+                bind:group={selectedIds}
+                disabled={deleting}
+                on:click|stopPropagation
+                aria-label={`选择 ${task.name}`}
+              />
               <strong>{task.name}</strong>
               {#if task.status === 'abandoned'}<span class="badge">已放弃</span>{/if}
             </span>
@@ -179,6 +259,7 @@
         {#if selected.task.status === 'abandoned'}<span class="badge">已放弃</span>{/if}
       </div>
       <div class="delete-actions">
+        <button disabled={deleting} on:click={exportSelected}>{exporting ? '正在导出…' : '导出'}</button>
         <button disabled={deleting} on:click={removeSelected}>{deleting ? '正在删除…' : confirmDeleteId === selected.task.id ? '确认删除' : '删除'}</button>
         {#if confirmDeleteId === selected.task.id}
           <span>仅从历史列表隐藏，轨迹保留。</span>
@@ -231,7 +312,11 @@
     border-right: 1px solid rgba(255, 255, 255, 0.1);
     background: #242429;
   }
-  h2 { margin: 0 6px 14px; font-size: 16px; }
+  .list-header { display: flex; align-items: center; justify-content: space-between; gap: 6px; margin: 0 6px 8px; }
+  h2 { margin: 0; font-size: 16px; }
+  .batch-select { display: inline-flex; align-items: center; gap: 3px; color: #aeb2b8; font-size: 10px; cursor: pointer; }
+  .batch-actions { display: flex; flex-wrap: wrap; gap: 4px; margin: 0 6px 10px; }
+  .batch-actions button { cursor: pointer; font-size: 10px; }
   .day { margin: 12px 6px 5px; color: #9398a0; font-size: 10px; font-weight: 700; }
   aside button {
     display: flex;
