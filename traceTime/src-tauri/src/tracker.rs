@@ -9,6 +9,8 @@ use serde::Serialize;
 use std::sync::Mutex;
 
 const PAUSE_REASONS: [&str; 4] = ["rest", "disturbance", "switch", "other"];
+const WIDGET_POSITION_X_KEY: &str = "widget_position_x";
+const WIDGET_POSITION_Y_KEY: &str = "widget_position_y";
 const TASK_COLUMNS: &str = "id, name, est_seconds, status, tag, COALESCE(net_seconds, 0) AS net_seconds, created_at, finished_at, reminder_muted";
 
 #[derive(Debug, Serialize, Clone)]
@@ -83,9 +85,19 @@ impl Tracker {
         kind: &str,
         detail: Option<&str>,
     ) -> Result<(), String> {
+        Self::add_event_at(conn, task_id, &now(), kind, detail)
+    }
+
+    fn add_event_at(
+        conn: &Connection,
+        task_id: &str,
+        at: &str,
+        kind: &str,
+        detail: Option<&str>,
+    ) -> Result<(), String> {
         conn.execute(
             "INSERT INTO events (task_id, at, kind, detail) VALUES (?1, ?2, ?3, ?4)",
-            rusqlite::params![task_id, now(), kind, detail],
+            rusqlite::params![task_id, at, kind, detail],
         )
         .map(|_| ())
         .map_err(|e| e.to_string())
@@ -398,6 +410,66 @@ impl Tracker {
         self.terminate(expected_task_id, "abandoned", "abandoned", &now())
     }
 
+    pub fn recover_running_tasks(
+        &self,
+        recovered_at: DateTime<Utc>,
+    ) -> Result<Vec<TaskDto>, String> {
+        let mut conn = self.conn.lock().map_err(|_| "lock poisoned")?;
+        let tx = conn.transaction().map_err(|e| e.to_string())?;
+        let running_ids = {
+            let mut stmt = tx
+                .prepare("SELECT id FROM tasks WHERE status='running' ORDER BY created_at, id")
+                .map_err(|e| e.to_string())?;
+            let rows = stmt
+                .query_map([], |row| row.get::<_, String>(0))
+                .map_err(|e| e.to_string())?;
+            rows.collect::<Result<Vec<_>, _>>()
+                .map_err(|e| e.to_string())?
+        };
+        let recovered_at_text = recovered_at.to_rfc3339();
+        let recovered_at_fixed = recovered_at.fixed_offset();
+        let mut recovered = Vec::with_capacity(running_ids.len());
+
+        for task_id in running_ids {
+            let already_recovered: bool = tx
+                .query_row(
+                    "SELECT EXISTS(SELECT 1 FROM events WHERE task_id=?1 AND kind='anomaly_recovered')",
+                    [&task_id],
+                    |row| row.get(0),
+                )
+                .map_err(|e| e.to_string())?;
+
+            if !already_recovered {
+                let started_at = Self::latest_start_at(&tx, &task_id)?
+                    .ok_or_else(|| "running task has no start event".to_string())?;
+                let start = Self::parse_timestamp(&started_at)?;
+                let ended_at = if recovered_at_fixed <= start {
+                    started_at.clone()
+                } else {
+                    recovered_at_text.clone()
+                };
+                tx.execute(
+                    "INSERT INTO segments (task_id, started_at, ended_at, kind)
+                     VALUES (?1, ?2, ?3, 'anomaly')",
+                    rusqlite::params![task_id, started_at, ended_at],
+                )
+                .map_err(|e| e.to_string())?;
+                let detail = serde_json::json!({ "reason": "anomaly" }).to_string();
+                Self::add_event_at(&tx, &task_id, &recovered_at_text, "paused", Some(&detail))?;
+                Self::add_event_at(&tx, &task_id, &recovered_at_text, "anomaly_recovered", None)?;
+            }
+
+            tx.execute("UPDATE tasks SET status='paused' WHERE id=?1", [&task_id])
+                .map_err(|e| e.to_string())?;
+            let task = Self::get_task(&tx, &task_id)?
+                .ok_or_else(|| "recovered task not found".to_string())?;
+            recovered.push(Self::with_live_net(&tx, task)?);
+        }
+
+        tx.commit().map_err(|e| e.to_string())?;
+        Ok(recovered)
+    }
+
     pub fn current(&self) -> Result<Option<TaskDto>, String> {
         let conn = self.conn.lock().map_err(|_| "lock poisoned")?;
         match Self::active_task(&conn)? {
@@ -587,6 +659,32 @@ impl Tracker {
         let task = Self::with_live_net(&tx, task)?;
         tx.commit().map_err(|e| e.to_string())?;
         Ok(task)
+    }
+
+    pub fn set_widget_position(&self, x: i32, y: i32) -> Result<(), String> {
+        self.set_settings(&std::collections::BTreeMap::from([
+            (WIDGET_POSITION_X_KEY.to_string(), x.to_string()),
+            (WIDGET_POSITION_Y_KEY.to_string(), y.to_string()),
+        ]))
+    }
+
+    pub fn widget_position(&self) -> Result<Option<(i32, i32)>, String> {
+        let conn = self.conn.lock().map_err(|_| "lock poisoned")?;
+        let x = Self::get_setting_from_conn(&conn, WIDGET_POSITION_X_KEY)?;
+        let y = Self::get_setting_from_conn(&conn, WIDGET_POSITION_Y_KEY)?;
+        match (x, y) {
+            (None, None) => Ok(None),
+            (Some(x), Some(y)) => {
+                let x = x
+                    .parse::<i32>()
+                    .map_err(|_| "invalid widget_position_x".to_string())?;
+                let y = y
+                    .parse::<i32>()
+                    .map_err(|_| "invalid widget_position_y".to_string())?;
+                Ok(Some((x, y)))
+            }
+            _ => Err("incomplete widget position".into()),
+        }
     }
 
     pub fn get_setting(&self, key: &str) -> Result<Option<String>, String> {
@@ -1520,6 +1618,157 @@ mod tests {
         let paused = tr.list_paused().unwrap();
         assert_eq!(paused.len(), 2);
         assert_eq!(paused[0].id, c.id);
+    }
+
+    #[test]
+    fn recovery_pauses_running_task_records_anomaly_without_counting_work_and_is_idempotent() {
+        let tr = t();
+        let task = tr.create_task("recover", 60, None, None).unwrap();
+        {
+            let conn = tr.conn.lock().unwrap();
+            conn.execute(
+                "UPDATE events SET at='2026-11-26T00:00:00Z' WHERE task_id=?1 AND kind='started'",
+                [&task.id],
+            )
+            .unwrap();
+        }
+        let recovered_at = DateTime::parse_from_rfc3339("2026-11-26T00:01:00Z")
+            .unwrap()
+            .with_timezone(&Utc);
+
+        let recovered = tr.recover_running_tasks(recovered_at).unwrap();
+        assert_eq!(recovered.len(), 1);
+        assert_eq!(recovered[0].id, task.id);
+        assert_eq!(recovered[0].status, "paused");
+        assert_eq!(recovered[0].net_seconds, 0);
+
+        let detail = tr.task_detail(&task.id).unwrap();
+        assert_eq!(detail.segments.len(), 1);
+        assert_eq!(detail.segments[0].kind, "anomaly");
+        assert_eq!(detail.segments[0].started_at, "2026-11-26T00:00:00Z");
+        assert_eq!(detail.segments[0].ended_at, "2026-11-26T00:01:00+00:00");
+        let recovery_events: Vec<_> = detail
+            .events
+            .iter()
+            .filter(|event| event.kind == "paused" || event.kind == "anomaly_recovered")
+            .collect();
+        assert_eq!(recovery_events.len(), 2);
+        assert_eq!(
+            recovery_events[0].detail.as_deref(),
+            Some(r#"{"reason":"anomaly"}"#)
+        );
+        assert_eq!(recovery_events[1].detail, None);
+
+        assert!(tr.recover_running_tasks(recovered_at).unwrap().is_empty());
+        let repeated = tr.task_detail(&task.id).unwrap();
+        assert_eq!(repeated.segments.len(), 1);
+        assert_eq!(
+            repeated
+                .events
+                .iter()
+                .filter(|event| event.kind == "paused" || event.kind == "anomaly_recovered")
+                .count(),
+            2
+        );
+    }
+
+    #[test]
+    fn recovery_clamps_anomaly_when_recovery_time_precedes_start() {
+        let tr = t();
+        let task = tr.create_task("rollback recovery", 60, None, None).unwrap();
+        {
+            let conn = tr.conn.lock().unwrap();
+            conn.execute(
+                "UPDATE events SET at='2026-11-26T00:01:00Z' WHERE task_id=?1 AND kind='started'",
+                [&task.id],
+            )
+            .unwrap();
+        }
+
+        tr.recover_running_tasks(
+            DateTime::parse_from_rfc3339("2026-11-26T00:00:00Z")
+                .unwrap()
+                .with_timezone(&Utc),
+        )
+        .unwrap();
+
+        let segment = &tr.task_detail(&task.id).unwrap().segments[0];
+        assert_eq!(segment.started_at, segment.ended_at);
+        assert_eq!(segment.started_at, "2026-11-26T00:01:00Z");
+    }
+
+    #[test]
+    fn recovery_leaves_paused_tasks_unchanged() {
+        let tr = t();
+        let task = tr.create_task("paused", 60, None, None).unwrap();
+        tr.pause("rest").unwrap();
+        let before = serde_json::to_value(tr.task_detail(&task.id).unwrap()).unwrap();
+
+        let recovered = tr
+            .recover_running_tasks(
+                DateTime::parse_from_rfc3339("2026-11-26T00:01:00Z")
+                    .unwrap()
+                    .with_timezone(&Utc),
+            )
+            .unwrap();
+
+        assert!(recovered.is_empty());
+        assert_eq!(
+            serde_json::to_value(tr.task_detail(&task.id).unwrap()).unwrap(),
+            before
+        );
+    }
+
+    #[test]
+    fn recovery_completes_existing_anomaly_transition_without_duplicate_history() {
+        let tr = t();
+        let task = tr.create_task("partial recovery", 60, None, None).unwrap();
+        {
+            let conn = tr.conn.lock().unwrap();
+            conn.execute(
+                "INSERT INTO events (task_id, at, kind) VALUES (?1, '2026-11-26T00:01:00Z', 'anomaly_recovered')",
+                [&task.id],
+            )
+            .unwrap();
+        }
+
+        let recovered = tr
+            .recover_running_tasks(
+                DateTime::parse_from_rfc3339("2026-11-26T00:02:00Z")
+                    .unwrap()
+                    .with_timezone(&Utc),
+            )
+            .unwrap();
+
+        assert_eq!(recovered.len(), 1);
+        assert_eq!(recovered[0].status, "paused");
+        let detail = tr.task_detail(&task.id).unwrap();
+        assert!(detail.segments.is_empty());
+        assert_eq!(
+            detail
+                .events
+                .iter()
+                .filter(|event| event.kind == "anomaly_recovered")
+                .count(),
+            1
+        );
+        assert!(detail.events.iter().all(|event| event.kind != "paused"));
+    }
+
+    #[test]
+    fn widget_position_roundtrips_signed_physical_coordinates() {
+        let tr = t();
+        assert_eq!(tr.widget_position().unwrap(), None);
+        tr.set_widget_position(120, -80).unwrap();
+        assert_eq!(tr.widget_position().unwrap(), Some((120, -80)));
+        assert_eq!(
+            tr.get_setting("widget_position_x").unwrap().as_deref(),
+            Some("120")
+        );
+        assert_eq!(
+            tr.get_setting("widget_position_y").unwrap().as_deref(),
+            Some("-80")
+        );
     }
 
     #[test]

@@ -195,6 +195,18 @@ pub async fn save_text_file_via_dialog(
     .map_err(|e| e.to_string())?
 }
 
+fn validate_widget_position(x: i64, y: i64) -> R<(i32, i32)> {
+    let x = i32::try_from(x).map_err(|_| "invalid widget x position".to_string())?;
+    let y = i32::try_from(y).map_err(|_| "invalid widget y position".to_string())?;
+    Ok((x, y))
+}
+
+#[tauri::command]
+pub fn set_widget_position(state: State<'_, Tracker>, x: i64, y: i64) -> R<()> {
+    let (x, y) = validate_widget_position(x, y)?;
+    state.set_widget_position(x, y)
+}
+
 #[tauri::command]
 pub fn set_widget_height(app: tauri::AppHandle, height: f64) -> R<()> {
     if !height.is_finite() {
@@ -206,4 +218,16 @@ pub fn set_widget_height(app: tauri::AppHandle, height: f64) -> R<()> {
     window
         .set_size(tauri::LogicalSize::new(260.0, height.clamp(140.0, 240.0)))
         .map_err(|e| e.to_string())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::validate_widget_position;
+
+    #[test]
+    fn widget_position_ipc_rejects_values_outside_i32_range() {
+        assert_eq!(validate_widget_position(120, -80).unwrap(), (120, -80));
+        assert!(validate_widget_position(i64::from(i32::MAX) + 1, 0).is_err());
+        assert!(validate_widget_position(0, i64::from(i32::MIN) - 1).is_err());
+    }
 }

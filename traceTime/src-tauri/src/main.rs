@@ -5,6 +5,8 @@ mod reminder;
 mod store;
 mod tracker;
 
+use chrono::Utc;
+use tauri::Manager;
 use tracker::Tracker;
 
 fn main() {
@@ -14,11 +16,41 @@ fn main() {
         .to_path_buf();
     std::fs::create_dir_all(&data_dir).expect("cannot create data dir");
     let conn = store::open(&data_dir.join("traceTime.db")).expect("cannot open db");
+    let tracker = Tracker::new(conn);
+    tracker
+        .recover_running_tasks(Utc::now())
+        .expect("cannot recover running tasks");
+    let widget_position = tracker
+        .widget_position()
+        .expect("cannot read widget position");
 
     tauri::Builder::default()
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_notification::init())
-        .manage(Tracker::new(conn))
+        .manage(tracker)
+        .setup(move |app| {
+            if let Some((x, y)) = widget_position {
+                let window = app
+                    .get_webview_window("main")
+                    .ok_or("main window not found")?;
+                window.set_position(tauri::PhysicalPosition::new(x, y))?;
+            }
+            Ok(())
+        })
+        .on_window_event(|window, event| {
+            if window.label() != "main" {
+                return;
+            }
+            if let tauri::WindowEvent::Moved(position) = event {
+                let app = window.app_handle().clone();
+                let (x, y) = (position.x, position.y);
+                tauri::async_runtime::spawn_blocking(move || {
+                    if let Err(error) = app.state::<Tracker>().set_widget_position(x, y) {
+                        eprintln!("cannot save widget position: {error}");
+                    }
+                });
+            }
+        })
         .invoke_handler(tauri::generate_handler![
             commands::create_task,
             commands::pause,
@@ -37,6 +69,7 @@ fn main() {
             commands::send_reminder_notification,
             commands::open_history,
             commands::open_settings,
+            commands::set_widget_position,
             commands::set_widget_height,
             commands::delete_task,
             commands::delete_tasks,
