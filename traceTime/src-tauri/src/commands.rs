@@ -10,7 +10,7 @@ pub fn create_task(
     est_seconds: i64,
     tag: Option<String>,
 ) -> R<TaskDto> {
-    state.create_task(&name, est_seconds, tag.as_deref())
+    state.create_task(&name, est_seconds, tag.as_deref(), None)
 }
 
 #[tauri::command]

@@ -15,6 +15,7 @@ pub struct TaskDto {
     pub net_seconds: i64,
     pub created_at: String,
     pub finished_at: Option<String>,
+    pub paused_since: Option<String>,
 }
 
 pub struct Tracker {
@@ -35,6 +36,7 @@ fn row_to_task(r: &rusqlite::Row) -> rusqlite::Result<TaskDto> {
         net_seconds: r.get("net_seconds")?,
         created_at: r.get("created_at")?,
         finished_at: r.get("finished_at")?,
+        paused_since: None,
     })
 }
 
@@ -140,12 +142,13 @@ impl Tracker {
         }
     }
 
-    fn active_task(conn: &Connection) -> Result<Option<TaskDto>, String> {
-        let id: Option<String> = match conn.query_row(
-            "SELECT id FROM tasks WHERE status IN ('pending','running','paused') LIMIT 1",
-            [],
-            |r| r.get(0),
-        ) {
+    fn task_with_status(
+        conn: &Connection,
+        status: &str,
+        order_by: &str,
+    ) -> Result<Option<TaskDto>, String> {
+        let sql = format!("SELECT id FROM tasks WHERE status = ?1 ORDER BY {order_by} LIMIT 1");
+        let id: Option<String> = match conn.query_row(&sql, [status], |r| r.get(0)) {
             Ok(id) => Some(id),
             Err(SqlError::QueryReturnedNoRows) => None,
             Err(e) => return Err(e.to_string()),
@@ -153,6 +156,21 @@ impl Tracker {
         match id {
             Some(id) => Self::get_task(conn, &id),
             None => Ok(None),
+        }
+    }
+
+    fn running_task(conn: &Connection) -> Result<Option<TaskDto>, String> {
+        Self::task_with_status(conn, "running", "created_at DESC")
+    }
+
+    fn latest_paused(conn: &Connection) -> Result<Option<TaskDto>, String> {
+        Self::task_with_status(conn, "paused", "created_at DESC")
+    }
+
+    fn active_task(conn: &Connection) -> Result<Option<TaskDto>, String> {
+        match Self::running_task(conn)? {
+            Some(task) => Ok(Some(task)),
+            None => Self::latest_paused(conn),
         }
     }
 
@@ -185,9 +203,26 @@ impl Tracker {
         .map_err(|e| e.to_string())
     }
 
+    fn paused_since(conn: &Connection, task_id: &str) -> Result<Option<String>, String> {
+        match conn.query_row(
+            "SELECT at FROM events WHERE task_id=?1 AND kind='paused' ORDER BY id DESC LIMIT 1",
+            [task_id],
+            |r| r.get(0),
+        ) {
+            Ok(at) => Ok(Some(at)),
+            Err(SqlError::QueryReturnedNoRows) => Ok(None),
+            Err(e) => Err(e.to_string()),
+        }
+    }
+
     /// 补齐 net_seconds 的实时计算，返回给前端
     fn with_live_net(conn: &Connection, mut task: TaskDto) -> Result<TaskDto, String> {
         task.net_seconds = Self::net_seconds(conn, &task)?;
+        task.paused_since = if task.status == "paused" {
+            Self::paused_since(conn, &task.id)?
+        } else {
+            None
+        };
         Ok(task)
     }
 
@@ -196,6 +231,7 @@ impl Tracker {
         name: &str,
         est_seconds: i64,
         tag: Option<&str>,
+        parent_task_id: Option<&str>,
     ) -> Result<TaskDto, String> {
         if name.trim().is_empty() {
             return Err("task name is required".into());
@@ -205,15 +241,30 @@ impl Tracker {
         }
         let mut conn = self.conn.lock().map_err(|_| "lock poisoned")?;
         let tx = conn.transaction().map_err(|e| e.to_string())?;
-        if Self::active_task(&tx)?.is_some() {
-            return Err("another task is active".into());
+        if Self::running_task(&tx)?.is_some() {
+            return Err("a task is already running".into());
+        }
+        if let Some(parent_task_id) = parent_task_id {
+            let valid_parent: bool = tx
+                .query_row(
+                    "SELECT EXISTS(
+                        SELECT 1 FROM tasks
+                        WHERE id = ?1 AND status IN ('paused','running')
+                    )",
+                    [parent_task_id],
+                    |r| r.get(0),
+                )
+                .map_err(|e| e.to_string())?;
+            if !valid_parent {
+                return Err("parent task not found or terminal".into());
+            }
         }
         let id = uuid::Uuid::new_v4().to_string();
         let ts = now();
         tx.execute(
-            "INSERT INTO tasks (id, name, est_seconds, status, created_at, tag)
-             VALUES (?1, ?2, ?3, 'running', ?4, ?5)",
-            rusqlite::params![id, name.trim(), est_seconds, ts, tag],
+            "INSERT INTO tasks (id, name, est_seconds, status, created_at, tag, parent_task_id)
+             VALUES (?1, ?2, ?3, 'running', ?4, ?5, ?6)",
+            rusqlite::params![id, name.trim(), est_seconds, ts, tag, parent_task_id],
         )
         .map_err(|e| e.to_string())?;
         Self::add_event(&tx, &id, "created", None)?;
@@ -302,6 +353,20 @@ impl Tracker {
         }
     }
 
+    pub fn list_paused(&self) -> Result<Vec<TaskDto>, String> {
+        let conn = self.conn.lock().map_err(|_| "lock poisoned")?;
+        let sql = format!(
+            "SELECT {TASK_COLUMNS} FROM tasks WHERE status='paused' ORDER BY created_at DESC"
+        );
+        let mut stmt = conn.prepare(&sql).map_err(|e| e.to_string())?;
+        let rows = stmt.query_map([], row_to_task).map_err(|e| e.to_string())?;
+        rows.map(|row| {
+            let task = row.map_err(|e| e.to_string())?;
+            Self::with_live_net(&conn, task)
+        })
+        .collect()
+    }
+
     pub fn list_finished(&self) -> Result<Vec<TaskDto>, String> {
         let conn = self.conn.lock().map_err(|_| "lock poisoned")?;
         let sql = format!(
@@ -326,7 +391,7 @@ mod tests {
     #[test]
     fn subsecond_segments_are_summed_before_rounding_and_persisted() {
         let tr = t();
-        let task = tr.create_task("fractional", 60, None).unwrap();
+        let task = tr.create_task("fractional", 60, None, None).unwrap();
         {
             let conn = tr.conn.lock().unwrap();
             conn.execute(
@@ -366,7 +431,7 @@ mod tests {
     #[test]
     fn subsecond_remainders_are_not_discarded_per_segment() {
         let tr = t();
-        let task = tr.create_task("fractional sum", 60, None).unwrap();
+        let task = tr.create_task("fractional sum", 60, None, None).unwrap();
         let conn = tr.conn.lock().unwrap();
         for _ in 0..3 {
             conn.execute(
@@ -382,7 +447,7 @@ mod tests {
     #[test]
     fn gross_duration_rounds_elapsed_time_not_endpoints() {
         let tr = t();
-        let task = tr.create_task("gross", 60, None).unwrap();
+        let task = tr.create_task("gross", 60, None, None).unwrap();
         let conn = tr.conn.lock().unwrap();
         conn.execute(
             "UPDATE tasks SET created_at='2026-11-26T00:00:00.900Z' WHERE id=?1",
@@ -404,7 +469,7 @@ mod tests {
     #[test]
     fn rollback_uses_append_order_and_clamps_closed_segments() {
         let tr = t();
-        let task = tr.create_task("rollback", 60, None).unwrap();
+        let task = tr.create_task("rollback", 60, None, None).unwrap();
         let conn = tr.conn.lock().unwrap();
         conn.execute("DELETE FROM events WHERE task_id=?1", [&task.id])
             .unwrap();
@@ -445,7 +510,7 @@ mod tests {
     #[test]
     fn finish_after_clock_rollback_persists_zero_totals() {
         let tr = t();
-        let task = tr.create_task("rollback finish", 60, None).unwrap();
+        let task = tr.create_task("rollback finish", 60, None, None).unwrap();
         {
             let conn = tr.conn.lock().unwrap();
             conn.execute(
@@ -473,7 +538,7 @@ mod tests {
     #[test]
     fn create_starts_running_with_open_segment() {
         let tr = t();
-        let task = tr.create_task("写周报", 3600, Some("科研")).unwrap();
+        let task = tr.create_task("写周报", 3600, Some("科研"), None).unwrap();
         assert_eq!(task.status, "running");
         assert_eq!(task.name, "写周报");
         assert_eq!(task.tag.as_deref(), Some("科研"));
@@ -486,7 +551,7 @@ mod tests {
     #[test]
     fn running_time_is_computed_from_latest_start_event() {
         let tr = t();
-        tr.create_task("A", 60, None).unwrap();
+        tr.create_task("A", 60, None, None).unwrap();
         std::thread::sleep(std::time::Duration::from_millis(1200));
         let running = tr.current().unwrap().unwrap();
         assert!(running.net_seconds >= 1, "net {}", running.net_seconds);
@@ -495,7 +560,7 @@ mod tests {
     #[test]
     fn pause_appends_one_closed_segment() {
         let tr = t();
-        let task = tr.create_task("A", 60, None).unwrap();
+        let task = tr.create_task("A", 60, None, None).unwrap();
         {
             let conn = tr.conn.lock().unwrap();
             let count: i64 = conn
@@ -524,15 +589,15 @@ mod tests {
     #[test]
     fn single_task_model_rejects_second_task() {
         let tr = t();
-        tr.create_task("A", 60, None).unwrap();
-        let err = tr.create_task("B", 60, None).unwrap_err();
-        assert_eq!(err, "another task is active");
+        tr.create_task("A", 60, None, None).unwrap();
+        let err = tr.create_task("B", 60, None, None).unwrap_err();
+        assert_eq!(err, "a task is already running");
     }
 
     #[test]
     fn pause_resume_accumulates_only_work_segments() {
         let tr = t();
-        tr.create_task("A", 100, None).unwrap();
+        tr.create_task("A", 100, None, None).unwrap();
         std::thread::sleep(std::time::Duration::from_millis(1100));
         tr.pause("rest").unwrap();
         let paused = tr.current().unwrap().unwrap();
@@ -562,7 +627,7 @@ mod tests {
     #[test]
     fn pause_requires_reason_in_enum() {
         let tr = t();
-        tr.create_task("A", 60, None).unwrap();
+        tr.create_task("A", 60, None, None).unwrap();
         let err = tr.pause("bogus").unwrap_err();
         assert!(err.contains("invalid pause reason"));
     }
@@ -570,7 +635,7 @@ mod tests {
     #[test]
     fn finish_fixes_totals_and_events() {
         let tr = t();
-        let task = tr.create_task("A", 60, None).unwrap();
+        let task = tr.create_task("A", 60, None, None).unwrap();
         std::thread::sleep(std::time::Duration::from_millis(300));
         let done = tr.finish().unwrap();
         assert_eq!(done.status, "done");
@@ -594,7 +659,7 @@ mod tests {
     #[test]
     fn abandon_records_trajectory() {
         let tr = t();
-        tr.create_task("A", 60, None).unwrap();
+        tr.create_task("A", 60, None, None).unwrap();
         let t2 = tr.abandon().unwrap();
         assert_eq!(t2.status, "abandoned");
         assert!(t2.finished_at.is_some());
@@ -603,15 +668,83 @@ mod tests {
     #[test]
     fn list_finished_orders_desc() {
         let tr = t();
-        let a = tr.create_task("A", 60, None).unwrap();
+        let a = tr.create_task("A", 60, None, None).unwrap();
         std::thread::sleep(std::time::Duration::from_millis(20));
         tr.finish().unwrap();
-        let b = tr.create_task("B", 60, None).unwrap();
+        let b = tr.create_task("B", 60, None, None).unwrap();
         std::thread::sleep(std::time::Duration::from_millis(20));
         tr.finish().unwrap();
         let list = tr.list_finished().unwrap();
         assert_eq!(list.len(), 2);
         assert_eq!(list[0].id, b.id);
         assert_eq!(list[1].id, a.id);
+    }
+
+    #[test]
+    fn paused_task_does_not_block_new_task() {
+        let tr = t();
+        tr.create_task("A", 60, None, None).unwrap();
+        tr.pause("rest").unwrap();
+        // paused 不阻塞新建，且无父任务的新任务不带关联
+        let b = tr.create_task("B", 60, None, None).unwrap();
+        assert_eq!(b.status, "running");
+        assert_eq!(tr.current().unwrap().unwrap().id, b.id); // running 优先
+        let err = tr.create_task("C", 60, None, None).unwrap_err();
+        assert_eq!(err, "a task is already running");
+    }
+
+    #[test]
+    fn interruption_creates_linked_child_and_parent_stays_paused() {
+        let tr = t();
+        let parent = tr.create_task("A", 3600, None, None).unwrap();
+        tr.pause("switch").unwrap();
+        let child = tr
+            .create_task("紧急修复", 900, Some("行政"), Some(&parent.id))
+            .unwrap();
+        assert_eq!(child.status, "running");
+        let conn = tr.conn.lock().unwrap();
+        let p: String = conn
+            .query_row(
+                "SELECT parent_task_id FROM tasks WHERE id=?1",
+                [&child.id],
+                |r| r.get(0),
+            )
+            .unwrap();
+        assert_eq!(p, parent.id);
+        drop(conn);
+        // current 显示子任务；子任务结束后回到父任务（paused，含 paused_since）
+        assert_eq!(tr.current().unwrap().unwrap().id, child.id);
+        tr.finish().unwrap();
+        let cur = tr.current().unwrap().unwrap();
+        assert_eq!(cur.id, parent.id);
+        assert_eq!(cur.status, "paused");
+        assert!(cur.paused_since.is_some());
+    }
+
+    #[test]
+    fn paused_since_exposed_on_current_paused_task() {
+        let tr = t();
+        tr.create_task("A", 60, None, None).unwrap();
+        tr.pause("rest").unwrap();
+        let cur = tr.current().unwrap().unwrap();
+        assert!(cur.paused_since.is_some());
+    }
+
+    #[test]
+    fn list_paused_orders_desc_and_running_task_finish_keeps_paused_sibling() {
+        let tr = t();
+        let a = tr.create_task("A", 60, None, None).unwrap();
+        tr.pause("switch").unwrap();
+        let b = tr.create_task("B", 60, None, Some(&a.id)).unwrap();
+        tr.finish().unwrap();
+        let paused = tr.list_paused().unwrap();
+        assert_eq!(paused.len(), 1);
+        assert_eq!(paused[0].id, a.id);
+        // 再次打断验证排序：新 paused 任务排在前面
+        let c = tr.create_task("C", 60, None, None).unwrap();
+        tr.pause("rest").unwrap();
+        let paused = tr.list_paused().unwrap();
+        assert_eq!(paused.len(), 2);
+        assert_eq!(paused[0].id, c.id);
     }
 }
