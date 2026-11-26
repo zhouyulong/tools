@@ -1,6 +1,7 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 mod commands;
+mod reminder;
 mod store;
 mod tracker;
 
@@ -16,6 +17,7 @@ fn main() {
 
     tauri::Builder::default()
         .plugin(tauri_plugin_dialog::init())
+        .plugin(tauri_plugin_notification::init())
         .manage(Tracker::new(conn))
         .invoke_handler(tauri::generate_handler![
             commands::create_task,
@@ -29,6 +31,9 @@ fn main() {
             commands::task_detail,
             commands::get_setting,
             commands::set_setting,
+            commands::check_reminders,
+            commands::set_reminder_muted,
+            commands::send_reminder_notification,
             commands::open_history,
             commands::set_widget_height,
             commands::delete_task,

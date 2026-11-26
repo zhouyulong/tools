@@ -1,6 +1,8 @@
+use crate::reminder::ReminderCheckDto;
 use crate::tracker::{TaskDetailDto, TaskDto, Tracker};
 use tauri::{Manager, State, WebviewUrl, WebviewWindowBuilder};
 use tauri_plugin_dialog::DialogExt;
+use tauri_plugin_notification::NotificationExt;
 
 type R<T> = Result<T, String>;
 
@@ -68,6 +70,30 @@ pub fn get_setting(state: State<'_, Tracker>, key: String) -> R<Option<String>> 
 #[tauri::command]
 pub fn set_setting(state: State<'_, Tracker>, key: String, value: String) -> R<()> {
     state.set_setting(&key, &value)
+}
+
+#[tauri::command]
+pub fn check_reminders(state: State<'_, Tracker>, expected_task_id: String) -> R<ReminderCheckDto> {
+    state.check_reminders(&expected_task_id)
+}
+
+#[tauri::command]
+pub fn set_reminder_muted(
+    state: State<'_, Tracker>,
+    expected_task_id: String,
+    muted: bool,
+) -> R<TaskDto> {
+    state.set_reminder_muted(&expected_task_id, muted)
+}
+
+#[tauri::command]
+pub fn send_reminder_notification(app: tauri::AppHandle, title: String, body: String) -> R<()> {
+    app.notification()
+        .builder()
+        .title(title)
+        .body(body)
+        .show()
+        .map_err(|e| e.to_string())
 }
 
 #[tauri::command]

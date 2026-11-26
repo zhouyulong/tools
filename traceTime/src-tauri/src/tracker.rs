@@ -1,9 +1,12 @@
+use crate::reminder::{
+    ReminderCheckDto, ReminderConfig, ReminderConfigDto, ReminderLevel, due_reminders,
+};
 use rusqlite::{Connection, Error as SqlError};
 use serde::Serialize;
 use std::sync::Mutex;
 
 const PAUSE_REASONS: [&str; 4] = ["rest", "disturbance", "switch", "other"];
-const TASK_COLUMNS: &str = "id, name, est_seconds, status, tag, COALESCE(net_seconds, 0) AS net_seconds, created_at, finished_at";
+const TASK_COLUMNS: &str = "id, name, est_seconds, status, tag, COALESCE(net_seconds, 0) AS net_seconds, created_at, finished_at, reminder_muted";
 
 #[derive(Debug, Serialize, Clone)]
 pub struct TaskDto {
@@ -16,6 +19,7 @@ pub struct TaskDto {
     pub created_at: String,
     pub finished_at: Option<String>,
     pub paused_since: Option<String>,
+    pub reminder_muted: bool,
 }
 
 #[derive(Debug, Serialize, Clone)]
@@ -59,6 +63,7 @@ fn row_to_task(r: &rusqlite::Row) -> rusqlite::Result<TaskDto> {
         created_at: r.get("created_at")?,
         finished_at: r.get("finished_at")?,
         paused_since: None,
+        reminder_muted: r.get::<_, i64>("reminder_muted")? != 0,
     })
 }
 
@@ -402,15 +407,98 @@ impl Tracker {
         .collect()
     }
 
-    pub fn get_setting(&self, key: &str) -> Result<Option<String>, String> {
-        let conn = self.conn.lock().map_err(|_| "lock poisoned")?;
+    fn get_setting_from_conn(conn: &Connection, key: &str) -> Result<Option<String>, String> {
         match conn.query_row("SELECT value FROM settings WHERE key=?1", [key], |r| {
             r.get(0)
         }) {
-            Ok(v) => Ok(Some(v)),
-            Err(rusqlite::Error::QueryReturnedNoRows) => Ok(None),
+            Ok(value) => Ok(Some(value)),
+            Err(SqlError::QueryReturnedNoRows) => Ok(None),
             Err(e) => Err(e.to_string()),
         }
+    }
+
+    fn reminder_config_from_conn(conn: &Connection) -> Result<ReminderConfig, String> {
+        ReminderConfig::from_settings(|key| Self::get_setting_from_conn(conn, key))
+    }
+
+    pub fn reminder_config(&self) -> Result<ReminderConfigDto, String> {
+        let conn = self.conn.lock().map_err(|_| "lock poisoned")?;
+        let config = Self::reminder_config_from_conn(&conn)?;
+        Ok(ReminderConfigDto::from(&config))
+    }
+
+    pub fn check_reminders(&self, expected_task_id: &str) -> Result<ReminderCheckDto, String> {
+        let mut conn = self.conn.lock().map_err(|_| "lock poisoned")?;
+        let tx = conn.transaction().map_err(|e| e.to_string())?;
+        let config = Self::reminder_config_from_conn(&tx)?;
+        let config_dto = ReminderConfigDto::from(&config);
+        let task = Self::require_active(&tx)?;
+        if task.id != expected_task_id {
+            return Err("task changed, please refresh".into());
+        }
+        if task.status != "running" {
+            return Ok(ReminderCheckDto {
+                config: config_dto,
+                reminders: Vec::new(),
+            });
+        }
+
+        let net_seconds = Self::net_seconds(&tx, &task)?;
+        let task_config = config.clone().for_estimate(task.est_seconds);
+        let candidates = due_reminders(net_seconds, &task_config);
+        let fired_at = now();
+        let mut reminders = Vec::new();
+        for mut candidate in candidates {
+            let inserted = tx
+                .execute(
+                    "INSERT INTO reminder_fired (task_id, node, fired_at) VALUES (?1, ?2, ?3)
+                     ON CONFLICT(task_id, node) DO NOTHING",
+                    rusqlite::params![task.id, candidate.node, fired_at],
+                )
+                .map_err(|e| e.to_string())?;
+            if inserted == 0 {
+                continue;
+            }
+            candidate.notify = match candidate.level {
+                ReminderLevel::Due => config.due_notify && !task.reminder_muted,
+                ReminderLevel::Overdue => config.overdue_notify && !task.reminder_muted,
+                ReminderLevel::Warn | ReminderLevel::Near => false,
+            };
+            reminders.push(candidate);
+        }
+        tx.commit().map_err(|e| e.to_string())?;
+        Ok(ReminderCheckDto {
+            config: config_dto,
+            reminders,
+        })
+    }
+
+    pub fn set_reminder_muted(
+        &self,
+        expected_task_id: &str,
+        muted: bool,
+    ) -> Result<TaskDto, String> {
+        let mut conn = self.conn.lock().map_err(|_| "lock poisoned")?;
+        let tx = conn.transaction().map_err(|e| e.to_string())?;
+        let task = Self::get_task(&tx, expected_task_id)?.ok_or("task not found")?;
+        if task.status == "done" || task.status == "abandoned" {
+            return Err("cannot mute reminders for terminal task".into());
+        }
+        tx.execute(
+            "UPDATE tasks SET reminder_muted=?2 WHERE id=?1",
+            rusqlite::params![expected_task_id, i64::from(muted)],
+        )
+        .map_err(|e| e.to_string())?;
+        let task = Self::get_task(&tx, expected_task_id)?
+            .ok_or_else(|| "updated task not found".to_string())?;
+        let task = Self::with_live_net(&tx, task)?;
+        tx.commit().map_err(|e| e.to_string())?;
+        Ok(task)
+    }
+
+    pub fn get_setting(&self, key: &str) -> Result<Option<String>, String> {
+        let conn = self.conn.lock().map_err(|_| "lock poisoned")?;
+        Self::get_setting_from_conn(&conn, key)
     }
 
     pub fn set_setting(&self, key: &str, value: &str) -> Result<(), String> {
@@ -520,6 +608,64 @@ mod tests {
 
     fn t() -> Tracker {
         Tracker::new(store::open_in_memory().unwrap())
+    }
+
+    #[test]
+    fn check_reminders_persists_once_and_repeats_overdue_by_bucket() {
+        let tr = t();
+        let task = tr.create_task("A", 60, None, None).unwrap();
+        {
+            let conn = tr.conn.lock().unwrap();
+            let past = (chrono::Utc::now() - chrono::Duration::seconds(80)).to_rfc3339();
+            conn.execute(
+                "UPDATE events SET at=?1 WHERE task_id=?2 AND kind='started'",
+                [&past, &task.id],
+            )
+            .unwrap();
+        }
+        let first = tr.check_reminders(&task.id).unwrap();
+        assert_eq!(
+            first
+                .reminders
+                .iter()
+                .map(|x| x.node.as_str())
+                .collect::<Vec<_>>(),
+            vec!["warn", "near", "due"]
+        );
+        let second = tr.check_reminders(&task.id).unwrap();
+        assert!(second.reminders.is_empty());
+
+        {
+            let conn = tr.conn.lock().unwrap();
+            let past = (chrono::Utc::now() - chrono::Duration::seconds(1300)).to_rfc3339();
+            conn.execute(
+                "UPDATE events SET at=?1 WHERE task_id=?2 AND kind='started'",
+                [&past, &task.id],
+            )
+            .unwrap();
+        }
+        let third = tr.check_reminders(&task.id).unwrap();
+        assert_eq!(
+            third
+                .reminders
+                .iter()
+                .map(|x| x.node.as_str())
+                .collect::<Vec<_>>(),
+            vec!["overdue:2"]
+        );
+    }
+
+    #[test]
+    fn reminder_mute_blocks_only_notifications_and_preserves_visual_config() {
+        let tr = t();
+        let config = tr.reminder_config().unwrap();
+        assert!(config.reminder_enabled);
+        let task = tr.create_task("A", 3600, None, None).unwrap();
+        let muted = tr.set_reminder_muted(&task.id, true).unwrap();
+        assert!(muted.reminder_muted);
+        let checked = tr.check_reminders(&task.id).unwrap();
+        assert_eq!(checked.config.reminder_enabled, true);
+        assert!(checked.reminders.iter().all(|item| !item.notify));
     }
 
     #[test]

@@ -4,9 +4,11 @@
   "description": "enables the default permissions",
   "windows": [
     "main",
-    "history"
+    "history",
+    "settings"
   ],
   "permissions": [
-    "core:default"
+    "core:default",
+    "notification:default"
   ]
 }
