@@ -1,15 +1,19 @@
 <script lang="ts">
   import { createEventDispatcher, onDestroy } from 'svelte'
-  import type { Task } from '../lib/api'
+  import type { ReminderConfig, Task } from '../lib/api'
   import { pause, resume, finishTask, abandonTask, PAUSE_REASONS } from '../lib/api'
   import { pausedChipLayout } from '../lib/pausedChips'
   import { fmtHMS } from '../lib/format'
+  import { reminderLevel, reminderPulse, type ReminderLevel } from '../lib/reminder'
   import SwitchTaskForm from './SwitchTaskForm.svelte'
 
   export let task: Task
   export let paused: Task[] = []
   export let nowTick = Date.now()
   export let widgetHeight = 0
+  export let reminderConfig: ReminderConfig | null = null
+  export let pulse: { level: ReminderLevel; until: number } = { level: 'none', until: 0 }
+  export let onMuteReminder: (expectedTaskId: string) => Promise<Task> = async () => task
 
   const dispatch = createEventDispatcher<{ switching: boolean; switched: void; layout: void }>()
 
@@ -20,14 +24,19 @@
   let switchParentId: string | null = null
   let confirmationTaskId = task.id
 
-
   $: chips = pausedChipLayout(paused.filter(item => item.id !== task.id), widgetHeight, Boolean(error))
 
   $: layoutSignature = [mode, chips.rows, chips.hiddenCount, Boolean(error), task.id, task.status].join('|')
   $: if (typeof layoutSignature === 'string') dispatch('layout')
   $: remaining = task.est_seconds - task.net_seconds
-  $: pct = Math.min(100, Math.round((task.net_seconds / task.est_seconds) * 100))
+  $: pct = task.est_seconds > 0
+    ? Math.min(100, Math.round((task.net_seconds / task.est_seconds) * 100)) : 0
   $: overdue = remaining < 0
+  $: visualLevel = reminderConfig
+    ? reminderLevel(task.net_seconds, task.est_seconds, reminderConfig)
+    : overdue ? 'overdue' : 'none'
+  $: pulseStrength = pulse.until > nowTick ? reminderPulse(pulse.level) : 'none'
+  $: dueState = visualLevel === 'due' || visualLevel === 'overdue'
 
   $: if (mode === 'switch-form' &&
     (task.id !== switchParentId || task.status !== 'paused')) {
@@ -97,15 +106,38 @@
     void act(() => abandonTask(expectedTaskId))
   }
 
+  function doMuteReminder() {
+    if (busy || task.reminder_muted) return
+    const expectedTaskId = task.id
+    void act(async () => {
+      const updated = await onMuteReminder(expectedTaskId)
+      if (task.id !== expectedTaskId || updated.id !== expectedTaskId) {
+        throw new Error('task changed, please refresh')
+      }
+      task = updated
+    })
+  }
+
   onDestroy(() => dispatch('switching', false))
 </script>
 
-<div class="widget" class:overdue>
+<div
+  class="widget"
+  class:due-state={dueState}
+  class:pulse-gentle={pulseStrength === 'gentle'}
+  class:pulse-strong={pulseStrength === 'strong'}
+>
   <div class="head">
     <span class="name">{task.name}</span>
     <span class="tag">{task.tag ?? ''}</span>
   </div>
-  <div class="time" class:overdue>{fmtHMS(task.net_seconds)}</div>
+  <div
+    class="time"
+    class:warn={visualLevel === 'warn'}
+    class:near={visualLevel === 'near'}
+    class:due={visualLevel === 'due'}
+    class:overdue={visualLevel === 'overdue'}
+  >{fmtHMS(task.net_seconds)}</div>
 
   {#if mode === 'switch-form' && switchParentId !== null}
     <SwitchTaskForm
@@ -128,6 +160,11 @@
         <span class="rem">剩余 {fmtHMS(remaining)} · {pct}%</span>
       {/if}
       <span class="actions">
+        {#if overdue}
+          <button class="mute" disabled={busy || task.reminder_muted} on:click={doMuteReminder}>
+            [{task.reminder_muted ? '已静音' : '静音'}]
+          </button>
+        {/if}
         <button disabled={busy} title="暂停" on:click={() => (mode = 'pause-menu')}>⏸</button>
         <button disabled={busy} title="完成" on:click={doFinish}>✔</button>
         <button disabled={busy} title="放弃" on:click={doAbandon}>{confirmAbandon ? '确认放弃?' : '✕'}</button>
@@ -163,13 +200,18 @@
   .name { min-width: 0; font-size: 11px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .tag { flex: none; max-width: 60px; overflow: hidden; text-overflow: ellipsis; font-size: 10px; opacity: 0.6; }
   .time { height: 28px; line-height: 28px; font-size: 26px; font-variant-numeric: tabular-nums; text-align: center; }
-  .time.overdue, .widget.overdue .rem { color: #c0392b; }
-  .widget.overdue { box-shadow: inset 0 0 0 2px #c0392b; }
+  .time.warn { color: #f1c40f; }
+  .time.near { color: #e67e22; }
+  .time.due, .time.overdue, .widget.due-state .rem { color: #e74c3c; }
+  .widget.due-state { box-shadow: inset 0 0 0 2px #c0392b; }
+  .widget.pulse-gentle { animation: pulse-gentle 3s ease-out; }
+  .widget.pulse-strong { animation: pulse-strong 3s ease-out; }
   .foot { display: flex; height: 20px; justify-content: space-between; align-items: center; gap: 2px; font-size: 10px; }
   .rem { min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .paused { opacity: 0.6; }
   .actions { display: flex; flex: none; }
   .actions button { height: 20px; border: none; background: none; cursor: pointer; font-size: 12px; padding: 1px 3px; }
+  .actions button.mute { font-size: 10px; padding-inline: 1px; }
   .pause-menu { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); grid-auto-rows: 20px; height: 44px; margin-top: 6px; gap: 4px; }
   .pause-menu button { width: 100%; min-width: 0; height: 20px; font-size: 10px; padding: 1px 2px; cursor: pointer; }
   .pause-menu button.cancel { opacity: 0.6; }
@@ -178,4 +220,13 @@
   .chip { flex: 0 0 calc(50% - 2px); min-width: 0; height: 18px; padding: 2px 4px; line-height: 14px; border-radius: 999px; background: rgba(255, 255, 255, 0.1); font-size: 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .collapsed { text-align: center; font-weight: 600; }
   .error { height: 12px; line-height: 12px; margin: 2px 0 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: #c0392b; font-size: 10px; }
+
+  @keyframes pulse-gentle {
+    0%, 35% { background: rgba(241, 196, 15, 0.18); }
+    100% { background: transparent; }
+  }
+  @keyframes pulse-strong {
+    0%, 18%, 36% { background: rgba(231, 76, 60, 0.28); box-shadow: inset 0 0 0 2px #e74c3c; }
+    9%, 27%, 100% { background: transparent; box-shadow: inset 0 0 0 2px rgba(192, 57, 43, 0.35); }
+  }
 </style>

@@ -10,6 +10,37 @@ export interface Task {
   created_at: string
   finished_at: string | null
   paused_since: string | null
+  reminder_muted: boolean
+}
+
+export interface ReminderConfig {
+  reminderEnabled: boolean
+  warnEnabled: boolean
+  warnPercent: number
+  nearEnabled: boolean
+  nearPercent: number
+  dueEnabled: boolean
+  duePercent: number
+  overdueEnabled: boolean
+  overdueNotify: boolean
+  overdueIntervalMinutes: number
+  warnSound: boolean
+  nearSound: boolean
+  dueNotify: boolean
+}
+
+export interface Reminder {
+  node: string
+  level: 'warn' | 'near' | 'due' | 'overdue'
+  title: string
+  body: string
+  notify: boolean
+  sound: boolean
+}
+
+export interface ReminderCheck {
+  config: ReminderConfig
+  reminders: Reminder[]
 }
 
 export interface Segment {
@@ -65,3 +96,11 @@ export const setSetting = (key: string, value: string) =>
 export const setWidgetHeight = (height: number) => invoke<void>('set_widget_height', { height })
 export const deleteTask = (taskId: string) => invoke<void>('delete_task', { taskId })
 export const deleteTasks = (ids: string[]) => invoke<void>('delete_tasks', { ids })
+
+
+export const checkReminders = (expectedTaskId: string) =>
+  invoke<ReminderCheck>('check_reminders', { expectedTaskId })
+export const setReminderMuted = (expectedTaskId: string, muted: boolean) =>
+  invoke<Task>('set_reminder_muted', { expectedTaskId, muted })
+export const sendReminderNotification = (title: string, body: string) =>
+  invoke<void>('send_reminder_notification', { title, body })
