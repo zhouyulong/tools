@@ -1,10 +1,15 @@
 <script lang="ts">
+  import { createEventDispatcher } from 'svelte'
   import type { Task } from '../lib/api'
   import { pause, resume, finishTask, abandonTask, PAUSE_REASONS } from '../lib/api'
   import { fmtHMS } from '../lib/format'
+  import SwitchTaskForm from './SwitchTaskForm.svelte'
 
   export let task: Task
-  let showPauseMenu = false
+
+  const dispatch = createEventDispatcher<{ switching: boolean; switched: void }>()
+
+  let mode: 'normal' | 'pause-menu' | 'switch-form' = 'normal'
   let confirmAbandon = false
   let error = ''
 
@@ -13,11 +18,31 @@
   $: overdue = remaining < 0
 
   async function doPause(reason: string) {
-    showPauseMenu = false
-    try { await pause(reason) } catch (e) { error = String(e) }
+    error = ''
+    try {
+      await pause(reason)
+      mode = reason === 'switch' ? 'switch-form' : 'normal'
+      if (reason === 'switch') dispatch('switching', true)
+    } catch (e) {
+      error = String(e)
+    }
   }
+
+  function cancelSwitch() {
+    mode = 'normal'
+    dispatch('switching', false)
+  }
+
+  function completeSwitch() {
+    mode = 'normal'
+    dispatch('switched')
+  }
+
   async function doAbandon() {
-    if (!confirmAbandon) { confirmAbandon = true; return }
+    if (!confirmAbandon) {
+      confirmAbandon = true
+      return
+    }
     try { await abandonTask() } catch (e) { error = String(e) }
   }
 </script>
@@ -28,7 +53,14 @@
     <span class="tag">{task.tag ?? ''}</span>
   </div>
   <div class="time" class:overdue>{fmtHMS(task.net_seconds)}</div>
-  {#if task.status === 'running'}
+
+  {#if mode === 'switch-form'}
+    <SwitchTaskForm
+      parentTaskId={task.id}
+      on:success={completeSwitch}
+      on:cancel={cancelSwitch}
+    />
+  {:else if task.status === 'running'}
     <div class="foot">
       {#if overdue}
         <span class="rem">超时 +{fmtHMS(-remaining)} · {pct}%</span>
@@ -36,7 +68,7 @@
         <span class="rem">剩余 {fmtHMS(remaining)} · {pct}%</span>
       {/if}
       <span class="actions">
-        <button title="暂停" on:click={() => (showPauseMenu = true)}>⏸</button>
+        <button title="暂停" on:click={() => (mode = 'pause-menu')}>⏸</button>
         <button title="完成" on:click={() => finishTask().catch(e => error = String(e))}>✔</button>
         <button title="放弃" on:click={doAbandon}>{confirmAbandon ? '确认放弃?' : '✕'}</button>
       </span>
@@ -51,12 +83,13 @@
       </span>
     </div>
   {/if}
-  {#if showPauseMenu}
+
+  {#if mode === 'pause-menu'}
     <div class="pause-menu">
-      {#each PAUSE_REASONS as r}
-        <button on:click={() => doPause(r.value)}>{r.label}</button>
+      {#each PAUSE_REASONS as reason}
+        <button on:click={() => doPause(reason.value)}>{reason.label}</button>
       {/each}
-      <button class="cancel" on:click={() => (showPauseMenu = false)}>取消</button>
+      <button class="cancel" on:click={() => (mode = 'normal')}>取消</button>
     </div>
   {/if}
   {#if error}<p class="error">{error}</p>{/if}
