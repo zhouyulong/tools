@@ -1,6 +1,6 @@
 <script lang="ts">
   import { onMount } from 'svelte'
-  import { createTask, EST_PRESETS, openHistory, TAG_PRESETS } from '../lib/api'
+  import { createTask, EST_PRESETS, openHistory, openSettings, TAG_PRESETS } from '../lib/api'
 
   export let refreshAll: () => Promise<void> = async () => {}
 
@@ -39,7 +39,10 @@
 <div class="task-form">
   <div class="form-header">
     <span>开始任务</span>
-    <button class="ghost" type="button" on:click={openHistory}>历史</button>
+    <span class="header-actions">
+      <button class="ghost" type="button" on:click={openSettings}>设置</button>
+      <button class="ghost" type="button" on:click={openHistory}>历史</button>
+    </span>
   </div>
 
   <form class="form" on:submit|preventDefault={submit}>
@@ -72,6 +75,7 @@
 <style>
   .task-form { height: auto; min-width: 0; overflow: hidden; padding: 4px 6px; }
   .form-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px; color: #aaaeb5; font-size: 11px; }
+  .header-actions { display: flex; gap: 3px; }
   .ghost { padding: 1px 5px; border: 1px solid rgba(255, 255, 255, 0.16); border-radius: 4px; color: #d8d8da; background: transparent; cursor: pointer; }
   .ghost:hover { background: rgba(255, 255, 255, 0.08); }
   .form { display: flex; flex-direction: column; gap: 4px; }

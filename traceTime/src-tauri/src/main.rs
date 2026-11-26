@@ -35,6 +35,7 @@ fn main() {
             commands::set_reminder_muted,
             commands::send_reminder_notification,
             commands::open_history,
+            commands::open_settings,
             commands::set_widget_height,
             commands::delete_task,
             commands::delete_tasks,

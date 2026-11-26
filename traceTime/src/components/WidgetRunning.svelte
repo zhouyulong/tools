@@ -1,7 +1,7 @@
 <script lang="ts">
   import { createEventDispatcher, onDestroy } from 'svelte'
   import type { ReminderConfig, Task } from '../lib/api'
-  import { pause, resume, finishTask, abandonTask, PAUSE_REASONS } from '../lib/api'
+  import { pause, resume, finishTask, abandonTask, openSettings, PAUSE_REASONS } from '../lib/api'
   import { pausedChipLayout } from '../lib/pausedChips'
   import { fmtHMS } from '../lib/format'
   import { reminderLevel, reminderPulse, type ReminderPulseState } from '../lib/reminder'
@@ -134,7 +134,10 @@
   {/if}
   <div class="head">
     <span class="name">{task.name}</span>
-    <span class="tag">{task.tag ?? ''}</span>
+    <span class="head-actions">
+      <span class="tag">{task.tag ?? ''}</span>
+      <button class="settings-button" type="button" title="提醒设置" aria-label="提醒设置" on:click={openSettings}>⚙</button>
+    </span>
   </div>
   <div
     class="time"
@@ -203,7 +206,9 @@
   .widget { position: relative; isolation: isolate; flex: none; min-width: 0; min-height: 126px; padding: 3px 6px; overflow: hidden; }
   .head { display: flex; height: 14px; line-height: 14px; justify-content: space-between; align-items: baseline; gap: 4px; overflow: hidden; }
   .name { min-width: 0; font-size: 11px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .tag { flex: none; max-width: 60px; overflow: hidden; text-overflow: ellipsis; font-size: 10px; opacity: 0.6; }
+  .head-actions { display: flex; flex: none; height: 14px; align-items: center; gap: 2px; overflow: hidden; }
+  .tag { flex: none; max-width: 48px; overflow: hidden; text-overflow: ellipsis; font-size: 10px; opacity: 0.6; }
+  .head .settings-button { flex: none; width: 15px; height: 14px; min-height: 0; padding: 0; border: 0; line-height: 14px; background: none; color: #c8c9cc; cursor: pointer; font-size: 10px; }
   .time { height: 28px; line-height: 28px; font-size: 26px; font-variant-numeric: tabular-nums; text-align: center; }
   .time.warn { color: #f1c40f; }
   .time.near { color: #e67e22; }

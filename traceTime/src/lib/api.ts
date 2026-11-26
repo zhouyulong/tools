@@ -86,6 +86,7 @@ export const abandonTask = (expectedTaskId: string): Promise<Task> => invoke<Tas
 export const currentTask = () => invoke<Task | null>('current_task')
 export const listFinished = () => invoke<Task[]>('list_finished')
 export const openHistory = () => invoke<void>('open_history')
+export const openSettings = () => invoke<void>('open_settings')
 
 export const listPaused = () => invoke<Task[]>('list_paused')
 export const taskDetail = (id: string) => invoke<TaskDetail>('task_detail', { taskId: id })

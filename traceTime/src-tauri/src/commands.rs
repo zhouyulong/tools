@@ -97,6 +97,28 @@ pub fn send_reminder_notification(app: tauri::AppHandle, title: String, body: St
 }
 
 #[tauri::command]
+pub async fn open_settings(app: tauri::AppHandle) -> R<()> {
+    if let Some(window) = app.get_webview_window("settings") {
+        window.show().map_err(|e| e.to_string())?;
+        window.set_focus().map_err(|e| e.to_string())?;
+        return Ok(());
+    }
+
+    WebviewWindowBuilder::new(
+        &app,
+        "settings",
+        WebviewUrl::App("index.html#settings".into()),
+    )
+    .title("traceTime 设置")
+    .inner_size(360.0, 480.0)
+    .resizable(false)
+    .always_on_top(true)
+    .build()
+    .map(|_| ())
+    .map_err(|e| e.to_string())
+}
+
+#[tauri::command]
 pub async fn open_history(app: tauri::AppHandle) -> R<()> {
     if let Some(window) = app.get_webview_window("history") {
         window.show().map_err(|e| e.to_string())?;
