@@ -56,6 +56,7 @@
       {#each PAUSE_REASONS as r}
         <button on:click={() => doPause(r.value)}>{r.label}</button>
       {/each}
+      <button class="cancel" on:click={() => (showPauseMenu = false)}>取消</button>
     </div>
   {/if}
   {#if error}<p class="error">{error}</p>{/if}
@@ -74,5 +75,6 @@
   .actions button { border: none; background: none; cursor: pointer; font-size: 13px; padding: 2px 4px; }
   .pause-menu { position: absolute; inset: auto 8px 8px 8px; display: flex; gap: 4px; }
   .pause-menu button { flex: 1; font-size: 10px; padding: 4px 2px; cursor: pointer; }
+  .pause-menu button.cancel { opacity: 0.6; }
   .error { color: #c0392b; font-size: 10px; }
 </style>
