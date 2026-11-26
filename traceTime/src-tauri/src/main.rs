@@ -31,6 +31,7 @@ fn main() {
             commands::task_detail,
             commands::get_setting,
             commands::set_setting,
+            commands::set_settings,
             commands::check_reminders,
             commands::set_reminder_muted,
             commands::send_reminder_notification,

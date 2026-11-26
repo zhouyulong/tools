@@ -1,6 +1,6 @@
 <script lang="ts">
   import { onMount } from 'svelte'
-  import { getSetting, setSetting } from '../lib/api'
+  import { getSetting, saveSettings } from '../lib/api'
   import {
     SETTINGS,
     defaultReminderSettings,
@@ -53,7 +53,7 @@
     saved = false
     values = normalized.values
     try {
-      await Promise.all(SETTINGS.map(item => setSetting(item.key, normalized.values[item.key])))
+      await saveSettings(normalized.values)
       saved = true
     } catch (error) {
       errors = [`保存失败：${String(error)}`]

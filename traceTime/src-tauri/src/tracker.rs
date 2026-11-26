@@ -512,6 +512,23 @@ impl Tracker {
         Ok(())
     }
 
+    pub fn set_settings(
+        &self,
+        values: &std::collections::BTreeMap<String, String>,
+    ) -> Result<(), String> {
+        let mut conn = self.conn.lock().map_err(|_| "lock poisoned")?;
+        let tx = conn.transaction().map_err(|e| e.to_string())?;
+        for (key, value) in values {
+            tx.execute(
+                "INSERT INTO settings (key, value) VALUES (?1, ?2)
+                 ON CONFLICT(key) DO UPDATE SET value=excluded.value",
+                [key, value],
+            )
+            .map_err(|e| e.to_string())?;
+        }
+        tx.commit().map_err(|e| e.to_string())
+    }
+
     pub fn task_detail(&self, task_id: &str) -> Result<TaskDetailDto, String> {
         let conn = self.conn.lock().map_err(|_| "lock poisoned")?;
         let task = match Self::get_task(&conn, task_id)? {
@@ -1244,6 +1261,32 @@ mod tests {
             tr.get_setting("long_pause_hours").unwrap().as_deref(),
             Some("1")
         );
+    }
+
+    #[test]
+    fn settings_batch_rolls_back_when_later_write_fails() {
+        let tr = t();
+        tr.set_setting("a_first", "original").unwrap();
+        {
+            let conn = tr.conn.lock().unwrap();
+            conn.execute_batch(
+                "CREATE TEMP TRIGGER reject_late_setting BEFORE INSERT ON settings
+                 WHEN NEW.key = 'z_fail'
+                 BEGIN SELECT RAISE(ABORT, 'injected settings failure'); END;",
+            )
+            .unwrap();
+        }
+        let values = std::collections::BTreeMap::from([
+            ("a_first".to_string(), "written".to_string()),
+            ("z_fail".to_string(), "rejected".to_string()),
+        ]);
+
+        assert!(tr.set_settings(&values).is_err());
+        assert_eq!(
+            tr.get_setting("a_first").unwrap().as_deref(),
+            Some("original")
+        );
+        assert_eq!(tr.get_setting("z_fail").unwrap(), None);
     }
 
     #[test]

@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import { afterEach, test } from 'node:test'
 import { clearMocks, mockIPC } from '@tauri-apps/api/mocks'
-import { finishTask, abandonTask, resume, deleteTask, deleteTasks, setWidgetHeight } from '../src/lib/api.ts'
+import { finishTask, abandonTask, resume, deleteTask, deleteTasks, saveSettings, setWidgetHeight } from '../src/lib/api.ts'
 
 globalThis.window = {} as Window & typeof globalThis
 afterEach(clearMocks)
@@ -32,4 +32,12 @@ test('soft deletion and resizing call registered commands with the explicit id/h
     ['delete_tasks', { ids: ['A', 'B'] }],
     ['set_widget_height', { height: 180 }],
   ])
+})
+
+test('batch settings save uses one IPC command with the complete values map', async () => {
+  const calls: unknown[] = []
+  mockIPC((command, payload) => { calls.push([command, payload]) })
+  const values = { reminder_enabled: 'true', reminder_warn_percent: '75' }
+  await saveSettings(values)
+  assert.deepEqual(calls, [['set_settings', { values }]])
 })

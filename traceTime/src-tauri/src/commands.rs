@@ -73,6 +73,14 @@ pub fn set_setting(state: State<'_, Tracker>, key: String, value: String) -> R<(
 }
 
 #[tauri::command]
+pub fn set_settings(
+    state: State<'_, Tracker>,
+    values: std::collections::BTreeMap<String, String>,
+) -> R<()> {
+    state.set_settings(&values)
+}
+
+#[tauri::command]
 pub fn check_reminders(state: State<'_, Tracker>, expected_task_id: String) -> R<ReminderCheckDto> {
     state.check_reminders(&expected_task_id)
 }
