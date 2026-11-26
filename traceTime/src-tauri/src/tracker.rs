@@ -1,11 +1,9 @@
-use crate::store;
 use rusqlite::{Connection, Error as SqlError};
 use serde::Serialize;
 use std::sync::Mutex;
 
 const PAUSE_REASONS: [&str; 4] = ["rest", "disturbance", "switch", "other"];
-const TASK_COLUMNS: &str =
-    "id, name, est_seconds, status, tag, COALESCE(net_seconds, 0) AS net_seconds, created_at, finished_at";
+const TASK_COLUMNS: &str = "id, name, est_seconds, status, tag, COALESCE(net_seconds, 0) AS net_seconds, created_at, finished_at";
 
 #[derive(Debug, Serialize, Clone)]
 pub struct TaskDto {
@@ -61,24 +59,43 @@ impl Tracker {
         .map_err(|e| e.to_string())
     }
 
-    fn closed_net_seconds(conn: &Connection, task_id: &str) -> Result<i64, String> {
-        conn.query_row(
-            "SELECT COALESCE(SUM(
-                CAST(strftime('%s', ended_at) AS INTEGER)
-              - CAST(strftime('%s', started_at) AS INTEGER)
-             ), 0)
-             FROM segments WHERE task_id = ?1 AND kind = 'work'",
-            [task_id],
-            |r| r.get(0),
-        )
-        .map_err(|e| e.to_string())
+    fn elapsed(started_at: &str, ended_at: &str) -> Result<chrono::TimeDelta, String> {
+        let start = chrono::DateTime::parse_from_rfc3339(started_at).map_err(|e| e.to_string())?;
+        let end = chrono::DateTime::parse_from_rfc3339(ended_at).map_err(|e| e.to_string())?;
+        Ok((end - start).max(chrono::TimeDelta::zero()))
     }
 
+    fn closed_work_duration(conn: &Connection, task_id: &str) -> Result<chrono::TimeDelta, String> {
+        let mut stmt = conn
+            .prepare(
+                "SELECT started_at, ended_at FROM segments
+             WHERE task_id = ?1 AND kind = 'work' AND ended_at IS NOT NULL",
+            )
+            .map_err(|e| e.to_string())?;
+        let rows = stmt
+            .query_map([task_id], |r| {
+                Ok((r.get::<_, String>(0)?, r.get::<_, String>(1)?))
+            })
+            .map_err(|e| e.to_string())?;
+        let mut total = chrono::TimeDelta::zero();
+        for row in rows {
+            let (start, end) = row.map_err(|e| e.to_string())?;
+            total += Self::elapsed(&start, &end)?;
+        }
+        Ok(total)
+    }
+
+    fn closed_net_seconds(conn: &Connection, task_id: &str) -> Result<i64, String> {
+        // Retain subsecond precision across all segments; truncate only at the seconds API boundary.
+        Ok(Self::closed_work_duration(conn, task_id)?.num_seconds())
+    }
+
+    // Event ids preserve append order even when wall-clock timestamps move backwards.
     fn latest_start_at(conn: &Connection, task_id: &str) -> Result<Option<String>, String> {
         match conn.query_row(
             "SELECT at FROM events
              WHERE task_id = ?1 AND kind IN ('started', 'resumed')
-             ORDER BY at DESC, id DESC LIMIT 1",
+             ORDER BY id DESC LIMIT 1",
             [task_id],
             |r| r.get(0),
         ) {
@@ -89,32 +106,26 @@ impl Tracker {
     }
 
     fn net_seconds(conn: &Connection, task: &TaskDto) -> Result<i64, String> {
-        let closed = Self::closed_net_seconds(conn, &task.id)?;
+        let closed = Self::closed_work_duration(conn, &task.id)?;
         if task.status != "running" {
-            return Ok(closed);
+            return Ok(closed.num_seconds());
         }
         let started_at = Self::latest_start_at(conn, &task.id)?
             .ok_or_else(|| "running task has no start event".to_string())?;
-        let live: i64 = conn
-            .query_row(
-                "SELECT CAST(strftime('%s', ?2) AS INTEGER)
-                      - CAST(strftime('%s', ?1) AS INTEGER)",
-                rusqlite::params![started_at, now()],
-                |r| r.get(0),
-            )
-            .map_err(|e| e.to_string())?;
-        Ok(closed + live.max(0))
+        let live = Self::elapsed(&started_at, &now())?;
+        // The live segment participates in the same sum, without per-segment rounding.
+        Ok((closed + live).num_seconds())
     }
 
     fn gross_seconds(conn: &Connection, task_id: &str, ended_at: &str) -> Result<i64, String> {
-        conn.query_row(
-            "SELECT CAST(strftime('%s', ?2) AS INTEGER)
-                   - CAST(strftime('%s', created_at) AS INTEGER)
-             FROM tasks WHERE id = ?1",
-            rusqlite::params![task_id, ended_at],
-            |r| r.get(0),
-        )
-        .map_err(|e| e.to_string())
+        let created_at: String = conn
+            .query_row(
+                "SELECT created_at FROM tasks WHERE id = ?1",
+                [task_id],
+                |r| r.get(0),
+            )
+            .map_err(|e| e.to_string())?;
+        Ok(Self::elapsed(&created_at, ended_at)?.num_seconds())
     }
 
     fn get_task(conn: &Connection, task_id: &str) -> Result<Option<TaskDto>, String> {
@@ -156,6 +167,15 @@ impl Tracker {
     ) -> Result<(), String> {
         let started_at = Self::latest_start_at(conn, task_id)?
             .ok_or_else(|| "running task has no start event".to_string())?;
+        // Keep a zero-length segment on rollback (or equal timestamps), never a negative one.
+        // Compare parsed instants, not RFC3339 strings, which may use different offsets.
+        let end = chrono::DateTime::parse_from_rfc3339(ended_at).map_err(|e| e.to_string())?;
+        let start = chrono::DateTime::parse_from_rfc3339(&started_at).map_err(|e| e.to_string())?;
+        let ended_at = if end <= start {
+            started_at.as_str()
+        } else {
+            ended_at
+        };
         conn.execute(
             "INSERT INTO segments (task_id, started_at, ended_at, kind)
              VALUES (?1, ?2, ?3, 'work')",
@@ -198,8 +218,7 @@ impl Tracker {
         .map_err(|e| e.to_string())?;
         Self::add_event(&tx, &id, "created", None)?;
         Self::add_event(&tx, &id, "started", None)?;
-        let task = Self::get_task(&tx, &id)?
-            .ok_or_else(|| "created task not found".to_string())?;
+        let task = Self::get_task(&tx, &id)?.ok_or_else(|| "created task not found".to_string())?;
         let task = Self::with_live_net(&tx, task)?;
         tx.commit().map_err(|e| e.to_string())?;
         Ok(task)
@@ -221,8 +240,8 @@ impl Tracker {
         Self::add_event(&tx, &task.id, "paused", Some(&detail))?;
         tx.execute("UPDATE tasks SET status='paused' WHERE id=?1", [&task.id])
             .map_err(|e| e.to_string())?;
-        let task = Self::get_task(&tx, &task.id)?
-            .ok_or_else(|| "paused task not found".to_string())?;
+        let task =
+            Self::get_task(&tx, &task.id)?.ok_or_else(|| "paused task not found".to_string())?;
         let task = Self::with_live_net(&tx, task)?;
         tx.commit().map_err(|e| e.to_string())?;
         Ok(task)
@@ -238,41 +257,41 @@ impl Tracker {
         Self::add_event(&tx, &task.id, "resumed", None)?;
         tx.execute("UPDATE tasks SET status='running' WHERE id=?1", [&task.id])
             .map_err(|e| e.to_string())?;
-        let task = Self::get_task(&tx, &task.id)?
-            .ok_or_else(|| "resumed task not found".to_string())?;
+        let task =
+            Self::get_task(&tx, &task.id)?.ok_or_else(|| "resumed task not found".to_string())?;
         let task = Self::with_live_net(&tx, task)?;
         tx.commit().map_err(|e| e.to_string())?;
         Ok(task)
     }
 
-    fn terminate(&self, status: &str, kind: &str) -> Result<TaskDto, String> {
+    // A single supplied instant makes finalization consistent and deterministic in tests.
+    fn terminate(&self, status: &str, kind: &str, finished_at: &str) -> Result<TaskDto, String> {
         let mut conn = self.conn.lock().map_err(|_| "lock poisoned")?;
         let tx = conn.transaction().map_err(|e| e.to_string())?;
         let task = Self::require_active(&tx)?;
-        let finished_at = now();
         if task.status == "running" {
-            Self::append_closed_segment(&tx, &task.id, &finished_at)?;
+            Self::append_closed_segment(&tx, &task.id, finished_at)?;
         }
         let net = Self::closed_net_seconds(&tx, &task.id)?;
-        let gross = Self::gross_seconds(&tx, &task.id, &finished_at)?;
+        let gross = Self::gross_seconds(&tx, &task.id, finished_at)?;
         tx.execute(
             "UPDATE tasks SET status=?2, finished_at=?3, net_seconds=?4, gross_seconds=?5 WHERE id=?1",
             rusqlite::params![task.id, status, finished_at, net, gross],
         )
         .map_err(|e| e.to_string())?;
         Self::add_event(&tx, &task.id, kind, None)?;
-        let task = Self::get_task(&tx, &task.id)?
-            .ok_or_else(|| "finished task not found".to_string())?;
+        let task =
+            Self::get_task(&tx, &task.id)?.ok_or_else(|| "finished task not found".to_string())?;
         tx.commit().map_err(|e| e.to_string())?;
         Ok(task)
     }
 
     pub fn finish(&self) -> Result<TaskDto, String> {
-        self.terminate("done", "finished")
+        self.terminate("done", "finished", &now())
     }
 
     pub fn abandon(&self) -> Result<TaskDto, String> {
-        self.terminate("abandoned", "abandoned")
+        self.terminate("abandoned", "abandoned", &now())
     }
 
     pub fn current(&self) -> Result<Option<TaskDto>, String> {
@@ -290,16 +309,165 @@ impl Tracker {
         );
         let mut stmt = conn.prepare(&sql).map_err(|e| e.to_string())?;
         let rows = stmt.query_map([], row_to_task).map_err(|e| e.to_string())?;
-        rows.collect::<Result<Vec<_>, _>>().map_err(|e| e.to_string())
+        rows.collect::<Result<Vec<_>, _>>()
+            .map_err(|e| e.to_string())
     }
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::store;
 
     fn t() -> Tracker {
         Tracker::new(store::open_in_memory().unwrap())
+    }
+
+    #[test]
+    fn subsecond_segments_are_summed_before_rounding_and_persisted() {
+        let tr = t();
+        let task = tr.create_task("fractional", 60, None).unwrap();
+        {
+            let conn = tr.conn.lock().unwrap();
+            conn.execute(
+                "UPDATE tasks SET status='paused', created_at='2026-11-26T00:00:00.900Z' WHERE id=?1",
+                [&task.id],
+            )
+            .unwrap();
+            // Each 0.2 s interval crosses a second boundary: endpoint truncation yields 3 s.
+            for (start, end) in [
+                ("2026-11-26T00:00:00.900Z", "2026-11-26T00:00:01.100Z"),
+                ("2026-11-26T00:00:02.900Z", "2026-11-26T00:00:03.100Z"),
+                ("2026-11-26T00:00:04.900Z", "2026-11-26T00:00:05.100Z"),
+            ] {
+                conn.execute(
+                    "INSERT INTO segments (task_id, started_at, ended_at, kind) VALUES (?1, ?2, ?3, 'work')",
+                    rusqlite::params![task.id, start, end],
+                ).unwrap();
+            }
+        }
+        assert_eq!(tr.current().unwrap().unwrap().net_seconds, 0);
+        let done = tr
+            .terminate("done", "finished", "2026-11-26T00:00:05.100Z")
+            .unwrap();
+        assert_eq!(done.net_seconds, 0);
+        let conn = tr.conn.lock().unwrap();
+        let totals: (i64, i64) = conn
+            .query_row(
+                "SELECT net_seconds, gross_seconds FROM tasks WHERE id=?1",
+                [&task.id],
+                |r| Ok((r.get(0)?, r.get(1)?)),
+            )
+            .unwrap();
+        // Gross is exactly 4.2 s: truncate the duration, not the two endpoints (5 s).
+        assert_eq!(totals, (0, 4));
+    }
+
+    #[test]
+    fn subsecond_remainders_are_not_discarded_per_segment() {
+        let tr = t();
+        let task = tr.create_task("fractional sum", 60, None).unwrap();
+        let conn = tr.conn.lock().unwrap();
+        for _ in 0..3 {
+            conn.execute(
+                "INSERT INTO segments (task_id, started_at, ended_at, kind)
+                 VALUES (?1, '2026-11-26T00:00:00.100Z', '2026-11-26T00:00:00.700Z', 'work')",
+                [&task.id],
+            )
+            .unwrap();
+        }
+        assert_eq!(Tracker::closed_net_seconds(&conn, &task.id).unwrap(), 1);
+    }
+
+    #[test]
+    fn gross_duration_rounds_elapsed_time_not_endpoints() {
+        let tr = t();
+        let task = tr.create_task("gross", 60, None).unwrap();
+        let conn = tr.conn.lock().unwrap();
+        conn.execute(
+            "UPDATE tasks SET created_at='2026-11-26T00:00:00.900Z' WHERE id=?1",
+            [&task.id],
+        )
+        .unwrap();
+        for (end, expected) in [
+            ("2026-11-26T00:00:01.100Z", 0),
+            ("2026-11-26T00:00:02.100Z", 1),
+            ("2026-11-26T00:00:00.100Z", 0),
+        ] {
+            assert_eq!(
+                Tracker::gross_seconds(&conn, &task.id, end).unwrap(),
+                expected
+            );
+        }
+    }
+
+    #[test]
+    fn rollback_uses_append_order_and_clamps_closed_segments() {
+        let tr = t();
+        let task = tr.create_task("rollback", 60, None).unwrap();
+        let conn = tr.conn.lock().unwrap();
+        conn.execute("DELETE FROM events WHERE task_id=?1", [&task.id])
+            .unwrap();
+        for (at, kind) in [
+            ("2026-11-26T00:00:10Z", "started"),
+            ("2026-11-26T00:00:11Z", "paused"),
+            ("2026-11-26T00:00:05Z", "resumed"),
+        ] {
+            conn.execute(
+                "INSERT INTO events (task_id, at, kind) VALUES (?1, ?2, ?3)",
+                rusqlite::params![task.id, at, kind],
+            )
+            .unwrap();
+        }
+        Tracker::append_closed_segment(&conn, &task.id, "2026-11-26T00:00:06Z").unwrap();
+        let first: (String, String) = conn
+            .query_row(
+                "SELECT started_at, ended_at FROM segments WHERE task_id=?1 ORDER BY id LIMIT 1",
+                [&task.id],
+                |r| Ok((r.get(0)?, r.get(1)?)),
+            )
+            .unwrap();
+        assert_eq!(
+            first,
+            ("2026-11-26T00:00:05Z".into(), "2026-11-26T00:00:06Z".into())
+        );
+        for end in ["2026-11-26T00:00:04Z", "2026-11-26T00:00:05Z"] {
+            Tracker::append_closed_segment(&conn, &task.id, end).unwrap();
+            let closed: (String, String) = conn.query_row(
+                "SELECT started_at, ended_at FROM segments WHERE task_id=?1 ORDER BY id DESC LIMIT 1",
+                [&task.id], |r| Ok((r.get(0)?, r.get(1)?)),
+            ).unwrap();
+            assert_eq!(closed.0, closed.1);
+        }
+        assert_eq!(Tracker::closed_net_seconds(&conn, &task.id).unwrap(), 1);
+    }
+
+    #[test]
+    fn finish_after_clock_rollback_persists_zero_totals() {
+        let tr = t();
+        let task = tr.create_task("rollback finish", 60, None).unwrap();
+        {
+            let conn = tr.conn.lock().unwrap();
+            conn.execute(
+                "UPDATE tasks SET created_at='2026-11-26T00:00:10Z' WHERE id=?1",
+                [&task.id],
+            )
+            .unwrap();
+            conn.execute("INSERT INTO events (task_id, at, kind) VALUES (?1, '2026-11-26T00:00:11Z', 'resumed')", [&task.id]).unwrap();
+        }
+        let done = tr
+            .terminate("done", "finished", "2026-11-26T00:00:05Z")
+            .unwrap();
+        assert_eq!(done.net_seconds, 0);
+        let conn = tr.conn.lock().unwrap();
+        let totals: (i64, i64) = conn
+            .query_row(
+                "SELECT net_seconds, gross_seconds FROM tasks WHERE id=?1",
+                [&task.id],
+                |r| Ok((r.get(0)?, r.get(1)?)),
+            )
+            .unwrap();
+        assert_eq!(totals, (0, 0));
     }
 
     #[test]
@@ -415,7 +583,9 @@ mod tests {
             let mut stmt = conn
                 .prepare("SELECT kind FROM events WHERE task_id=?1 ORDER BY at, id")
                 .unwrap();
-            let rows = stmt.query_map([&task.id], |r| r.get::<_, String>(0)).unwrap();
+            let rows = stmt
+                .query_map([&task.id], |r| r.get::<_, String>(0))
+                .unwrap();
             rows.collect::<Result<Vec<_>, _>>().unwrap()
         };
         assert_eq!(kinds, vec!["created", "started", "finished"]);

@@ -21,7 +21,7 @@ export const PAUSE_REASONS = [
 export const EST_PRESETS = [15, 25, 45, 60, 120] // 分钟
 export const TAG_PRESETS = ['科研', '行政', '杂务']
 
-export const createTask = (name: string, estSeconds: number, tag?: string) =>
+export const createTask = (name: string, estSeconds: number, tag?: string | null) =>
   invoke<Task>('create_task', { name, estSeconds: Math.round(estSeconds), tag: tag ?? null })
 export const pause = (reason: string) => invoke<Task>('pause', { reason })
 export const resume = (): Promise<Task> => invoke<Task>('resume')
