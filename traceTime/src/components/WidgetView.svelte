@@ -2,14 +2,15 @@
   import { onDestroy, onMount } from 'svelte'
   import { listen } from '@tauri-apps/api/event'
   import {
-    applyBackgroundMode,
     checkReminders,
     currentTask,
     getSetting,
+    getWidgetBackgroundMode,
     listPaused,
     sendReminderNotification,
     setReminderMuted,
     setWidgetHeight,
+    setWidgetIdleFade,
     type BackgroundModeResult,
     type ReminderConfig,
     type Task,
@@ -17,7 +18,7 @@
   import { createReminderPulseQueue, playReminderChime, type ReminderPulse } from '../lib/reminder'
   import { createIdleFadeController } from '../lib/idleFade'
   import { createWidgetHeightObserver } from '../lib/widgetHeight'
-  import { backgroundClass, normalizeBackgroundMode, type BackgroundMode } from '../lib/settings'
+  import { backgroundClass, type BackgroundMode } from '../lib/settings'
   import LongPauseBanner from './LongPauseBanner.svelte'
   import TaskForm from './TaskForm.svelte'
   import WidgetRunning from './WidgetRunning.svelte'
@@ -34,7 +35,7 @@
   let reminderConfig: ReminderConfig | null = null
   let pulse: ReminderPulse | null = null
   const pulses = createReminderPulseQueue(next => { pulse = next })
-  const idleFade = createIdleFadeController()
+  const idleFade = createIdleFadeController({ onFadedChange: setWidgetIdleFade })
   let reminderTaskId: string | null = null
   let processedReminderKeys = new Set<string>()
   let effectiveBackground: BackgroundMode = 'translucent'
@@ -90,11 +91,9 @@
 
   async function loadBackgroundMode() {
     try {
-      const requested = normalizeBackgroundMode(await getSetting('background_mode'))
-      const result = await applyBackgroundMode(requested)
-      effectiveBackground = result.effective
+      effectiveBackground = (await getWidgetBackgroundMode()).effective
     } catch {
-      effectiveBackground = 'translucent'
+      // Keep the last known result (or the safe startup CSS fallback).
     }
   }
 
@@ -128,8 +127,9 @@
     }).then(unlisten => {
       if (destroyed) unlisten()
       else stopBackgroundListener = unlisten
+    }).catch(() => {}).then(() => {
+      if (!destroyed) void loadBackgroundMode()
     })
-    void loadBackgroundMode()
     void loadLongPauseHours()
     void refreshAll()
     interval = setInterval(refreshAll, 1000)
@@ -181,7 +181,6 @@
 
 <style>
   main { display: flex; flex-direction: column; width: 100%; height: auto; min-height: 140px; overflow: hidden; color: #f0f0f0; }
-  main:hover { opacity: 1 !important; transition-duration: 0ms !important; }
   .drag-region { flex: none; width: 100%; height: 8px; cursor: grab; user-select: none; }
   .drag-region:active { cursor: grabbing; }
   .background-glass { background: rgba(24, 24, 28, 0.52); }

@@ -1,0 +1,7 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "widget-drag",
+  "description": "allows dragging the main widget from its drag region",
+  "windows": ["main"],
+  "permissions": ["core:window:allow-start-dragging"]
+}

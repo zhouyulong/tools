@@ -1,8 +1,8 @@
 use crate::reminder::{
     DueReminder, OVERDUE_INTERVAL_KEY, ReminderCheckDto, ReminderConfig, ReminderConfigDto,
-    ReminderLevel, due_reminders, parse_overdue_interval,
+    ReminderLevel, due_reminders, load_overdue_interval, parse_overdue_interval,
 };
-use crate::store::OVERDUE_UPGRADE_CUTOFF_KEY;
+use crate::store::{OVERDUE_UPGRADE_CUTOFF_KEY, RECOVERY_SCHEDULE_MIGRATION};
 use chrono::{DateTime, FixedOffset, TimeDelta, Utc};
 use rusqlite::{Connection, Error as SqlError};
 use serde::Serialize;
@@ -484,9 +484,12 @@ impl Tracker {
                 .map_err(|e| e.to_string())?;
             let task = Self::get_task(&tx, &task_id)?
                 .ok_or_else(|| "recovered task not found".to_string())?;
-            recovered.push(Self::with_live_net(&tx, task)?);
+            let task = Self::with_live_net(&tx, task)?;
+            Self::reset_overdue_schedule(&tx, &task.id, task.net_seconds)?;
+            recovered.push(task);
         }
 
+        Self::backfill_recovered_overdue_schedules(&tx, &recovered)?;
         tx.commit().map_err(|e| e.to_string())?;
         Ok(recovered)
     }
@@ -540,13 +543,59 @@ impl Tracker {
             // a fresh schedule at the net time the task uses now. Interval edits
             // from the old schedule must not constrain the reset schedule.
             let net = Self::net_seconds(conn, &task)?;
-            conn.execute(
-                "UPDATE tasks SET overdue_upgrade_cutoff_net=?2,
-                     overdue_interval_changed_at_net=NULL WHERE id=?1",
-                rusqlite::params![task.id, net],
+            Self::reset_overdue_schedule(conn, &task.id, net)?;
+        }
+        Ok(())
+    }
+
+    fn reset_overdue_schedule(conn: &Connection, task_id: &str, net: i64) -> Result<(), String> {
+        conn.execute(
+            "UPDATE tasks SET overdue_upgrade_cutoff_net=?2,
+                 overdue_interval_changed_at_net=NULL WHERE id=?1",
+            rusqlite::params![task_id, net],
+        )
+        .map(|_| ())
+        .map_err(|e| e.to_string())
+    }
+
+    fn backfill_recovered_overdue_schedules(
+        tx: &rusqlite::Transaction<'_>,
+        just_recovered: &[TaskDto],
+    ) -> Result<(), String> {
+        let applied: bool = tx
+            .query_row(
+                "SELECT EXISTS(SELECT 1 FROM schema_migrations WHERE version=?1)",
+                [RECOVERY_SCHEDULE_MIGRATION],
+                |row| row.get(0),
             )
             .map_err(|e| e.to_string())?;
+        if applied {
+            return Ok(());
         }
+
+        // Earlier builds could leave an inflated cutoff and/or interval edit on
+        // an already-paused anomaly, including after a second launch recovered it.
+        let mut stmt = tx
+            .prepare(
+                "SELECT t.id FROM tasks t WHERE t.status='paused' AND EXISTS (
+                SELECT 1 FROM events e WHERE e.task_id=t.id AND e.kind='anomaly_recovered'
+             )",
+            )
+            .map_err(|e| e.to_string())?;
+        let ids = stmt
+            .query_map([], |row| row.get::<_, String>(0))
+            .map_err(|e| e.to_string())?;
+        for id in ids {
+            let id = id.map_err(|e| e.to_string())?;
+            if !just_recovered.iter().any(|task| task.id == id) {
+                Self::reset_overdue_schedule(tx, &id, Self::closed_net_seconds(tx, &id)?)?;
+            }
+        }
+        tx.execute(
+            "INSERT INTO schema_migrations (version) VALUES (?1)",
+            [RECOVERY_SCHEDULE_MIGRATION],
+        )
+        .map_err(|e| e.to_string())?;
         Ok(())
     }
 
@@ -693,19 +742,8 @@ impl Tracker {
         let conn = self.conn.lock().map_err(|_| "lock poisoned")?;
         let x = Self::get_setting_from_conn(&conn, WIDGET_POSITION_X_KEY)?;
         let y = Self::get_setting_from_conn(&conn, WIDGET_POSITION_Y_KEY)?;
-        match (x, y) {
-            (None, None) => Ok(None),
-            (Some(x), Some(y)) => {
-                let x = x
-                    .parse::<i32>()
-                    .map_err(|_| "invalid widget_position_x".to_string())?;
-                let y = y
-                    .parse::<i32>()
-                    .map_err(|_| "invalid widget_position_y".to_string())?;
-                Ok(Some((x, y)))
-            }
-            _ => Err("incomplete widget position".into()),
-        }
+        Ok(x.and_then(|x| x.parse().ok())
+            .zip(y.and_then(|y| y.parse().ok())))
     }
 
     pub fn background_mode(&self) -> Result<BackgroundMode, String> {
@@ -738,8 +776,7 @@ impl Tracker {
         let tx = conn.transaction().map_err(|e| e.to_string())?;
         let interval_changed = if let Some(value) = values.get(OVERDUE_INTERVAL_KEY) {
             let previous = Self::get_setting_from_conn(&tx, OVERDUE_INTERVAL_KEY)?;
-            parse_overdue_interval(previous.as_deref()).ok()
-                != Some(parse_overdue_interval(Some(value))?)
+            load_overdue_interval(previous.as_deref()) != parse_overdue_interval(Some(value))?
         } else {
             false
         };
@@ -1832,6 +1869,32 @@ mod tests {
             tr.get_setting("widget_position_y").unwrap().as_deref(),
             Some("-80")
         );
+    }
+
+    #[test]
+    fn missing_partial_and_bad_widget_positions_leave_the_default() {
+        for (x, y) in [
+            (None, None),
+            (Some("12"), None),
+            (None, Some("50")),
+            (Some("bad"), Some("50")),
+            (Some("12"), Some("2147483648")),
+        ] {
+            let tr = Tracker::new(crate::store::open_in_memory().unwrap());
+            for (key, value) in [
+                (super::WIDGET_POSITION_X_KEY, x),
+                (super::WIDGET_POSITION_Y_KEY, y),
+            ] {
+                if let Some(value) = value {
+                    tr.set_setting(key, value).unwrap();
+                }
+            }
+            assert_eq!(
+                tr.widget_position().unwrap(),
+                None,
+                "coordinates {x:?}, {y:?}"
+            );
+        }
     }
 
     #[test]

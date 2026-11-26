@@ -3,6 +3,9 @@ use std::path::Path;
 
 pub(crate) const OVERDUE_UPGRADE_CUTOFF_KEY: &str = "reminder_overdue_upgrade_cutoff";
 
+// v9 is applied by Tracker in the startup recovery transaction, not before it.
+pub(crate) const RECOVERY_SCHEDULE_MIGRATION: i64 = 9;
+
 const MIGRATIONS: &[&str] = &[
     // v1: 建表，与设计文档第 6 节一致。IF NOT EXISTS 允许恢复旧版本中断留下的部分建表。
     r#"
@@ -63,6 +66,22 @@ const MIGRATIONS: &[&str] = &[
     "",
 ];
 
+pub fn try_lock_instance(path: &Path) -> std::io::Result<Option<std::fs::File>> {
+    use std::fs::{File, TryLockError};
+    // Leave the lock file in place: unlinking it could let another process lock
+    // a different inode while this one still holds the original handle.
+    let file = File::options()
+        .write(true)
+        .create(true)
+        .truncate(false)
+        .open(path)?;
+    match file.try_lock() {
+        Ok(()) => Ok(Some(file)),
+        Err(TryLockError::WouldBlock) => Ok(None),
+        Err(TryLockError::Error(error)) => Err(error),
+    }
+}
+
 pub fn open(path: &Path) -> rusqlite::Result<Connection> {
     initialize_connection(Connection::open(path)?)
 }
@@ -119,6 +138,17 @@ fn migrate(conn: &Connection) -> rusqlite::Result<()> {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn instance_lock_blocks_a_second_handle_until_the_owner_exits() {
+        let path =
+            std::env::temp_dir().join(format!("tracetime-test-{}.lock", uuid::Uuid::new_v4()));
+        let original = try_lock_instance(&path).unwrap().unwrap();
+        assert!(try_lock_instance(&path).unwrap().is_none());
+        drop(original);
+        assert!(try_lock_instance(&path).unwrap().is_some());
+        std::fs::remove_file(path).unwrap();
+    }
 
     #[test]
     fn migration_recovers_partial_unversioned_schema() {
@@ -274,6 +304,119 @@ mod tests {
         assert_no_reminders(&tr);
         set_live_work_seconds(&tr, cutoff + 600 - 630);
         assert_next_overdue_repeats_once(&tr, cutoff + 600 - 60);
+    }
+
+    #[test]
+    fn recovery_reanchors_a_running_tasks_upgraded_schedule_at_closed_work() {
+        let tr = crate::tracker::Tracker::new(initialize_connection(legacy_overdue_db()).unwrap());
+        assert!(saved_upgrade_cutoff(&tr) >= 724);
+        tr.conn
+            .lock()
+            .unwrap()
+            .execute(
+                "UPDATE tasks SET overdue_interval_changed_at_net=5000 WHERE id='old'",
+                [],
+            )
+            .unwrap();
+        let recovered = tr.recover_running_tasks(chrono::Utc::now()).unwrap();
+        assert_eq!(recovered[0].net_seconds, 630);
+        assert_eq!(saved_upgrade_cutoff(&tr), 630);
+        tr.resume("old").unwrap();
+        set_live_work_seconds(&tr, 599);
+        assert_no_reminders(&tr);
+        set_live_work_seconds(&tr, 600);
+        assert_next_overdue_repeats_once(&tr, 1170);
+
+        // A later episode must still reset the cutoff after the backfill has been marked.
+        tr.conn.lock().unwrap().execute(
+            "UPDATE tasks SET overdue_upgrade_cutoff_net=5000, overdue_interval_changed_at_net=5000 WHERE id='old'", [],
+        ).unwrap();
+        let recovered = tr.recover_running_tasks(chrono::Utc::now()).unwrap();
+        assert_eq!(recovered[0].net_seconds, 630);
+        assert_eq!(saved_upgrade_cutoff(&tr), 630);
+        assert!(
+            tr.recover_running_tasks(chrono::Utc::now())
+                .unwrap()
+                .is_empty()
+        );
+    }
+
+    #[test]
+    fn recovery_backfills_v8_paused_anomalies_once_without_rewriting_history() {
+        let conn = initialize_connection(legacy_overdue_db()).unwrap();
+        conn.execute_batch(
+            "UPDATE tasks SET status='paused', overdue_upgrade_cutoff_net=777660,
+                 overdue_interval_changed_at_net=432000 WHERE id='old';
+             INSERT INTO events (task_id, at, kind, detail) VALUES
+                 ('old', '2026-11-26T00:00:00Z', 'paused', '{\"reason\":\"anomaly\"}'),
+                 ('old', '2026-11-26T00:00:00Z', 'anomaly_recovered', NULL);
+             INSERT INTO segments (task_id, started_at, ended_at, kind)
+                 VALUES ('old', '2026-11-25T23:59:00Z', '2026-11-26T00:00:00Z', 'anomaly');
+             INSERT INTO tasks (id, name, est_seconds, status, created_at,
+                                overdue_upgrade_cutoff_net, overdue_interval_changed_at_net)
+                 VALUES ('done', 'done', 60, 'done', '2026-01-01T00:00:00Z', 777660, 432000),
+                        ('normal', 'normal', 60, 'paused', '2026-01-01T00:00:00Z', 45, 80);
+             INSERT INTO events (task_id, at, kind) VALUES
+                 ('done', '2026-01-01T00:00:00Z', 'anomaly_recovered');
+             CREATE TRIGGER protect_history BEFORE UPDATE ON tasks WHEN OLD.status='done'
+                 BEGIN SELECT RAISE(ABORT, 'terminal task rewritten'); END;
+             CREATE TRIGGER protect_legacy_fires BEFORE UPDATE ON reminder_fired
+                 BEGIN SELECT RAISE(ABORT, 'legacy reminder rewritten'); END;
+             CREATE TRIGGER reject_backfill BEFORE INSERT ON schema_migrations WHEN NEW.version=9
+                 BEGIN SELECT RAISE(ABORT, 'backfill marker rejected'); END;",
+        )
+        .unwrap();
+        let tr = crate::tracker::Tracker::new(conn);
+        let snapshot = |id: &str| -> (i64, Option<i64>) {
+            tr.conn.lock().unwrap().query_row(
+                "SELECT overdue_upgrade_cutoff_net, overdue_interval_changed_at_net FROM tasks WHERE id=?1",
+                [id], |row| Ok((row.get(0)?, row.get(1)?)),
+            ).unwrap()
+        };
+        assert!(tr.recover_running_tasks(chrono::Utc::now()).is_err());
+        assert_eq!(snapshot("old"), (777660, Some(432000)));
+        tr.conn
+            .lock()
+            .unwrap()
+            .execute_batch("DROP TRIGGER reject_backfill;")
+            .unwrap();
+        assert!(
+            tr.recover_running_tasks(chrono::Utc::now())
+                .unwrap()
+                .is_empty()
+        );
+        assert_eq!(snapshot("old"), (630, None));
+        assert_eq!(snapshot("done"), (777660, Some(432000)));
+        assert_eq!(snapshot("normal"), (45, Some(80)));
+        let detail = tr.task_detail("old").unwrap();
+        assert_eq!(detail.segments.len(), 2);
+        assert_eq!(detail.events.len(), 5);
+        assert_eq!(
+            tr.conn
+                .lock()
+                .unwrap()
+                .query_row(
+                    "SELECT COUNT(*) FROM reminder_fired WHERE task_id='old'",
+                    [],
+                    |row| row.get::<_, i64>(0),
+                )
+                .unwrap(),
+            4
+        );
+
+        tr.set_setting("reminder_overdue_interval_minutes", "2")
+            .unwrap();
+        assert!(
+            tr.recover_running_tasks(chrono::Utc::now())
+                .unwrap()
+                .is_empty()
+        );
+        assert_eq!(snapshot("old"), (630, Some(630)));
+        tr.resume("old").unwrap();
+        set_live_work_seconds(&tr, 119);
+        assert_no_reminders(&tr);
+        set_live_work_seconds(&tr, 120);
+        assert_next_overdue_repeats_once(&tr, 690);
     }
 
     fn simulate_rollback_pause_and_resume(conn: &Connection) {

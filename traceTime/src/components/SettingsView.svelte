@@ -1,10 +1,10 @@
 <script lang="ts">
   import { onMount } from 'svelte'
-  import { applyBackgroundMode, getSetting, saveSettings } from '../lib/api'
+  import { applyBackgroundMode, getSetting, getWidgetBackgroundMode, saveSettings, type BackgroundModeResult } from '../lib/api'
   import {
-    BACKGROUND_MODE_KEY,
     SETTINGS,
     defaultSettings,
+    loadStoredSettings,
     normalizeSettings,
     type BackgroundMode,
     type ReminderSettingKey,
@@ -23,6 +23,9 @@
   let saving = false
   let errors: string[] = []
   let saved = false
+  let invalidStoredValues = false
+  let settingsReadFailed = false
+  let backgroundResult: BackgroundModeResult | undefined
 
   const spec = (key: ReminderSettingKey) => SETTINGS.find(item => item.key === key)!
 
@@ -36,20 +39,15 @@
   async function load() {
     loading = true
     errors = []
-    try {
-      const loaded = await Promise.all([
-        ...SETTINGS.map(async item => [
-          item.key,
-          (await getSetting(item.key)) ?? item.default,
-        ] as const),
-        getSetting(BACKGROUND_MODE_KEY).then(value => [BACKGROUND_MODE_KEY, value ?? 'glass'] as const),
-      ])
-      values = normalizeSettings(Object.fromEntries(loaded)).values
-    } catch (error) {
-      errors = [`读取设置失败：${String(error)}`]
-    } finally {
-      loading = false
-    }
+    const [settings, background] = await Promise.all([
+      loadStoredSettings(getSetting),
+      getWidgetBackgroundMode().catch(() => undefined),
+    ])
+    values = settings.values
+    invalidStoredValues = settings.hasInvalidValues
+    settingsReadFailed = settings.readFailed
+    backgroundResult = background
+    loading = false
   }
 
   async function save() {
@@ -67,8 +65,14 @@
     values = normalized.values
     try {
       await saveSettings(normalized.values)
-      await applyBackgroundMode(normalized.values.background_mode)
+      invalidStoredValues = false
+      settingsReadFailed = false
       saved = true
+      try {
+        backgroundResult = await applyBackgroundMode(normalized.values.background_mode)
+      } catch (error) {
+        errors = [`设置已保存，但未能应用背景：${String(error)}`]
+      }
     } catch (error) {
       errors = [`保存失败：${String(error)}`]
     } finally {
@@ -91,6 +95,12 @@
   {#if loading}
     <p class="state">加载中…</p>
   {:else}
+    {#if invalidStoredValues}
+      <p class="settings-note warning" role="status">部分设置无效，已显示默认值；保存后修复</p>
+    {/if}
+    {#if settingsReadFailed}
+      <p class="settings-note warning" role="status">部分设置读取失败，已显示默认值</p>
+    {/if}
     <section>
       <h2>背景</h2>
       <div class="choice-group">
@@ -108,6 +118,9 @@
           </label>
         {/each}
       </div>
+      {#if backgroundResult?.requested === 'glass' && backgroundResult.effective === 'translucent'}
+        <p class="settings-note" role="status">当前实际：半透明纯色</p>
+      {/if}
     </section>
 
     <section>
@@ -212,6 +225,8 @@
   .choice-row { display: flex; align-items: center; gap: 7px; cursor: pointer; }
   .choice-row input { width: 14px; height: 14px; margin: 0; }
   .state { color: #aaaeb5; }
+  .settings-note { margin: 6px 0 0; font-size: 12px; color: #b9bbc2; }
+  .warning { margin-bottom: 8px; color: #f3c272; }
   .errors { margin: 6px 0 0; padding-left: 18px; color: #ff8177; }
   .saved { margin: 6px 0 0; color: #7bd88f; font-weight: 600; }
 </style>

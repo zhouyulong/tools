@@ -70,6 +70,50 @@ export function backgroundClass(mode: BackgroundMode): `background-${BackgroundM
   return `background-${mode}`
 }
 
+function normalizeValue(spec: SettingSpec, raw: string, stored = false): string | undefined {
+  const value = raw.trim()
+  if (spec.kind === 'boolean') {
+    if (stored && (value === '1' || value === '0')) return String(value === '1')
+    return value === 'true' || value === 'false' ? value : undefined
+  }
+  if (stored && !/^[+-]?\d+$/.test(value)) return undefined
+  const parsed = Number(value)
+  return Number.isInteger(parsed) && parsed >= spec.min! && parsed <= spec.max! ? String(parsed) : undefined
+}
+
+// Loading is tolerant and field-local. Only saving sorts thresholds and rejects invalid edits.
+export async function loadStoredSettings(get: (key: SettingKey) => Promise<string | null>) {
+  const values = defaultSettings()
+  let hasInvalidValues = false
+  let readFailed = false
+  const keys = [...REMINDER_SETTING_KEYS, BACKGROUND_MODE_KEY] as const
+  const results = await Promise.allSettled(keys.map(async key => get(key)))
+  keys.forEach((key, index) => {
+    const result = results[index]
+    if (result.status === 'rejected') {
+      readFailed = true
+      return
+    }
+    const raw = result.value
+    if (raw === null) return
+    if (typeof raw !== 'string') {
+      hasInvalidValues = true
+      return
+    }
+    const value = raw.trim()
+    if (key === BACKGROUND_MODE_KEY) {
+      const mode = normalizeBackgroundMode(value)
+      if (mode === value) values[key] = mode
+      else hasInvalidValues = true
+    } else {
+      const normalized = normalizeValue(SPEC_BY_KEY.get(key)!, value, true)
+      if (normalized === undefined) hasInvalidValues = true
+      else values[key] = normalized
+    }
+  })
+  return { values, hasInvalidValues, readFailed }
+}
+
 export function normalizeReminderSettings(
   input: Partial<Record<ReminderSettingKey, string>>,
 ): { values: ReminderSettingValues; errors: string[] } {
@@ -80,20 +124,10 @@ export function normalizeReminderSettings(
     const spec = SPEC_BY_KEY.get(key)!
     const raw = input[key]
     if (raw === undefined || raw === null) continue
-    const value = String(raw).trim()
-
-    if (spec.kind === 'boolean') {
-      if (value === 'true' || value === 'false') values[key] = value
-      else errors.push(`${spec.label}必须为 true 或 false`)
-      continue
-    }
-
-    const parsed = Number(value)
-    if (!Number.isInteger(parsed) || parsed < spec.min! || parsed > spec.max!) {
-      errors.push(`${spec.label}必须是 ${spec.min}–${spec.max} 的整数`)
-      continue
-    }
-    values[key] = String(parsed)
+    const value = normalizeValue(spec, raw)
+    if (value !== undefined) values[key] = value
+    else if (spec.kind === 'boolean') errors.push(`${spec.label}必须为 true 或 false`)
+    else errors.push(`${spec.label}必须是 ${spec.min}–${spec.max} 的整数`)
   }
 
   if (errors.length === 0) {

@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import { afterEach, test } from 'node:test'
 import { clearMocks, mockIPC } from '@tauri-apps/api/mocks'
-import { applyBackgroundMode, finishTask, abandonTask, resume, deleteTask, deleteTasks, saveSettings, sendReminderNotification, setWidgetHeight } from '../src/lib/api.ts'
+import { applyBackgroundMode, getWidgetBackgroundMode, setWidgetIdleFade, finishTask, abandonTask, resume, deleteTask, deleteTasks, saveSettings, sendReminderNotification, setWidgetHeight } from '../src/lib/api.ts'
 
 globalThis.window = {} as Window & typeof globalThis
 afterEach(clearMocks)
@@ -64,4 +64,21 @@ test('background mode IPC returns requested and effective modes', async () => {
     effective: 'translucent',
   })
   assert.deepEqual(calls, [['apply_background_mode', { mode: 'glass' }]])
+})
+
+
+test('background startup reads the actual mode and forwards both idle transitions', async () => {
+  const calls: unknown[] = []
+  mockIPC((command, payload) => {
+    calls.push([command, payload])
+    if (command === 'get_widget_background_mode') return { requested: 'glass', effective: 'translucent' }
+  })
+  assert.deepEqual(await getWidgetBackgroundMode(), { requested: 'glass', effective: 'translucent' })
+  await setWidgetIdleFade(true)
+  await setWidgetIdleFade(false)
+  assert.deepEqual(calls, [
+    ['get_widget_background_mode', {}],
+    ['set_widget_idle_fade', { faded: true }],
+    ['set_widget_idle_fade', { faded: false }],
+  ])
 })

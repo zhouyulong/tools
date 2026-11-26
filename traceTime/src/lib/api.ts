@@ -104,6 +104,8 @@ export const saveSettings = (values: Record<string, string>) =>
   invoke<void>('set_settings', { values })
 export const applyBackgroundMode = (mode: BackgroundMode) =>
   invoke<BackgroundModeResult>('apply_background_mode', { mode })
+export const getWidgetBackgroundMode = () => invoke<BackgroundModeResult>('get_widget_background_mode')
+export const setWidgetIdleFade = (faded: boolean) => invoke<void>('set_widget_idle_fade', { faded })
 
 export const setWidgetHeight = (height: number) => invoke<void>('set_widget_height', { height })
 export const deleteTask = (taskId: string) => invoke<void>('delete_task', { taskId })

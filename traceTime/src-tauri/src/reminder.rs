@@ -4,14 +4,24 @@ const DEFAULT_EST_SECONDS: i64 = 60;
 const DEFAULT_OVERDUE_INTERVAL_MINUTES: i64 = 10;
 pub const OVERDUE_INTERVAL_KEY: &str = "reminder_overdue_interval_minutes";
 
+fn valid_integer(value: &str, range: std::ops::RangeInclusive<i64>) -> Option<i64> {
+    value
+        .trim()
+        .parse::<i64>()
+        .ok()
+        .filter(|number| range.contains(number))
+}
+
 pub fn parse_overdue_interval(value: Option<&str>) -> Result<i64, String> {
     match value {
         None => Ok(DEFAULT_OVERDUE_INTERVAL_MINUTES),
-        Some(value) => value
-            .parse::<i64>()
-            .map(|minutes| minutes.clamp(1, 1440))
-            .map_err(|_| format!("invalid integer setting {OVERDUE_INTERVAL_KEY}: {value}")),
+        Some(value) => valid_integer(value, 1..=1440)
+            .ok_or_else(|| format!("invalid integer setting {OVERDUE_INTERVAL_KEY}: {value}")),
     }
+}
+
+pub fn load_overdue_interval(value: Option<&str>) -> i64 {
+    parse_overdue_interval(value).unwrap_or(DEFAULT_OVERDUE_INTERVAL_MINUTES)
 }
 
 #[derive(Debug, Clone)]
@@ -66,14 +76,11 @@ impl ReminderConfig {
             key: &str,
             default: bool,
         ) -> Result<bool, String> {
-            match get(key)? {
-                None => Ok(default),
-                Some(value) => match value.as_str() {
-                    "true" | "1" => Ok(true),
-                    "false" | "0" => Ok(false),
-                    _ => Err(format!("invalid boolean setting {key}: {value}")),
-                },
-            }
+            Ok(match get(key)?.as_deref().map(str::trim) {
+                Some("true" | "1") => true,
+                Some("false" | "0") => false,
+                _ => default,
+            })
         }
 
         fn int_value(
@@ -82,13 +89,9 @@ impl ReminderConfig {
             default: i64,
             range: std::ops::RangeInclusive<i64>,
         ) -> Result<i64, String> {
-            let value = match get(key)? {
-                None => default,
-                Some(value) => value
-                    .parse::<i64>()
-                    .map_err(|_| format!("invalid integer setting {key}: {value}"))?,
-            };
-            Ok(value.clamp(*range.start(), *range.end()))
+            Ok(get(key)?
+                .and_then(|value| valid_integer(&value, range))
+                .unwrap_or(default))
         }
 
         let defaults = Self::default();
@@ -123,9 +126,7 @@ impl ReminderConfig {
                 defaults.overdue_enabled,
             )?,
             overdue_notify: bool_value(&get, "reminder_overdue_notify", defaults.overdue_notify)?,
-            overdue_interval_minutes: parse_overdue_interval(
-                get(OVERDUE_INTERVAL_KEY)?.as_deref(),
-            )?,
+            overdue_interval_minutes: load_overdue_interval(get(OVERDUE_INTERVAL_KEY)?.as_deref()),
             warn_sound: bool_value(&get, "reminder_warn_sound", defaults.warn_sound)?,
             near_sound: bool_value(&get, "reminder_near_sound", defaults.near_sound)?,
             due_notify: bool_value(&get, "reminder_due_notify", defaults.due_notify)?,
@@ -322,7 +323,30 @@ mod tests {
     }
 
     #[test]
-    fn settings_are_clamped_and_stage_percentages_are_sorted() {
+    fn malformed_reminder_values_do_not_disable_valid_stored_thresholds_and_toggles() {
+        let config = ReminderConfig::from_settings(|key| {
+            Ok(match key {
+                "reminder_warn_percent" => Some("82".into()),
+                "reminder_near_percent" => Some("nope".into()),
+                "reminder_due_percent" => Some("111".into()),
+                "reminder_warn_sound" => Some("true".into()),
+                "reminder_due_notify" => Some("false".into()),
+                "reminder_overdue_interval_minutes" => Some("not an interval".into()),
+                _ => None,
+            })
+        })
+        .unwrap();
+        assert_eq!(
+            (config.warn_percent, config.near_percent, config.due_percent),
+            (82, 90, 111)
+        );
+        assert!(config.warn_sound);
+        assert!(!config.due_notify);
+        assert_eq!(config.overdue_interval_minutes, 10);
+    }
+
+    #[test]
+    fn out_of_range_settings_use_defaults_and_stage_percentages_are_sorted() {
         let config = ReminderConfig::from_settings(|key| {
             Ok(match key {
                 "reminder_warn_percent" => Some("1200".into()),
@@ -335,9 +359,9 @@ mod tests {
         .unwrap();
         assert_eq!(
             (config.warn_percent, config.near_percent, config.due_percent),
-            (25, 50, 1000)
+            (25, 50, 75)
         );
-        assert_eq!(config.overdue_interval_minutes, 1);
+        assert_eq!(config.overdue_interval_minutes, 10);
     }
 
     #[test]

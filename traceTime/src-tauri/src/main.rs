@@ -1,6 +1,8 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
+mod background;
 mod commands;
+mod position;
 mod reminder;
 mod store;
 mod tracker;
@@ -9,64 +11,64 @@ use chrono::Utc;
 use tauri::Manager;
 use tracker::{BackgroundMode, Tracker};
 
-fn persist_widget_positions(
-    receiver: std::sync::mpsc::Receiver<(i32, i32)>,
-    mut persist: impl FnMut(i32, i32),
-) {
-    for (x, y) in receiver {
-        persist(x, y);
-    }
-}
-
 fn main() {
-    let data_dir = directories::ProjectDirs::from("", "", "traceTime")
-        .expect("cannot resolve data dir")
-        .data_dir()
-        .to_path_buf();
-    std::fs::create_dir_all(&data_dir).expect("cannot create data dir");
-    let conn = store::open(&data_dir.join("traceTime.db")).expect("cannot open db");
-    let tracker = Tracker::new(conn);
-    tracker
-        .recover_running_tasks(Utc::now())
-        .expect("cannot recover running tasks");
-    let widget_position = tracker
-        .widget_position()
-        .expect("cannot read widget position");
-    let background_mode = tracker.background_mode().unwrap_or(BackgroundMode::Glass);
-    let (position_sender, position_receiver) = std::sync::mpsc::channel();
+    let builder = tauri::Builder::default();
+    // The plugin must run before Tauri invokes setup, where the database is opened.
+    #[cfg(any(target_os = "macos", windows, target_os = "linux"))]
+    let builder = builder.plugin(tauri_plugin_single_instance::init(|app, _, _| {
+        let existing = app.clone();
+        let _ = app.run_on_main_thread(move || {
+            if let Some(window) = existing.get_webview_window("main") {
+                let _ = window.show();
+                let _ = window.unminimize();
+                let _ = window.set_focus();
+            }
+        });
+    }));
 
-    tauri::Builder::default()
+    builder
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_notification::init())
-        .manage(tracker)
-        .setup(move |app| {
-            let app_handle = app.handle().clone();
-            std::thread::Builder::new()
-                .name("widget-position-writer".into())
-                .spawn(move || {
-                    persist_widget_positions(position_receiver, |x, y| {
-                        if let Err(error) = app_handle.state::<Tracker>().set_widget_position(x, y)
-                        {
-                            eprintln!("cannot save widget position: {error}");
-                        }
-                    });
-                })?;
-
+        .setup(|app| {
+            let data_dir = directories::ProjectDirs::from("", "", "traceTime")
+                .ok_or("cannot resolve data dir")?
+                .data_dir()
+                .to_path_buf();
+            std::fs::create_dir_all(&data_dir)?;
+            // Also guard the DB if platform instance discovery races or is unavailable.
+            let Some(lock) = store::try_lock_instance(&data_dir.join("traceTime.lock"))? else {
+                app.handle().exit(0);
+                return Ok(());
+            };
+            app.manage(lock);
+            let tracker = Tracker::new(store::open(&data_dir.join("traceTime.db"))?);
+            tracker.recover_running_tasks(Utc::now())?;
             let window = app
                 .get_webview_window("main")
                 .ok_or("main window not found")?;
-            if let Some((x, y)) = widget_position {
-                window.set_position(tauri::PhysicalPosition::new(x, y))?;
+            let restored = tracker
+                .widget_position()
+                .and_then(|saved| position::restore(&window, saved).map_err(|e| e.to_string()));
+            if let Err(error) = restored {
+                eprintln!("cannot restore widget position: {error}");
             }
-            commands::apply_background_mode_to_window(&window, background_mode);
+            let background_mode = tracker.background_mode().unwrap_or(BackgroundMode::Glass);
+            app.manage(tracker);
+            background::initialize_widget_background(app, &window, background_mode);
+
+            let app_handle = app.handle().clone();
+            app.manage(position::PositionWriter::start(move |x, y| {
+                if let Err(error) = app_handle.state::<Tracker>().set_widget_position(x, y) {
+                    eprintln!("cannot save widget position: {error}");
+                }
+            })?);
             Ok(())
         })
-        .on_window_event(move |window, event| {
-            if window.label() != "main" {
-                return;
-            }
-            if let tauri::WindowEvent::Moved(position) = event
-                && let Err(error) = position_sender.send((position.x, position.y))
+        .on_window_event(|window, event| {
+            if window.label() == "main"
+                && let tauri::WindowEvent::Moved(position) = event
+                && let Some(writer) = window.try_state::<position::PositionWriter>()
+                && let Err(error) = writer.queue((position.x, position.y))
             {
                 eprintln!("cannot queue widget position: {error}");
             }
@@ -84,7 +86,9 @@ fn main() {
             commands::get_setting,
             commands::set_setting,
             commands::set_settings,
-            commands::apply_background_mode,
+            background::apply_background_mode,
+            background::get_widget_background_mode,
+            background::set_widget_idle_fade,
             commands::check_reminders,
             commands::set_reminder_muted,
             commands::send_reminder_notification,
@@ -96,25 +100,13 @@ fn main() {
             commands::delete_tasks,
             commands::save_text_file_via_dialog,
         ])
-        .run(tauri::generate_context!())
-        .expect("error while running tauri application");
-}
-
-#[cfg(test)]
-mod tests {
-    use super::persist_widget_positions;
-
-    #[test]
-    fn position_worker_applies_moves_in_send_order() {
-        let (sender, receiver) = std::sync::mpsc::channel();
-        sender.send((10, 20)).unwrap();
-        sender.send((30, 40)).unwrap();
-        sender.send((-50, 60)).unwrap();
-        drop(sender);
-
-        let mut written = Vec::new();
-        persist_widget_positions(receiver, |x, y| written.push((x, y)));
-
-        assert_eq!(written, vec![(10, 20), (30, 40), (-50, 60)]);
-    }
+        .build(tauri::generate_context!())
+        .expect("error while building tauri application")
+        .run(|app, event| {
+            if matches!(event, tauri::RunEvent::Exit)
+                && let Some(writer) = app.try_state::<position::PositionWriter>()
+            {
+                writer.flush_and_join();
+            }
+        });
 }

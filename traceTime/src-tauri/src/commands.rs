@@ -1,105 +1,11 @@
+use crate::position::PositionWriter;
 use crate::reminder::{ReminderCheckDto, ReminderLevel};
-use crate::tracker::{BackgroundMode, TaskDetailDto, TaskDto, Tracker, effective_background_mode};
-use serde::Serialize;
-use tauri::{Emitter, Manager, State, WebviewUrl, WebviewWindow, WebviewWindowBuilder};
+use crate::tracker::{TaskDetailDto, TaskDto, Tracker};
+use tauri::{Manager, State, WebviewUrl, WebviewWindowBuilder};
 use tauri_plugin_dialog::DialogExt;
 use tauri_plugin_notification::NotificationExt;
 
 type R<T> = Result<T, String>;
-
-#[derive(Debug, Serialize, Clone, Copy, PartialEq, Eq)]
-pub struct BackgroundModeResult {
-    pub requested: BackgroundMode,
-    pub effective: BackgroundMode,
-}
-
-#[cfg(target_os = "macos")]
-fn clear_native_background(window: &WebviewWindow) {
-    let _ = window_vibrancy::clear_vibrancy(window);
-}
-
-#[cfg(target_os = "windows")]
-fn clear_native_background(window: &WebviewWindow) {
-    let _ = window_vibrancy::clear_mica(window);
-    let _ = window_vibrancy::clear_acrylic(window);
-    let _ = window_vibrancy::clear_blur(window);
-}
-
-#[cfg(not(any(target_os = "macos", target_os = "windows")))]
-fn clear_native_background(_window: &WebviewWindow) {}
-
-#[cfg(target_os = "macos")]
-fn try_native_glass(window: &WebviewWindow) -> bool {
-    window_vibrancy::apply_vibrancy(
-        window,
-        window_vibrancy::NSVisualEffectMaterial::HudWindow,
-        Some(window_vibrancy::NSVisualEffectState::Active),
-        Some(8.0),
-    )
-    .is_ok()
-}
-
-#[cfg(target_os = "windows")]
-fn try_native_glass(window: &WebviewWindow) -> bool {
-    window_vibrancy::apply_mica(window, Some(true)).is_ok()
-        || window_vibrancy::apply_acrylic(window, Some((24, 24, 28, 190))).is_ok()
-}
-
-#[cfg(not(any(target_os = "macos", target_os = "windows")))]
-fn try_native_glass(_window: &WebviewWindow) -> bool {
-    // Linux blur is compositor-controlled; window-vibrancy exposes no portable API.
-    false
-}
-
-fn apply_native_background(window: &WebviewWindow, requested: BackgroundMode) -> bool {
-    clear_native_background(window);
-    requested == BackgroundMode::Glass && try_native_glass(window)
-}
-
-pub fn apply_background_mode_to_window(
-    window: &WebviewWindow,
-    requested: BackgroundMode,
-) -> BackgroundModeResult {
-    let result = BackgroundModeResult {
-        requested,
-        effective: effective_background_mode(requested, apply_native_background(window, requested)),
-    };
-    let _ = window.emit("background-mode-changed", result);
-    result
-}
-
-#[tauri::command]
-pub async fn apply_background_mode(app: tauri::AppHandle, mode: String) -> R<BackgroundModeResult> {
-    let requested = BackgroundMode::parse(&mode)?;
-    let window = app
-        .get_webview_window("main")
-        .ok_or("main window not found")?;
-    let native_window = window.clone();
-    let (sender, receiver) = std::sync::mpsc::sync_channel(1);
-    let scheduled = window.run_on_main_thread(move || {
-        let result = apply_background_mode_to_window(&native_window, requested);
-        let _ = sender.send(result);
-    });
-    if scheduled.is_err() {
-        let result = BackgroundModeResult {
-            requested,
-            effective: effective_background_mode(requested, false),
-        };
-        let _ = window.emit("background-mode-changed", result);
-        return Ok(result);
-    }
-    Ok(tauri::async_runtime::spawn_blocking(move || {
-        receiver.recv().unwrap_or(BackgroundModeResult {
-            requested,
-            effective: effective_background_mode(requested, false),
-        })
-    })
-    .await
-    .unwrap_or(BackgroundModeResult {
-        requested,
-        effective: effective_background_mode(requested, false),
-    }))
-}
 
 #[tauri::command]
 pub fn create_task(
@@ -297,9 +203,8 @@ fn validate_widget_position(x: i64, y: i64) -> R<(i32, i32)> {
 }
 
 #[tauri::command]
-pub fn set_widget_position(state: State<'_, Tracker>, x: i64, y: i64) -> R<()> {
-    let (x, y) = validate_widget_position(x, y)?;
-    state.set_widget_position(x, y)
+pub fn set_widget_position(writer: State<'_, PositionWriter>, x: i64, y: i64) -> R<()> {
+    writer.queue(validate_widget_position(x, y)?)
 }
 
 #[tauri::command]

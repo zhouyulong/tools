@@ -146,3 +146,29 @@ test('rebinding the same element does not register duplicate listeners', () => {
   assert.equal(element.listenerCount(), 5)
   assert.equal(scheduler.pendingCount(), 1)
 })
+
+test('native transition callbacks run only when faded state changes, even after a rejected fade', async () => {
+  const scheduler = createScheduler()
+  const element = new FakeElement()
+  const states: boolean[] = []
+  const controller = createIdleFadeController({
+    schedule: scheduler.setTimeout,
+    cancel: scheduler.clearTimeout,
+    onFadedChange: async faded => {
+      states.push(faded)
+      if (faded) throw new Error('native effect unavailable')
+    },
+  })
+  controller.bind(element as unknown as HTMLElement)
+  element.dispatch('mousemove')
+  scheduler.advance(10_000)
+  assert.equal(element.style.opacity, '0.2')
+  await Promise.resolve()
+  assert.deepEqual(states, [true])
+
+  element.dispatch('mouseenter')
+  element.dispatch('mousemove')
+  assert.equal(element.style.opacity, '1')
+  await new Promise(resolve => setImmediate(resolve))
+  assert.deepEqual(states, [true, false])
+})
