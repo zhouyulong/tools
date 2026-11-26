@@ -249,7 +249,7 @@ impl Tracker {
                 .query_row(
                     "SELECT EXISTS(
                         SELECT 1 FROM tasks
-                        WHERE id = ?1 AND status IN ('paused','running')
+                        WHERE id = ?1 AND status NOT IN ('done','abandoned')
                     )",
                     [parent_task_id],
                     |r| r.get(0),
@@ -735,7 +735,7 @@ mod tests {
         let tr = t();
         let a = tr.create_task("A", 60, None, None).unwrap();
         tr.pause("switch").unwrap();
-        let b = tr.create_task("B", 60, None, Some(&a.id)).unwrap();
+        let _b = tr.create_task("B", 60, None, Some(&a.id)).unwrap();
         tr.finish().unwrap();
         let paused = tr.list_paused().unwrap();
         assert_eq!(paused.len(), 1);
@@ -746,5 +746,52 @@ mod tests {
         let paused = tr.list_paused().unwrap();
         assert_eq!(paused.len(), 2);
         assert_eq!(paused[0].id, c.id);
+    }
+
+    #[test]
+    fn parent_validation_excludes_only_terminal_statuses() {
+        let tr = t();
+
+        let err = tr
+            .create_task("missing child", 60, None, Some("missing"))
+            .unwrap_err();
+        assert_eq!(err, "parent task not found or terminal");
+
+        let done_parent = tr.create_task("done parent", 60, None, None).unwrap();
+        tr.finish().unwrap();
+        let err = tr
+            .create_task("done child", 60, None, Some(&done_parent.id))
+            .unwrap_err();
+        assert_eq!(err, "parent task not found or terminal");
+
+        let abandoned_parent = tr.create_task("abandoned parent", 60, None, None).unwrap();
+        tr.abandon().unwrap();
+        let err = tr
+            .create_task("abandoned child", 60, None, Some(&abandoned_parent.id))
+            .unwrap_err();
+        assert_eq!(err, "parent task not found or terminal");
+
+        let pending_parent_id = uuid::Uuid::new_v4().to_string();
+        {
+            let conn = tr.conn.lock().unwrap();
+            conn.execute(
+                "INSERT INTO tasks (id, name, est_seconds, status, created_at)\n                 VALUES (?1, 'pending parent', 60, 'pending', '2026-11-26T00:00:00Z')",
+                [&pending_parent_id],
+            )
+            .unwrap();
+        }
+        let child = tr
+            .create_task("pending child", 60, None, Some(&pending_parent_id))
+            .unwrap();
+        assert_eq!(child.status, "running");
+        let conn = tr.conn.lock().unwrap();
+        let linked_parent: String = conn
+            .query_row(
+                "SELECT parent_task_id FROM tasks WHERE id=?1",
+                [&child.id],
+                |r| r.get(0),
+            )
+            .unwrap();
+        assert_eq!(linked_parent, pending_parent_id);
     }
 }
