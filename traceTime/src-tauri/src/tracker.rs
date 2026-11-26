@@ -2,6 +2,7 @@ use crate::reminder::{
     DueReminder, OVERDUE_INTERVAL_KEY, ReminderCheckDto, ReminderConfig, ReminderConfigDto,
     ReminderLevel, due_reminders, parse_overdue_interval,
 };
+use crate::store::OVERDUE_UPGRADE_CUTOFF_KEY;
 use chrono::{DateTime, FixedOffset, TimeDelta, Utc};
 use rusqlite::{Connection, Error as SqlError};
 use serde::Serialize;
@@ -98,15 +99,15 @@ impl Tracker {
         (end - start).max(TimeDelta::zero())
     }
 
-    fn closed_work_duration(
+    fn visit_closed_work(
         conn: &Connection,
         task_id: &str,
-        through: Option<DateTime<FixedOffset>>,
-    ) -> Result<TimeDelta, String> {
+        mut visit: impl FnMut(DateTime<FixedOffset>, DateTime<FixedOffset>),
+    ) -> Result<(), String> {
         let mut stmt = conn
             .prepare(
                 "SELECT started_at, ended_at FROM segments
-             WHERE task_id = ?1 AND kind = 'work' AND ended_at IS NOT NULL",
+                 WHERE task_id = ?1 AND kind = 'work' AND ended_at IS NOT NULL ORDER BY id",
             )
             .map_err(|e| e.to_string())?;
         let rows = stmt
@@ -114,19 +115,24 @@ impl Tracker {
                 Ok((r.get::<_, String>(0)?, r.get::<_, String>(1)?))
             })
             .map_err(|e| e.to_string())?;
-        let mut total = TimeDelta::zero();
         for row in rows {
             let (start, end) = row.map_err(|e| e.to_string())?;
-            let start = Self::parse_timestamp(&start)?;
-            let end = Self::parse_timestamp(&end)?;
-            total += Self::elapsed(start, through.map_or(end, |at| end.min(at)));
+            visit(Self::parse_timestamp(&start)?, Self::parse_timestamp(&end)?);
         }
+        Ok(())
+    }
+
+    fn closed_work_duration(conn: &Connection, task_id: &str) -> Result<TimeDelta, String> {
+        let mut total = TimeDelta::zero();
+        Self::visit_closed_work(conn, task_id, |start, end| {
+            total += Self::elapsed(start, end)
+        })?;
         Ok(total)
     }
 
     fn closed_net_seconds(conn: &Connection, task_id: &str) -> Result<i64, String> {
         // Retain subsecond precision across all segments; truncate only at the seconds API boundary.
-        Ok(Self::closed_work_duration(conn, task_id, None)?.num_seconds())
+        Ok(Self::closed_work_duration(conn, task_id)?.num_seconds())
     }
 
     // Event ids preserve append order even when wall-clock timestamps move backwards.
@@ -144,23 +150,18 @@ impl Tracker {
         }
     }
 
-    fn net_seconds(conn: &Connection, task: &TaskDto) -> Result<i64, String> {
-        Self::net_seconds_through(conn, task, None)
+    fn running_start(conn: &Connection, task: &TaskDto) -> Result<DateTime<FixedOffset>, String> {
+        let at = Self::latest_start_at(conn, &task.id)?
+            .ok_or_else(|| "running task has no start event".to_string())?;
+        Self::parse_timestamp(&at)
     }
 
-    fn net_seconds_through(
-        conn: &Connection,
-        task: &TaskDto,
-        through: Option<DateTime<FixedOffset>>,
-    ) -> Result<i64, String> {
-        let closed = Self::closed_work_duration(conn, &task.id, through)?;
+    fn net_seconds(conn: &Connection, task: &TaskDto) -> Result<i64, String> {
+        let closed = Self::closed_work_duration(conn, &task.id)?;
         if task.status != "running" {
             return Ok(closed.num_seconds());
         }
-        let started_at = Self::latest_start_at(conn, &task.id)?
-            .ok_or_else(|| "running task has no start event".to_string())?;
-        let end = through.unwrap_or_else(|| Utc::now().fixed_offset());
-        let live = Self::elapsed(Self::parse_timestamp(&started_at)?, end);
+        let live = Self::elapsed(Self::running_start(conn, task)?, Utc::now().fixed_offset());
         // The live segment participates in the same sum, without per-segment rounding.
         Ok((closed + live).num_seconds())
     }
@@ -440,6 +441,86 @@ impl Tracker {
         }
     }
 
+    pub(crate) fn snapshot_overdue_upgrade(
+        conn: &Connection,
+        backfill_v5: bool,
+    ) -> Result<(), String> {
+        let at = Self::get_setting_from_conn(conn, OVERDUE_UPGRADE_CUTOFF_KEY)?
+            .ok_or("missing overdue upgrade cutoff")?;
+        let at = Self::parse_timestamp(&at)?;
+        let mut stmt = conn
+            .prepare(&format!(
+                "SELECT {TASK_COLUMNS}, overdue_schedule_started_at FROM tasks
+             WHERE status IN ('running', 'paused') AND overdue_schedule_started_at IS NOT NULL"
+            ))
+            .map_err(|e| e.to_string())?;
+        let rows = stmt
+            .query_map([], |row| {
+                Ok((
+                    row_to_task(row)?,
+                    row.get::<_, String>("overdue_schedule_started_at")?,
+                ))
+            })
+            .map_err(|e| e.to_string())?;
+        let tasks = rows
+            .collect::<Result<Vec<_>, _>>()
+            .map_err(|e| e.to_string())?;
+        for (task, v5_at) in tasks {
+            let cutoff_at = at.max(Self::parse_timestamp(&v5_at)?);
+            let last_legacy_fire = if backfill_v5 {
+                Self::last_legacy_overdue_fire(conn, &task.id)?
+            } else {
+                None
+            };
+            let mut closed = TimeDelta::zero();
+            let mut legacy_peak = TimeDelta::zero();
+            Self::visit_closed_work(conn, &task.id, |start, end| {
+                // v5 may already have closed a formerly live segment using a rolled-back clock.
+                // Its legacy fire had the preceding closed work plus the live time at firing.
+                // We don't know which segment was live: take the greatest possible total.
+                if let Some(fired_at) = last_legacy_fire {
+                    legacy_peak = legacy_peak.max(closed + Self::elapsed(start, fired_at));
+                }
+                closed += Self::elapsed(start, end);
+            })?;
+            let cutoff = if task.status == "running" {
+                let start = Self::running_start(conn, &task)?;
+                closed
+                    + Self::elapsed(
+                        start,
+                        last_legacy_fire.map_or(cutoff_at, |fired_at| cutoff_at.max(fired_at)),
+                    )
+            } else {
+                closed
+            };
+            conn.execute(
+                "UPDATE tasks SET overdue_upgrade_cutoff_net=?2 WHERE id=?1",
+                rusqlite::params![task.id, cutoff.max(legacy_peak).num_seconds()],
+            )
+            .map_err(|e| e.to_string())?;
+        }
+        Ok(())
+    }
+
+    fn last_legacy_overdue_fire(
+        conn: &Connection,
+        task_id: &str,
+    ) -> Result<Option<DateTime<FixedOffset>>, String> {
+        let mut stmt = conn.prepare(
+            "SELECT fired_at FROM reminder_fired WHERE task_id=?1 AND node GLOB 'overdue:[0-9]*'"
+        ).map_err(|e| e.to_string())?;
+        let rows = stmt
+            .query_map([task_id], |row| row.get::<_, String>(0))
+            .map_err(|e| e.to_string())?;
+        let mut latest = None;
+        for at in rows {
+            latest = latest.max(Some(Self::parse_timestamp(
+                &at.map_err(|e| e.to_string())?,
+            )?));
+        }
+        Ok(latest)
+    }
+
     fn reminder_config_from_conn(conn: &Connection) -> Result<ReminderConfig, String> {
         ReminderConfig::from_settings(|key| Self::get_setting_from_conn(conn, key))
     }
@@ -450,24 +531,16 @@ impl Tracker {
         net_seconds: i64,
         config: ReminderConfig,
     ) -> Result<Vec<DueReminder>, String> {
-        let (interval_changed_at_net, schedule_started_at): (Option<i64>, Option<String>) = conn
+        let (interval_changed_at_net, upgrade_cutoff_net): (Option<i64>, Option<i64>) = conn
             .query_row(
-                "SELECT overdue_interval_changed_at_net, overdue_schedule_started_at FROM tasks WHERE id=?1",
+                "SELECT overdue_interval_changed_at_net, overdue_upgrade_cutoff_net FROM tasks WHERE id=?1",
                 [&task.id],
                 |row| Ok((row.get(0)?, row.get(1)?)),
             )
             .map_err(|e| e.to_string())?;
-        let upgrade_from_net = if let Some(at) = schedule_started_at {
-            // Exclude milestones already reached at upgrade, using net time so
-            // pauses and work segments that straddle the cutoff are handled correctly.
-            let cutoff = Self::parse_timestamp(&at)?;
-            Some(Self::net_seconds_through(conn, task, Some(cutoff))? + 1)
-        } else {
-            None
-        };
         let overdue_from_net = interval_changed_at_net
             .into_iter()
-            .chain(upgrade_from_net)
+            .chain(upgrade_cutoff_net.map(|net| net + 1))
             .max();
         let task_config = config.for_task(task.est_seconds, overdue_from_net);
         Ok(due_reminders(net_seconds, &task_config))
@@ -593,6 +666,9 @@ impl Tracker {
         &self,
         values: &std::collections::BTreeMap<String, String>,
     ) -> Result<(), String> {
+        if values.contains_key(OVERDUE_UPGRADE_CUTOFF_KEY) {
+            return Err("overdue upgrade cutoff is migration-owned".into());
+        }
         let mut conn = self.conn.lock().map_err(|_| "lock poisoned")?;
         let tx = conn.transaction().map_err(|e| e.to_string())?;
         let interval_changed = if let Some(value) = values.get(OVERDUE_INTERVAL_KEY) {
