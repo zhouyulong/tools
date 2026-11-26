@@ -15,6 +15,7 @@
     type Task,
   } from '../lib/api'
   import { createReminderPulseQueue, playReminderChime, type ReminderPulse } from '../lib/reminder'
+  import { createIdleFadeController } from '../lib/idleFade'
   import { createWidgetHeightObserver } from '../lib/widgetHeight'
   import { backgroundClass, normalizeBackgroundMode, type BackgroundMode } from '../lib/settings'
   import LongPauseBanner from './LongPauseBanner.svelte'
@@ -33,6 +34,7 @@
   let reminderConfig: ReminderConfig | null = null
   let pulse: ReminderPulse | null = null
   const pulses = createReminderPulseQueue(next => { pulse = next })
+  const idleFade = createIdleFadeController()
   let reminderTaskId: string | null = null
   let processedReminderKeys = new Set<string>()
   let effectiveBackground: BackgroundMode = 'translucent'
@@ -131,12 +133,16 @@
     void loadLongPauseHours()
     void refreshAll()
     interval = setInterval(refreshAll, 1000)
+    idleFade.bind(main)
     const observer = createWidgetHeightObserver(main, async height => {
       widgetHeight = height
       await setWidgetHeight(height)
     })
     measureNow = observer.measureNow
-    return observer.cleanup
+    return () => {
+      observer.cleanup()
+      idleFade.destroy()
+    }
   })
   onDestroy(() => {
     destroyed = true
@@ -175,6 +181,7 @@
 
 <style>
   main { display: flex; flex-direction: column; width: 100%; height: auto; min-height: 140px; overflow: hidden; color: #f0f0f0; }
+  main:hover { opacity: 1 !important; transition-duration: 0ms !important; }
   .drag-region { flex: none; width: 100%; height: 8px; cursor: grab; user-select: none; }
   .drag-region:active { cursor: grabbing; }
   .background-glass { background: rgba(24, 24, 28, 0.52); }
