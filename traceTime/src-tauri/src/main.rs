@@ -24,6 +24,10 @@ fn main() {
             commands::abandon_task,
             commands::current_task,
             commands::list_finished,
+            commands::list_paused,
+            commands::task_detail,
+            commands::get_setting,
+            commands::set_setting,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
