@@ -40,12 +40,6 @@ fn row_to_task(r: &rusqlite::Row) -> rusqlite::Result<TaskDto> {
     })
 }
 
-fn elapsed_millis(start: &str, end: &str) -> Option<i64> {
-    let start = chrono::DateTime::parse_from_rfc3339(start).ok()?;
-    let end = chrono::DateTime::parse_from_rfc3339(end).ok()?;
-    Some((end - start).num_milliseconds().max(0))
-}
-
 impl Tracker {
     pub fn new(conn: Connection) -> Tracker {
         Tracker {
@@ -68,35 +62,27 @@ impl Tracker {
     }
 
     fn net_seconds(conn: &Connection, task_id: &str) -> i64 {
-        let current = now();
-        let mut stmt = match conn.prepare(
-            "SELECT started_at, ended_at FROM segments WHERE task_id = ?1 AND kind = 'work'",
-        ) {
-            Ok(stmt) => stmt,
-            Err(_) => return 0,
-        };
-        let rows = match stmt.query_map([task_id], |row| {
-            Ok((row.get::<_, String>(0)?, row.get::<_, Option<String>>(1)?))
-        }) {
-            Ok(rows) => rows,
-            Err(_) => return 0,
-        };
-        rows.filter_map(Result::ok)
-            .filter_map(|(start, end)| elapsed_millis(&start, end.as_deref().unwrap_or(&current)))
-            .sum()
+        conn.query_row(
+            "SELECT COALESCE(SUM(
+                CAST(strftime('%s', COALESCE(ended_at, ?2)) AS INTEGER)
+              - CAST(strftime('%s', started_at) AS INTEGER)
+             ), 0)
+             FROM segments WHERE task_id = ?1 AND kind = 'work'",
+            rusqlite::params![task_id, now()],
+            |r| r.get(0),
+        )
+        .unwrap_or(0)
     }
 
     fn gross_seconds(conn: &Connection, task_id: &str) -> i64 {
-        let created_at = conn
-            .query_row(
-                "SELECT created_at FROM tasks WHERE id = ?1",
-                [task_id],
-                |r| r.get::<_, String>(0),
-            )
-            .ok();
-        created_at
-            .and_then(|created_at| elapsed_millis(&created_at, &now()))
-            .unwrap_or(0)
+        conn.query_row(
+            "SELECT CAST(strftime('%s', ?2) AS INTEGER)
+                   - CAST(strftime('%s', created_at) AS INTEGER)
+             FROM tasks WHERE id = ?1",
+            rusqlite::params![task_id, now()],
+            |r| r.get(0),
+        )
+        .unwrap_or(0)
     }
 
     fn get_task(conn: &Connection, task_id: &str) -> Option<TaskDto> {
@@ -291,18 +277,23 @@ mod tests {
     fn pause_resume_accumulates_only_work_segments() {
         let tr = t();
         tr.create_task("A", 100, None).unwrap();
-        std::thread::sleep(std::time::Duration::from_millis(50));
+        std::thread::sleep(std::time::Duration::from_millis(1100));
         tr.pause("rest").unwrap();
         let paused = tr.current().unwrap().unwrap();
         assert_eq!(paused.status, "paused");
-        assert!(paused.net_seconds >= 40, "net {}", paused.net_seconds);
-        std::thread::sleep(std::time::Duration::from_millis(60));
+        assert!(paused.net_seconds >= 1, "net {}", paused.net_seconds);
+        std::thread::sleep(std::time::Duration::from_millis(1200));
+        let still_paused = tr.current().unwrap().unwrap();
+        assert_eq!(still_paused.net_seconds, paused.net_seconds);
         tr.resume().unwrap();
-        std::thread::sleep(std::time::Duration::from_millis(50));
+        std::thread::sleep(std::time::Duration::from_millis(1100));
         let running = tr.current().unwrap().unwrap();
-        // 第二段至少 40ms；暂停的 60ms 不得计入
-        assert!(running.net_seconds >= 80, "net {}", running.net_seconds);
-        assert!(running.net_seconds < 130, "net {}", running.net_seconds);
+        // 第二段至少 1 秒；暂停的 1.2 秒不得计入
+        assert!(
+            running.net_seconds >= still_paused.net_seconds + 1,
+            "net {}",
+            running.net_seconds
+        );
     }
 
     #[test]
@@ -317,11 +308,11 @@ mod tests {
     fn finish_fixes_totals_and_events() {
         let tr = t();
         let task = tr.create_task("A", 60, None).unwrap();
-        std::thread::sleep(std::time::Duration::from_millis(30));
+        std::thread::sleep(std::time::Duration::from_millis(300));
         let done = tr.finish().unwrap();
         assert_eq!(done.status, "done");
         assert!(done.finished_at.is_some());
-        assert!(done.net_seconds >= 25);
+        assert!(done.net_seconds <= 1, "net {}", done.net_seconds);
         assert!(tr.current().unwrap().is_none()); // 无活动任务返回 None
         // 事件齐全
         let conn = tr.conn.lock().unwrap();
