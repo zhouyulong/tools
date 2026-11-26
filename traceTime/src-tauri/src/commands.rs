@@ -1,5 +1,6 @@
 use crate::tracker::{TaskDetailDto, TaskDto, Tracker};
 use tauri::{Manager, State, WebviewUrl, WebviewWindowBuilder};
+use tauri_plugin_dialog::DialogExt;
 
 type R<T> = Result<T, String>;
 
@@ -102,6 +103,33 @@ pub fn delete_tasks(state: State<'_, Tracker>, ids: Vec<String>) -> R<()> {
 }
 
 #[tauri::command]
+pub async fn save_text_file_via_dialog(
+    app: tauri::AppHandle,
+    contents: String,
+    file_name: String,
+) -> R<Option<String>> {
+    // Dialog and filesystem I/O must stay off the main thread.
+    tauri::async_runtime::spawn_blocking(move || {
+        let selected = app
+            .dialog()
+            .file()
+            .set_file_name(&file_name)
+            .add_filter("traceTime JSON", &["json"])
+            .blocking_save_file();
+        match selected {
+            None => Ok(None),
+            Some(path) => {
+                let path = path.into_path().map_err(|e| e.to_string())?;
+                std::fs::write(&path, contents).map_err(|e| e.to_string())?;
+                Ok(Some(path.to_string_lossy().into_owned()))
+            }
+        }
+    })
+    .await
+    .map_err(|e| e.to_string())?
+}
+
+#[tauri::command]
 pub fn set_widget_height(app: tauri::AppHandle, height: f64) -> R<()> {
     if !height.is_finite() {
         return Err("invalid widget height".into());
@@ -110,6 +138,6 @@ pub fn set_widget_height(app: tauri::AppHandle, height: f64) -> R<()> {
         .get_webview_window("main")
         .ok_or("main window not found")?;
     window
-        .set_size(tauri::LogicalSize::new(260.0, height.clamp(140.0, 220.0)))
+        .set_size(tauri::LogicalSize::new(260.0, height.clamp(140.0, 240.0)))
         .map_err(|e| e.to_string())
 }

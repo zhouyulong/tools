@@ -16,7 +16,6 @@ fn main() {
 
     tauri::Builder::default()
         .plugin(tauri_plugin_dialog::init())
-        .plugin(tauri_plugin_fs::init())
         .manage(Tracker::new(conn))
         .invoke_handler(tauri::generate_handler![
             commands::create_task,
@@ -34,6 +33,7 @@ fn main() {
             commands::set_widget_height,
             commands::delete_task,
             commands::delete_tasks,
+            commands::save_text_file_via_dialog,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

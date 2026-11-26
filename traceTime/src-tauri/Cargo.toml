@@ -22,4 +22,3 @@ chrono = "0.4"
 directories = "5"
 tauri = { version = "2.12.7", features = [] }
 tauri-plugin-dialog = "2"
-tauri-plugin-fs = "2"
