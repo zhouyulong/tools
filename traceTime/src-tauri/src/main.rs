@@ -28,6 +28,7 @@ fn main() {
             commands::task_detail,
             commands::get_setting,
             commands::set_setting,
+            commands::open_history,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

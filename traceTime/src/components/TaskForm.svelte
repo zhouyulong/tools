@@ -1,6 +1,6 @@
 <script lang="ts">
   import { onMount } from 'svelte'
-  import { createTask, EST_PRESETS, resume, TAG_PRESETS, type Task } from '../lib/api'
+  import { createTask, EST_PRESETS, openHistory, resume, TAG_PRESETS, type Task } from '../lib/api'
   import { fmtHMS } from '../lib/format'
 
   export let paused: Task[] = []
@@ -70,6 +70,11 @@
     </div>
   {/if}
 
+  <div class="form-header">
+    <span>开始任务</span>
+    <button class="ghost" type="button" on:click={openHistory}>历史</button>
+  </div>
+
   <form class="form" on:submit|preventDefault={submit}>
     <input class="name" placeholder="任务名" bind:value={name} required />
     <div class="row">
@@ -99,6 +104,9 @@
 
 <style>
   .task-form { padding: 10px; }
+  .form-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; color: #aaaeb5; font-size: 11px; }
+  .ghost { padding: 2px 7px; border: 1px solid rgba(255, 255, 255, 0.16); border-radius: 4px; color: #d8d8da; background: transparent; cursor: pointer; }
+  .ghost:hover { background: rgba(255, 255, 255, 0.08); }
   .form { display: flex; flex-direction: column; gap: 6px; }
   .row { display: flex; gap: 6px; }
   .name { width: 100%; box-sizing: border-box; }

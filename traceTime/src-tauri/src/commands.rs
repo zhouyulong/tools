@@ -1,5 +1,5 @@
 use crate::tracker::{TaskDetailDto, TaskDto, Tracker};
-use tauri::State;
+use tauri::{Manager, State, WebviewUrl, WebviewWindowBuilder};
 
 type R<T> = Result<T, String>;
 
@@ -67,4 +67,26 @@ pub fn get_setting(state: State<'_, Tracker>, key: String) -> R<Option<String>> 
 #[tauri::command]
 pub fn set_setting(state: State<'_, Tracker>, key: String, value: String) -> R<()> {
     state.set_setting(&key, &value)
+}
+
+#[tauri::command]
+pub fn open_history(app: tauri::AppHandle) -> R<()> {
+    if let Some(window) = app.get_webview_window("history") {
+        window.show().map_err(|e| e.to_string())?;
+        window.set_focus().map_err(|e| e.to_string())?;
+        return Ok(());
+    }
+
+    WebviewWindowBuilder::new(
+        &app,
+        "history",
+        WebviewUrl::App("index.html#history".into()),
+    )
+    .title("traceTime 历史")
+    .inner_size(480.0, 520.0)
+    .resizable(true)
+    .always_on_top(true)
+    .build()
+    .map(|_| ())
+    .map_err(|e| e.to_string())
 }
