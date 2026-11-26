@@ -50,7 +50,7 @@
     <LongPauseBanner {task} {thresholdHours} {nowTick} {refreshAll} />
   {/if}
 
-  {#if task && (task.status === 'running' || switchingTask)}
+  {#if task}
     <WidgetRunning
       {task}
       on:switching={(event) => (switchingTask = event.detail)}
