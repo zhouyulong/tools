@@ -2,10 +2,33 @@
 
 桌面悬浮计时小组件：记录完成任务的真实时间与轨迹。
 
-## 启动（开发模式）
+## 环境要求
+
+- Node.js ≥ 20 与 pnpm
+- Rust 工具链（rustup，stable）
+- 系统依赖见 [Tauri 官方前置条件](https://tauri.app/start/prerequisites/)
+
+## 开发模式（日常调试）
 
     pnpm install
     pnpm tauri dev
+
+## 构建生产版本
+
+    pnpm tauri build
+
+构建产物（.app / .msi / .deb 等）位于 `src-tauri/target/release/bundle/` 下。仅验证可执行文件（不打安装包）可用：
+
+    pnpm tauri build --no-bundle
+    # 产物：src-tauri/target/release/traceTime（或平台对应名称）
+
+## 日常使用
+
+1. 启动后小组件显示创建表单：输入任务名，选择预计时长（预设或自定义分钟数）和标签（科研 / 行政 / 杂务 / 无标签），点"开始"。
+2. 计时开始后小组件显示大号计时和剩余时间；点 ⏸ 暂停时需选一个原因（临时离开 / 被干扰 / 切换任务 / 其他）。
+3. 暂停后点 ▶ 继续；点 ✔ 完成；点 ✕ 放弃（需二次确认）。
+4. 数据自动保存在本地 SQLite（系统应用数据目录），重启后运行中的任务会恢复。
+5. 更多说明：设计文档见 `docs/2026-11-26-tracetime-design.md`；M1 人工验收清单见 `docs/m1-acceptance.md`。
 
 ## 当前功能（M1）
 
@@ -17,4 +40,4 @@
 
 ## 技术栈
 
-Tauri 2 + Svelte 5 + SQLite (rusqlite)。设计文档见 `docs/2026-11-26-tracetime-design.md`。
+Tauri 2 + Svelte 5 + SQLite (rusqlite)。
