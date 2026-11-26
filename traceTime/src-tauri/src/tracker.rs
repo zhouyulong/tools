@@ -18,6 +18,27 @@ pub struct TaskDto {
     pub paused_since: Option<String>,
 }
 
+#[derive(Debug, Serialize, Clone)]
+pub struct SegmentDto {
+    pub started_at: String,
+    pub ended_at: String,
+    pub kind: String,
+}
+
+#[derive(Debug, Serialize, Clone)]
+pub struct EventDto {
+    pub at: String,
+    pub kind: String,
+    pub detail: Option<String>,
+}
+
+#[derive(Debug, Serialize, Clone)]
+pub struct TaskDetailDto {
+    pub task: TaskDto,
+    pub segments: Vec<SegmentDto>,
+    pub events: Vec<EventDto>,
+}
+
 pub struct Tracker {
     pub(crate) conn: Mutex<Connection>,
 }
@@ -365,6 +386,77 @@ impl Tracker {
             Self::with_live_net(&conn, task)
         })
         .collect()
+    }
+
+    pub fn get_setting(&self, key: &str) -> Result<Option<String>, String> {
+        let conn = self.conn.lock().map_err(|_| "lock poisoned")?;
+        match conn.query_row("SELECT value FROM settings WHERE key=?1", [key], |r| {
+            r.get(0)
+        }) {
+            Ok(v) => Ok(Some(v)),
+            Err(rusqlite::Error::QueryReturnedNoRows) => Ok(None),
+            Err(e) => Err(e.to_string()),
+        }
+    }
+
+    pub fn set_setting(&self, key: &str, value: &str) -> Result<(), String> {
+        let conn = self.conn.lock().map_err(|_| "lock poisoned")?;
+        conn.execute(
+            "INSERT INTO settings (key, value) VALUES (?1, ?2)
+             ON CONFLICT(key) DO UPDATE SET value=excluded.value",
+            [key, value],
+        )
+        .map_err(|e| e.to_string())?;
+        Ok(())
+    }
+
+    pub fn setting_or(&self, key: &str, default: &str) -> Result<String, String> {
+        Ok(self
+            .get_setting(key)?
+            .unwrap_or_else(|| default.to_string()))
+    }
+
+    pub fn task_detail(&self, task_id: &str) -> Result<TaskDetailDto, String> {
+        let conn = self.conn.lock().map_err(|_| "lock poisoned")?;
+        let task = match Self::get_task(&conn, task_id)? {
+            Some(t) => Self::with_live_net(&conn, t)?,
+            None => return Err("task not found".into()),
+        };
+        let mut stmt = conn
+            .prepare(
+                "SELECT started_at, ended_at, kind FROM segments WHERE task_id=?1 ORDER BY started_at, id",
+            )
+            .map_err(|e| e.to_string())?;
+        let segments = stmt
+            .query_map([task_id], |r| {
+                Ok(SegmentDto {
+                    started_at: r.get(0)?,
+                    ended_at: r.get(1)?,
+                    kind: r.get(2)?,
+                })
+            })
+            .map_err(|e| e.to_string())?
+            .filter_map(|r| r.ok())
+            .collect();
+        let mut stmt = conn
+            .prepare("SELECT at, kind, detail FROM events WHERE task_id=?1 ORDER BY at, id")
+            .map_err(|e| e.to_string())?;
+        let events = stmt
+            .query_map([task_id], |r| {
+                Ok(EventDto {
+                    at: r.get(0)?,
+                    kind: r.get(1)?,
+                    detail: r.get(2)?,
+                })
+            })
+            .map_err(|e| e.to_string())?
+            .filter_map(|r| r.ok())
+            .collect();
+        Ok(TaskDetailDto {
+            task,
+            segments,
+            events,
+        })
     }
 
     pub fn list_finished(&self) -> Result<Vec<TaskDto>, String> {
@@ -746,6 +838,38 @@ mod tests {
         let paused = tr.list_paused().unwrap();
         assert_eq!(paused.len(), 2);
         assert_eq!(paused[0].id, c.id);
+    }
+
+    #[test]
+    fn settings_roundtrip_and_default() {
+        let tr = t();
+        assert_eq!(tr.get_setting("long_pause_hours").unwrap(), None);
+        assert_eq!(tr.setting_or("long_pause_hours", "2").unwrap(), "2");
+        tr.set_setting("long_pause_hours", "1").unwrap();
+        assert_eq!(tr.setting_or("long_pause_hours", "2").unwrap(), "1");
+    }
+
+    #[test]
+    fn task_detail_returns_segments_and_events_in_order() {
+        let tr = t();
+        let task = tr.create_task("A", 60, None, None).unwrap();
+        std::thread::sleep(std::time::Duration::from_millis(1100));
+        tr.pause("rest").unwrap();
+        std::thread::sleep(std::time::Duration::from_millis(1100));
+        tr.resume().unwrap();
+        std::thread::sleep(std::time::Duration::from_millis(1100));
+        tr.finish().unwrap();
+        let d = tr.task_detail(&task.id).unwrap();
+        assert_eq!(d.task.id, task.id);
+        assert_eq!(d.segments.len(), 2);
+        assert!(d.segments.iter().all(|s| s.kind == "work"));
+        let kinds: Vec<&str> = d.events.iter().map(|e| e.kind.as_str()).collect();
+        assert_eq!(
+            kinds,
+            vec!["created", "started", "paused", "resumed", "finished"]
+        );
+        let err = tr.task_detail("nope").unwrap_err();
+        assert_eq!(err, "task not found");
     }
 
     #[test]
