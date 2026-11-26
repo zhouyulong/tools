@@ -21,9 +21,6 @@
 <main>
   {#if task && task.status !== 'done' && task.status !== 'abandoned'}
     <WidgetRunning {task} />
-  {:else if task}
-    <p class="done-hint">上一个任务已结束</p>
-    <TaskForm />
   {:else}
     <TaskForm />
   {/if}
@@ -31,5 +28,4 @@
 
 <style>
   main { background: rgba(30, 30, 34, 0.85); color: #f0f0f0; min-height: 100vh; }
-  .done-hint { font-size: 11px; opacity: 0.5; text-align: center; margin: 4px 0 0; }
 </style>
