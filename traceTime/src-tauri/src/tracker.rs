@@ -2,6 +2,7 @@ use crate::reminder::{
     DueReminder, OVERDUE_INTERVAL_KEY, ReminderCheckDto, ReminderConfig, ReminderConfigDto,
     ReminderLevel, due_reminders, parse_overdue_interval,
 };
+use chrono::{DateTime, FixedOffset, TimeDelta, Utc};
 use rusqlite::{Connection, Error as SqlError};
 use serde::Serialize;
 use std::sync::Mutex;
@@ -89,13 +90,19 @@ impl Tracker {
         .map_err(|e| e.to_string())
     }
 
-    fn elapsed(started_at: &str, ended_at: &str) -> Result<chrono::TimeDelta, String> {
-        let start = chrono::DateTime::parse_from_rfc3339(started_at).map_err(|e| e.to_string())?;
-        let end = chrono::DateTime::parse_from_rfc3339(ended_at).map_err(|e| e.to_string())?;
-        Ok((end - start).max(chrono::TimeDelta::zero()))
+    fn parse_timestamp(at: &str) -> Result<DateTime<FixedOffset>, String> {
+        DateTime::parse_from_rfc3339(at).map_err(|e| e.to_string())
     }
 
-    fn closed_work_duration(conn: &Connection, task_id: &str) -> Result<chrono::TimeDelta, String> {
+    fn elapsed(start: DateTime<FixedOffset>, end: DateTime<FixedOffset>) -> TimeDelta {
+        (end - start).max(TimeDelta::zero())
+    }
+
+    fn closed_work_duration(
+        conn: &Connection,
+        task_id: &str,
+        through: Option<DateTime<FixedOffset>>,
+    ) -> Result<TimeDelta, String> {
         let mut stmt = conn
             .prepare(
                 "SELECT started_at, ended_at FROM segments
@@ -107,17 +114,19 @@ impl Tracker {
                 Ok((r.get::<_, String>(0)?, r.get::<_, String>(1)?))
             })
             .map_err(|e| e.to_string())?;
-        let mut total = chrono::TimeDelta::zero();
+        let mut total = TimeDelta::zero();
         for row in rows {
             let (start, end) = row.map_err(|e| e.to_string())?;
-            total += Self::elapsed(&start, &end)?;
+            let start = Self::parse_timestamp(&start)?;
+            let end = Self::parse_timestamp(&end)?;
+            total += Self::elapsed(start, through.map_or(end, |at| end.min(at)));
         }
         Ok(total)
     }
 
     fn closed_net_seconds(conn: &Connection, task_id: &str) -> Result<i64, String> {
         // Retain subsecond precision across all segments; truncate only at the seconds API boundary.
-        Ok(Self::closed_work_duration(conn, task_id)?.num_seconds())
+        Ok(Self::closed_work_duration(conn, task_id, None)?.num_seconds())
     }
 
     // Event ids preserve append order even when wall-clock timestamps move backwards.
@@ -136,13 +145,22 @@ impl Tracker {
     }
 
     fn net_seconds(conn: &Connection, task: &TaskDto) -> Result<i64, String> {
-        let closed = Self::closed_work_duration(conn, &task.id)?;
+        Self::net_seconds_through(conn, task, None)
+    }
+
+    fn net_seconds_through(
+        conn: &Connection,
+        task: &TaskDto,
+        through: Option<DateTime<FixedOffset>>,
+    ) -> Result<i64, String> {
+        let closed = Self::closed_work_duration(conn, &task.id, through)?;
         if task.status != "running" {
             return Ok(closed.num_seconds());
         }
         let started_at = Self::latest_start_at(conn, &task.id)?
             .ok_or_else(|| "running task has no start event".to_string())?;
-        let live = Self::elapsed(&started_at, &now())?;
+        let end = through.unwrap_or_else(|| Utc::now().fixed_offset());
+        let live = Self::elapsed(Self::parse_timestamp(&started_at)?, end);
         // The live segment participates in the same sum, without per-segment rounding.
         Ok((closed + live).num_seconds())
     }
@@ -155,7 +173,11 @@ impl Tracker {
                 |r| r.get(0),
             )
             .map_err(|e| e.to_string())?;
-        Ok(Self::elapsed(&created_at, ended_at)?.num_seconds())
+        Ok(Self::elapsed(
+            Self::parse_timestamp(&created_at)?,
+            Self::parse_timestamp(ended_at)?,
+        )
+        .num_seconds())
     }
 
     fn get_task(conn: &Connection, task_id: &str) -> Result<Option<TaskDto>, String> {
@@ -428,14 +450,26 @@ impl Tracker {
         net_seconds: i64,
         config: ReminderConfig,
     ) -> Result<Vec<DueReminder>, String> {
-        let interval_changed_at_net = conn
+        let (interval_changed_at_net, schedule_started_at): (Option<i64>, Option<String>) = conn
             .query_row(
-                "SELECT overdue_interval_changed_at_net FROM tasks WHERE id=?1",
+                "SELECT overdue_interval_changed_at_net, overdue_schedule_started_at FROM tasks WHERE id=?1",
                 [&task.id],
-                |row| row.get(0),
+                |row| Ok((row.get(0)?, row.get(1)?)),
             )
             .map_err(|e| e.to_string())?;
-        let task_config = config.for_task(task.est_seconds, interval_changed_at_net);
+        let upgrade_from_net = if let Some(at) = schedule_started_at {
+            // Exclude milestones already reached at upgrade, using net time so
+            // pauses and work segments that straddle the cutoff are handled correctly.
+            let cutoff = Self::parse_timestamp(&at)?;
+            Some(Self::net_seconds_through(conn, task, Some(cutoff))? + 1)
+        } else {
+            None
+        };
+        let overdue_from_net = interval_changed_at_net
+            .into_iter()
+            .chain(upgrade_from_net)
+            .max();
+        let task_config = config.for_task(task.est_seconds, overdue_from_net);
         Ok(due_reminders(net_seconds, &task_config))
     }
 

@@ -14,12 +14,12 @@ test('reminder levels floor fractional thresholds like Rust', async () => {
   assert.equal(reminderLevel(58, 61, { ...config, reminderEnabled: false }), 'none')
 })
 
-test('countdown crosses the configured and floored due boundary, not the raw estimate', async () => {
-  const { reminderCountdown } = await import('../src/lib/reminder.ts')
-  assert.deepEqual(reminderCountdown(56, 61, 95), { phase: 'remaining', seconds: 1, percent: 98 })
-  assert.deepEqual(reminderCountdown(57, 61, 95), { phase: 'due', seconds: 0, percent: 100 })
-  assert.deepEqual(reminderCountdown(58, 61, 95), { phase: 'overdue', seconds: 1, percent: 100 })
-  assert.deepEqual(reminderCountdown(62, 61, 150), { phase: 'remaining', seconds: 29, percent: 68 })
+test('countdown and progress use the estimate, not the reminder deadline', async () => {
+  const { taskCountdown } = await import('../src/lib/reminder.ts')
+  assert.deepEqual(taskCountdown(57, 61), { phase: 'remaining', seconds: 4, percent: 93 })
+  assert.deepEqual(taskCountdown(60, 61), { phase: 'remaining', seconds: 1, percent: 98 })
+  assert.deepEqual(taskCountdown(61, 61), { phase: 'overdue', seconds: 0, percent: 100 })
+  assert.deepEqual(taskCountdown(62, 61), { phase: 'overdue', seconds: 1, percent: 100 })
 })
 
 test('pulse queue gives every event in a batch its own three-second slot', async ({ mock }) => {

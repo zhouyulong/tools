@@ -87,18 +87,38 @@ const reminderConfig = {
   overdueIntervalMinutes: 10, warnSound: false, nearSound: false, dueNotify: true,
 }
 
-test('running view changes countdown, border, and mute availability at the configured due second', () => {
-  const at = (net_seconds: number) => render(WidgetRunning, { props: {
-    task: { ...task, status: 'running', est_seconds: 61, net_seconds }, reminderConfig,
+function runningWidgetAt(net_seconds: number, config = reminderConfig) {
+  return render(WidgetRunning, { props: {
+    task: { ...task, status: 'running', est_seconds: 60, net_seconds }, reminderConfig: config,
   } }).body
-  assert.match(at(56), /剩余 00:00:01/)
-  assert.match(at(56), /class="widget [^"]*near-state/)
-  assert.doesNotMatch(at(56), /class="mute/)
-  assert.match(at(57), /已到期/)
-  assert.match(at(57), /class="widget [^"]*due-state/)
-  assert.match(at(57), /静音超时通知/)
-  assert.match(at(58), /超时 \+00:00:01/)
-  assert.match(at(58), /class="widget [^"]*due-state/)
+}
+
+test('an early reminder deadline changes color without ending the actual countdown', () => {
+  assert.match(runningWidgetAt(56), /class="widget [^"]*near-state/)
+  const due = runningWidgetAt(57)
+  assert.match(due, /class="widget [^"]*due-state/)
+  assert.match(due, /剩余 00:00:03/)
+  assert.doesNotMatch(due, /已到期|超时 \+|静音超时通知/)
+})
+
+test('at 150% the mute button and actual overtime precede the red reminder state', () => {
+  const config = { ...reminderConfig, duePercent: 150 }
+  assert.doesNotMatch(runningWidgetAt(59, config), /静音超时通知/)
+  assert.match(runningWidgetAt(60, config), /静音超时通知/)
+  const overtime = runningWidgetAt(65, config)
+  assert.match(overtime, /超时 \+00:00:05/)
+  assert.match(overtime, /class="widget [^"]*near-state/)
+  assert.doesNotMatch(overtime, /剩余|已到期|due-state/)
+  const due = runningWidgetAt(90, config)
+  assert.match(due, /class="widget [^"]*due-state/)
+  assert.match(due, /超时 \+00:00:30/)
+})
+
+test('disabled reminders still show actual overtime with no reminder color', () => {
+  const body = runningWidgetAt(65, { ...reminderConfig, duePercent: 150, reminderEnabled: false })
+  assert.match(body, /超时 \+00:00:05/)
+  assert.match(body, /静音超时通知/)
+  assert.doesNotMatch(body, /near-state|due-state|剩余|已到期/)
 })
 
 test('paused view recomputes steady levels from current config with no new pulse', () => {

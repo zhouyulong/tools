@@ -49,6 +49,11 @@ const MIGRATIONS: &[&str] = &[
     "ALTER TABLE tasks ADD COLUMN reminder_muted INTEGER NOT NULL DEFAULT 0;",
     // v4: do not backfill past milestones when a task's repeat interval changes.
     "ALTER TABLE tasks ADD COLUMN overdue_interval_changed_at_net INTEGER;",
+    // v5: an existing task may have used legacy bucket IDs with unknown intervals.
+    // Start the absolute schedule at upgrade, without guessing or rewriting old IDs.
+    "ALTER TABLE tasks ADD COLUMN overdue_schedule_started_at TEXT;
+     UPDATE tasks SET overdue_schedule_started_at = strftime('%Y-%m-%dT%H:%M:%fZ', 'now')
+     WHERE status IN ('running', 'paused');",
 ];
 
 pub fn open(path: &Path) -> rusqlite::Result<Connection> {
@@ -117,7 +122,7 @@ mod tests {
             conn.query_row("SELECT MAX(version) FROM schema_migrations", [], |r| r
                 .get::<_, i64>(0))
                 .unwrap(),
-            4
+            5
         );
         assert_eq!(
             conn.query_row("SELECT name FROM tasks WHERE id='existing'", [], |r| r
@@ -178,7 +183,7 @@ mod tests {
             conn.query_row("SELECT MAX(version) FROM schema_migrations", [], |r| r
                 .get::<_, i64>(0))
                 .unwrap(),
-            4
+            5
         );
     }
 
@@ -202,7 +207,80 @@ mod tests {
             conn.query_row("SELECT MAX(version) FROM schema_migrations", [], |r| r
                 .get::<_, i64>(0))
                 .unwrap(),
-            4
+            5
+        );
+    }
+
+    #[test]
+    fn upgrade_skips_legacy_overdue_milestones_but_fires_a_new_one() {
+        let conn = Connection::open_in_memory().unwrap();
+        for sql in &MIGRATIONS[..3] {
+            conn.execute_batch(sql).unwrap();
+        }
+        conn.execute_batch(
+            "CREATE TABLE schema_migrations (version INTEGER PRIMARY KEY);
+             INSERT INTO schema_migrations VALUES (1), (2), (3);
+             INSERT INTO tasks (id, name, est_seconds, status, created_at)
+                 VALUES ('old', 'old', 60, 'running', strftime('%Y-%m-%dT%H:%M:%fZ', 'now', '-1040 seconds'));
+             INSERT INTO segments (task_id, started_at, ended_at, kind)
+                 SELECT id, created_at, strftime('%Y-%m-%dT%H:%M:%fZ', 'now', '-410 seconds'), 'work' FROM tasks;
+             INSERT INTO events (task_id, at, kind)
+                 VALUES ('old', strftime('%Y-%m-%dT%H:%M:%fZ', 'now', '-95 seconds'), 'resumed');
+             INSERT INTO reminder_fired (task_id, node, fired_at)
+                 SELECT 'old', column1, strftime('%Y-%m-%dT%H:%M:%fZ', 'now', '-60 seconds')
+                 FROM (VALUES ('warn'), ('near'), ('due'), ('overdue:1'));",
+        )
+        .unwrap();
+        let tr = crate::tracker::Tracker::new(initialize_connection(conn).unwrap());
+        // Net time at upgrade is 630s closed + ~95s live. The 660s boundary is old.
+        let first = tr.check_reminders("old").unwrap();
+        assert!(first.net_seconds > 660 && first.net_seconds < 1260);
+        assert!(first.reminders.is_empty(), "replayed {:?}", first.reminders);
+        assert!(
+            tr.task_detail("old")
+                .unwrap()
+                .events
+                .iter()
+                .all(|e| e.kind != "reminder_fired")
+        );
+
+        // Simulate 600 more net seconds without sleeping by aging the whole timeline
+        // including the migration marker. Reopening must not reset that marker.
+        {
+            let conn = tr.conn.lock().unwrap();
+            conn.execute_batch(
+                "UPDATE tasks SET created_at = strftime('%Y-%m-%dT%H:%M:%fZ', created_at, '-600 seconds'),
+                     overdue_schedule_started_at = strftime('%Y-%m-%dT%H:%M:%fZ', overdue_schedule_started_at, '-600 seconds');
+                 UPDATE segments SET started_at = strftime('%Y-%m-%dT%H:%M:%fZ', started_at, '-600 seconds'),
+                     ended_at = strftime('%Y-%m-%dT%H:%M:%fZ', ended_at, '-600 seconds');
+                 UPDATE events SET at = strftime('%Y-%m-%dT%H:%M:%fZ', at, '-600 seconds');
+                 UPDATE reminder_fired SET fired_at = strftime('%Y-%m-%dT%H:%M:%fZ', fired_at, '-600 seconds');",
+            )
+            .unwrap();
+            migrate(&conn).unwrap();
+        }
+        let later = tr.check_reminders("old").unwrap();
+        assert_eq!(
+            later
+                .reminders
+                .iter()
+                .map(|r| r.node.as_str())
+                .collect::<Vec<_>>(),
+            ["overdue:at:1200"]
+        );
+        assert!(tr.check_reminders("old").unwrap().reminders.is_empty());
+        let detail = tr.task_detail("old").unwrap();
+        let events: Vec<_> = detail
+            .events
+            .iter()
+            .filter(|e| e.kind == "reminder_fired")
+            .map(|e| {
+                serde_json::from_str::<serde_json::Value>(e.detail.as_deref().unwrap()).unwrap()
+            })
+            .collect();
+        assert_eq!(
+            events,
+            [serde_json::json!({"node": "overdue:at:1200", "level": "overdue"})]
         );
     }
 

@@ -7,14 +7,13 @@ const PULSE_MS = 3000
 const thresholdSeconds = (estSeconds: number, percent: number) =>
   Math.floor(estSeconds * percent / 100)
 
-export function reminderCountdown(netSeconds: number, estSeconds: number, duePercent = 100) {
-  const dueAt = thresholdSeconds(estSeconds, duePercent)
+export function taskCountdown(netSeconds: number, estSeconds: number) {
   const elapsed = Math.max(0, netSeconds)
-  const delta = elapsed - dueAt
+  const delta = elapsed - estSeconds
   return {
-    phase: delta < 0 ? 'remaining' : delta === 0 ? 'due' : 'overdue',
+    phase: delta < 0 ? 'remaining' : 'overdue',
     seconds: Math.abs(delta),
-    percent: delta >= 0 ? 100 : Math.floor(elapsed / dueAt * 100),
+    percent: delta >= 0 ? 100 : Math.floor(elapsed / estSeconds * 100),
   } as const
 }
 
@@ -29,9 +28,9 @@ export function reminderLevel(
   if (!config.reminderEnabled || estSeconds <= 0) return 'none'
 
   const elapsed = Math.max(0, netSeconds)
-  const phase = reminderCountdown(elapsed, estSeconds, config.duePercent).phase
-  if (phase === 'overdue' && config.overdueEnabled !== false) return 'overdue'
-  if (phase !== 'remaining' && config.dueEnabled !== false) return 'due'
+  const dueAt = thresholdSeconds(estSeconds, config.duePercent)
+  if (elapsed > dueAt && config.overdueEnabled !== false) return 'overdue'
+  if (elapsed >= dueAt && config.dueEnabled !== false) return 'due'
   if (config.nearEnabled !== false && elapsed >= thresholdSeconds(estSeconds, config.nearPercent)) return 'near'
   if (config.warnEnabled !== false && elapsed >= thresholdSeconds(estSeconds, config.warnPercent)) return 'warn'
   return 'none'

@@ -4,7 +4,7 @@
   import { pause, resume, finishTask, abandonTask, openSettings, PAUSE_REASONS } from '../lib/api'
   import { pausedChipLayout } from '../lib/pausedChips'
   import { fmtHMS } from '../lib/format'
-  import { reminderCountdown, reminderLevel, type ReminderPulse } from '../lib/reminder'
+  import { taskCountdown, reminderLevel, type ReminderPulse } from '../lib/reminder'
   import SwitchTaskForm from './SwitchTaskForm.svelte'
 
   export let task: Task
@@ -28,10 +28,10 @@
 
   $: layoutSignature = [mode, chips.rows, chips.hiddenCount, Boolean(error), task.id, task.status].join('|')
   $: if (typeof layoutSignature === 'string') dispatch('layout')
-  $: countdown = reminderCountdown(task.net_seconds, task.est_seconds, reminderConfig?.duePercent)
+  $: countdown = taskCountdown(task.net_seconds, task.est_seconds)
   $: visualLevel = reminderConfig
     ? reminderLevel(task.net_seconds, task.est_seconds, reminderConfig)
-    : countdown.phase === 'remaining' ? 'none' : countdown.phase
+    : 'none'
   $: dueState = visualLevel === 'due' || visualLevel === 'overdue'
 
   $: if (mode === 'switch-form' &&
@@ -156,13 +156,11 @@
       <div class="foot">
         {#if countdown.phase === 'overdue'}
           <span class="rem">超时 +{fmtHMS(countdown.seconds)} · {countdown.percent}%</span>
-        {:else if countdown.phase === 'due'}
-          <span class="rem">已到期 · {countdown.percent}%</span>
         {:else}
           <span class="rem">剩余 {fmtHMS(countdown.seconds)} · {countdown.percent}%</span>
         {/if}
         <span class="actions">
-          {#if countdown.phase !== 'remaining'}
+          {#if countdown.phase === 'overdue'}
             <button class="mute" disabled={busy || task.reminder_muted} on:click={doMuteReminder}
               title={task.reminder_muted ? '已静音超时通知' : '静音超时通知'}
               aria-label={task.reminder_muted ? '已静音超时通知' : '静音超时通知'}>

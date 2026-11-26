@@ -30,7 +30,7 @@ pub struct ReminderConfig {
     pub near_sound: bool,
     pub due_notify: bool,
     est_seconds: i64,
-    interval_changed_at_net: Option<i64>,
+    overdue_from_net: Option<i64>,
 }
 
 impl Default for ReminderConfig {
@@ -50,7 +50,7 @@ impl Default for ReminderConfig {
             near_sound: false,
             due_notify: true,
             est_seconds: DEFAULT_EST_SECONDS,
-            interval_changed_at_net: None,
+            overdue_from_net: None,
         }
     }
 }
@@ -131,13 +131,9 @@ impl ReminderConfig {
         })
     }
 
-    pub(crate) fn for_task(
-        mut self,
-        est_seconds: i64,
-        interval_changed_at_net: Option<i64>,
-    ) -> Self {
+    pub(crate) fn for_task(mut self, est_seconds: i64, overdue_from_net: Option<i64>) -> Self {
         self.est_seconds = est_seconds;
-        self.interval_changed_at_net = interval_changed_at_net;
+        self.overdue_from_net = overdue_from_net;
         self
     }
 }
@@ -264,16 +260,14 @@ pub fn due_reminders(net_seconds: i64, config: &ReminderConfig) -> Vec<DueRemind
             sound: false,
         });
     }
-    // Seed the new schedule with ceil(overtime at the edit / interval), then
-    // choose only the newest *reached* boundary so a late poll doesn't replay a backlog.
+    // Round the schedule's lower bound (upgrade or interval change) up to a
+    // repeat boundary. A late poll emits only the newest reached boundary.
     let interval = i128::from(config.overdue_interval_minutes) * 60;
     let overtime = |net: i64| (i128::from(net) - i128::from(due_at)).max(0);
     let current_overtime = overtime(net_seconds);
-    let first_milestone = config
-        .interval_changed_at_net
-        .map_or(interval, |net_at_edit| {
-            ((overtime(net_at_edit) + interval - 1) / interval * interval).max(interval)
-        });
+    let first_milestone = config.overdue_from_net.map_or(interval, |from_net| {
+        ((overtime(from_net) + interval - 1) / interval * interval).max(interval)
+    });
     let reached_milestone = current_overtime / interval * interval;
     if config.overdue_enabled && reached_milestone >= first_milestone {
         reminders.push(DueReminder {
