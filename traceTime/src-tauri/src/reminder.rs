@@ -1,6 +1,18 @@
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 
 const DEFAULT_EST_SECONDS: i64 = 60;
+const DEFAULT_OVERDUE_INTERVAL_MINUTES: i64 = 10;
+pub const OVERDUE_INTERVAL_KEY: &str = "reminder_overdue_interval_minutes";
+
+pub fn parse_overdue_interval(value: Option<&str>) -> Result<i64, String> {
+    match value {
+        None => Ok(DEFAULT_OVERDUE_INTERVAL_MINUTES),
+        Some(value) => value
+            .parse::<i64>()
+            .map(|minutes| minutes.clamp(1, 1440))
+            .map_err(|_| format!("invalid integer setting {OVERDUE_INTERVAL_KEY}: {value}")),
+    }
+}
 
 #[derive(Debug, Clone)]
 pub struct ReminderConfig {
@@ -18,6 +30,7 @@ pub struct ReminderConfig {
     pub near_sound: bool,
     pub due_notify: bool,
     est_seconds: i64,
+    interval_changed_at_net: Option<i64>,
 }
 
 impl Default for ReminderConfig {
@@ -32,11 +45,12 @@ impl Default for ReminderConfig {
             due_percent: 100,
             overdue_enabled: true,
             overdue_notify: true,
-            overdue_interval_minutes: 10,
+            overdue_interval_minutes: DEFAULT_OVERDUE_INTERVAL_MINUTES,
             warn_sound: false,
             near_sound: false,
             due_notify: true,
             est_seconds: DEFAULT_EST_SECONDS,
+            interval_changed_at_net: None,
         }
     }
 }
@@ -107,21 +121,23 @@ impl ReminderConfig {
                 defaults.overdue_enabled,
             )?,
             overdue_notify: bool_value(&get, "reminder_overdue_notify", defaults.overdue_notify)?,
-            overdue_interval_minutes: int_value(
-                &get,
-                "reminder_overdue_interval_minutes",
-                defaults.overdue_interval_minutes,
-                1..=1440,
+            overdue_interval_minutes: parse_overdue_interval(
+                get(OVERDUE_INTERVAL_KEY)?.as_deref(),
             )?,
             warn_sound: bool_value(&get, "reminder_warn_sound", defaults.warn_sound)?,
             near_sound: bool_value(&get, "reminder_near_sound", defaults.near_sound)?,
             due_notify: bool_value(&get, "reminder_due_notify", defaults.due_notify)?,
-            est_seconds: defaults.est_seconds,
+            ..defaults
         })
     }
 
-    pub(crate) fn for_estimate(mut self, est_seconds: i64) -> Self {
-        self.est_seconds = est_seconds.max(1);
+    pub(crate) fn for_task(
+        mut self,
+        est_seconds: i64,
+        interval_changed_at_net: Option<i64>,
+    ) -> Self {
+        self.est_seconds = est_seconds;
+        self.interval_changed_at_net = interval_changed_at_net;
         self
     }
 }
@@ -164,7 +180,7 @@ impl From<&ReminderConfig> for ReminderConfigDto {
     }
 }
 
-#[derive(Debug, Serialize, Clone, PartialEq, Eq)]
+#[derive(Debug, Deserialize, Serialize, Clone, Copy, PartialEq, Eq)]
 #[serde(rename_all = "lowercase")]
 pub enum ReminderLevel {
     Warn,
@@ -183,8 +199,21 @@ pub struct DueReminder {
     pub sound: bool,
 }
 
+impl DueReminder {
+    pub fn notification_allowed(&self, task_muted: bool) -> bool {
+        self.notify
+            && match self.level {
+                ReminderLevel::Due => true,
+                ReminderLevel::Overdue => !task_muted,
+                ReminderLevel::Warn | ReminderLevel::Near => false,
+            }
+    }
+}
+
 #[derive(Debug, Serialize, Clone)]
+#[serde(rename_all = "camelCase")]
 pub struct ReminderCheckDto {
+    pub net_seconds: i64,
     pub config: ReminderConfigDto,
     pub reminders: Vec<DueReminder>,
 }
@@ -200,22 +229,6 @@ pub fn due_reminders(net_seconds: i64, config: &ReminderConfig) -> Vec<DueRemind
 
     let net_seconds = net_seconds.max(0);
     let due_at = threshold_seconds(config.est_seconds, config.due_percent);
-    let interval_seconds = config.overdue_interval_minutes.saturating_mul(60).max(1);
-    let overdue_seconds = net_seconds.saturating_sub(due_at);
-    let overdue_bucket = overdue_seconds / interval_seconds;
-
-    if config.overdue_enabled && overdue_bucket >= 1 {
-        let overdue_minutes = overdue_seconds / 60;
-        return vec![DueReminder {
-            node: format!("overdue:{overdue_bucket}"),
-            level: ReminderLevel::Overdue,
-            title: "任务已超时".into(),
-            body: format!("已超过预计时长 {overdue_minutes} 分钟"),
-            notify: config.overdue_notify,
-            sound: false,
-        }];
-    }
-
     let mut reminders = Vec::new();
     if config.warn_enabled
         && net_seconds >= threshold_seconds(config.est_seconds, config.warn_percent)
@@ -248,6 +261,27 @@ pub fn due_reminders(net_seconds: i64, config: &ReminderConfig) -> Vec<DueRemind
             title: "已达到预计时长".into(),
             body: "请尽快收尾".into(),
             notify: config.due_notify,
+            sound: false,
+        });
+    }
+    // Seed the new schedule with ceil(overtime at the edit / interval), then
+    // choose only the newest *reached* boundary so a late poll doesn't replay a backlog.
+    let interval = i128::from(config.overdue_interval_minutes) * 60;
+    let overtime = |net: i64| (i128::from(net) - i128::from(due_at)).max(0);
+    let current_overtime = overtime(net_seconds);
+    let first_milestone = config
+        .interval_changed_at_net
+        .map_or(interval, |net_at_edit| {
+            ((overtime(net_at_edit) + interval - 1) / interval * interval).max(interval)
+        });
+    let reached_milestone = current_overtime / interval * interval;
+    if config.overdue_enabled && reached_milestone >= first_milestone {
+        reminders.push(DueReminder {
+            node: format!("overdue:at:{reached_milestone}"),
+            level: ReminderLevel::Overdue,
+            title: "任务已超时".into(),
+            body: format!("已超过到期时间 {} 分钟", current_overtime / 60),
+            notify: config.overdue_notify,
             sound: false,
         });
     }
@@ -298,22 +332,60 @@ mod tests {
     }
 
     #[test]
-    fn overdue_uses_minute_buckets_and_respects_mute_for_notify() {
+    fn overdue_includes_all_relevant_stages_and_only_latest_reached_milestone() {
+        let config = ReminderConfig::default();
+        let due = due_reminders(1300, &config); // 1240 seconds overdue
+        assert_eq!(
+            due.iter().map(|r| r.node.as_str()).collect::<Vec<_>>(),
+            ["warn", "near", "due", "overdue:at:1200"]
+        );
+        assert_eq!(due[3].level, ReminderLevel::Overdue);
+        assert!(due[3].notify);
+    }
+
+    #[test]
+    fn new_interval_includes_an_exact_edit_boundary_but_never_an_earlier_one() {
         let config = ReminderConfig {
-            overdue_interval_minutes: 10,
+            overdue_interval_minutes: 1,
             ..ReminderConfig::default()
         };
-        let due = due_reminders(1260, &config); // 20 minutes overdue on a 60s estimate
-        assert_eq!(
-            due,
-            vec![DueReminder {
-                node: "overdue:2".into(),
-                level: ReminderLevel::Overdue,
-                title: "任务已超时".into(),
-                body: "已超过预计时长 20 分钟".into(),
-                notify: true,
-                sound: false,
-            }]
-        );
+        let overdue_at = |edit, elapsed| {
+            due_reminders(elapsed, &config.clone().for_task(60, Some(edit)))
+                .into_iter()
+                .find(|r| r.level == ReminderLevel::Overdue)
+                .map(|r| r.node)
+        };
+        assert_eq!(overdue_at(180, 182).as_deref(), Some("overdue:at:120"));
+        assert_eq!(overdue_at(181, 182), None);
+        assert_eq!(overdue_at(181, 245).as_deref(), Some("overdue:at:180"));
+    }
+
+    #[test]
+    fn fractional_thresholds_floor_for_all_stages() {
+        // Also exercised by the TypeScript visual/countdown tests.
+        let config = ReminderConfig {
+            est_seconds: 61,
+            due_percent: 95,
+            overdue_interval_minutes: 1,
+            ..ReminderConfig::default()
+        };
+        for (elapsed, expected) in [
+            (44, vec![]),
+            (45, vec!["warn"]),
+            (54, vec!["warn", "near"]),
+            (56, vec!["warn", "near"]),
+            (57, vec!["warn", "near", "due"]),
+            (116, vec!["warn", "near", "due"]),
+            (117, vec!["warn", "near", "due", "overdue:at:60"]),
+        ] {
+            let reminders = due_reminders(elapsed, &config);
+            assert_eq!(
+                reminders
+                    .iter()
+                    .map(|r| r.node.as_str())
+                    .collect::<Vec<_>>(),
+                expected
+            );
+        }
     }
 }

@@ -18,6 +18,7 @@
   const spec = (key: ReminderSettingKey) => SETTINGS.find(item => item.key === key)!
 
   function edit(key: ReminderSettingKey, value: string) {
+    if (saving) return
     values = { ...values, [key]: value }
     saved = false
     errors = []
@@ -81,7 +82,7 @@
       <label class="switch-row">
         <span>{spec('reminder_enabled').label}</span>
         <input
-          type="checkbox"
+          type="checkbox" disabled={saving}
           checked={values.reminder_enabled === 'true'}
           on:change={(event) => edit('reminder_enabled', String(event.currentTarget.checked))}
         />
@@ -92,15 +93,15 @@
       <h2>75% 提前预警</h2>
       <label class="switch-row">
         <span>视觉提醒</span>
-        <input type="checkbox" checked={values.reminder_warn_enabled === 'true'} on:change={(event) => edit('reminder_warn_enabled', String(event.currentTarget.checked))} />
+        <input type="checkbox" disabled={saving} checked={values.reminder_warn_enabled === 'true'} on:change={(event) => edit('reminder_warn_enabled', String(event.currentTarget.checked))} />
       </label>
       <label class="number-row">
         <span>触发百分比</span>
-        <span><input aria-label="提前预警百分比" type="number" min="1" max="1000" step="1" value={values.reminder_warn_percent} on:input={(event) => edit('reminder_warn_percent', event.currentTarget.value)} /> %</span>
+        <span><input aria-label="提前预警百分比" type="number" disabled={saving} min="1" max="1000" step="1" value={values.reminder_warn_percent} on:input={(event) => edit('reminder_warn_percent', event.currentTarget.value)} /> %</span>
       </label>
       <label class="switch-row">
         <span>声音</span>
-        <input type="checkbox" checked={values.reminder_warn_sound === 'true'} on:change={(event) => edit('reminder_warn_sound', String(event.currentTarget.checked))} />
+        <input type="checkbox" disabled={saving} checked={values.reminder_warn_sound === 'true'} on:change={(event) => edit('reminder_warn_sound', String(event.currentTarget.checked))} />
       </label>
     </section>
 
@@ -108,15 +109,15 @@
       <h2>90% 临近截止</h2>
       <label class="switch-row">
         <span>视觉提醒</span>
-        <input type="checkbox" checked={values.reminder_near_enabled === 'true'} on:change={(event) => edit('reminder_near_enabled', String(event.currentTarget.checked))} />
+        <input type="checkbox" disabled={saving} checked={values.reminder_near_enabled === 'true'} on:change={(event) => edit('reminder_near_enabled', String(event.currentTarget.checked))} />
       </label>
       <label class="number-row">
         <span>触发百分比</span>
-        <span><input aria-label="临近截止百分比" type="number" min="1" max="1000" step="1" value={values.reminder_near_percent} on:input={(event) => edit('reminder_near_percent', event.currentTarget.value)} /> %</span>
+        <span><input aria-label="临近截止百分比" type="number" disabled={saving} min="1" max="1000" step="1" value={values.reminder_near_percent} on:input={(event) => edit('reminder_near_percent', event.currentTarget.value)} /> %</span>
       </label>
       <label class="switch-row">
         <span>声音</span>
-        <input type="checkbox" checked={values.reminder_near_sound === 'true'} on:change={(event) => edit('reminder_near_sound', String(event.currentTarget.checked))} />
+        <input type="checkbox" disabled={saving} checked={values.reminder_near_sound === 'true'} on:change={(event) => edit('reminder_near_sound', String(event.currentTarget.checked))} />
       </label>
     </section>
 
@@ -124,15 +125,15 @@
       <h2>100% 到期</h2>
       <label class="switch-row">
         <span>视觉提醒</span>
-        <input type="checkbox" checked={values.reminder_due_enabled === 'true'} on:change={(event) => edit('reminder_due_enabled', String(event.currentTarget.checked))} />
+        <input type="checkbox" disabled={saving} checked={values.reminder_due_enabled === 'true'} on:change={(event) => edit('reminder_due_enabled', String(event.currentTarget.checked))} />
       </label>
       <label class="number-row">
         <span>触发百分比</span>
-        <span><input aria-label="到期百分比" type="number" min="1" max="1000" step="1" value={values.reminder_due_percent} on:input={(event) => edit('reminder_due_percent', event.currentTarget.value)} /> %</span>
+        <span><input aria-label="到期百分比" type="number" disabled={saving} min="1" max="1000" step="1" value={values.reminder_due_percent} on:input={(event) => edit('reminder_due_percent', event.currentTarget.value)} /> %</span>
       </label>
       <label class="switch-row">
         <span>系统通知</span>
-        <input type="checkbox" checked={values.reminder_due_notify === 'true'} on:change={(event) => edit('reminder_due_notify', String(event.currentTarget.checked))} />
+        <input type="checkbox" disabled={saving} checked={values.reminder_due_notify === 'true'} on:change={(event) => edit('reminder_due_notify', String(event.currentTarget.checked))} />
       </label>
     </section>
 
@@ -140,15 +141,15 @@
       <h2>超时</h2>
       <label class="switch-row">
         <span>启用超时提醒</span>
-        <input type="checkbox" checked={values.reminder_overdue_enabled === 'true'} on:change={(event) => edit('reminder_overdue_enabled', String(event.currentTarget.checked))} />
+        <input type="checkbox" disabled={saving} checked={values.reminder_overdue_enabled === 'true'} on:change={(event) => edit('reminder_overdue_enabled', String(event.currentTarget.checked))} />
       </label>
       <label class="switch-row">
         <span>系统通知</span>
-        <input type="checkbox" checked={values.reminder_overdue_notify === 'true'} on:change={(event) => edit('reminder_overdue_notify', String(event.currentTarget.checked))} />
+        <input type="checkbox" disabled={saving} checked={values.reminder_overdue_notify === 'true'} on:change={(event) => edit('reminder_overdue_notify', String(event.currentTarget.checked))} />
       </label>
       <label class="number-row">
         <span>重复周期</span>
-        <span><input aria-label="超时重复周期" type="number" min="1" max="1440" step="1" value={values.reminder_overdue_interval_minutes} on:input={(event) => edit('reminder_overdue_interval_minutes', event.currentTarget.value)} /> 分钟</span>
+        <span><input aria-label="超时重复周期" type="number" disabled={saving} min="1" max="1440" step="1" value={values.reminder_overdue_interval_minutes} on:input={(event) => edit('reminder_overdue_interval_minutes', event.currentTarget.value)} /> 分钟</span>
       </label>
     </section>
   {/if}

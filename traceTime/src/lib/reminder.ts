@@ -1,17 +1,25 @@
-import type { ReminderConfig } from './api'
+import type { Reminder, ReminderConfig } from './api'
 
-export type ReminderLevel = 'none' | 'warn' | 'near' | 'due' | 'overdue'
-export type ReminderPulse = 'none' | 'gentle' | 'strong'
-export interface ReminderPulseState {
-  level: ReminderLevel
-  until: number
-  key: string
+export type ReminderLevel = 'none' | Reminder['level']
+export type ReminderPulse = Pick<Reminder, 'node' | 'level'>
+const PULSE_MS = 3000
+
+const thresholdSeconds = (estSeconds: number, percent: number) =>
+  Math.floor(estSeconds * percent / 100)
+
+export function reminderCountdown(netSeconds: number, estSeconds: number, duePercent = 100) {
+  const dueAt = thresholdSeconds(estSeconds, duePercent)
+  const elapsed = Math.max(0, netSeconds)
+  const delta = elapsed - dueAt
+  return {
+    phase: delta < 0 ? 'remaining' : delta === 0 ? 'due' : 'overdue',
+    seconds: Math.abs(delta),
+    percent: delta >= 0 ? 100 : Math.floor(elapsed / dueAt * 100),
+  } as const
 }
 
-type VisualReminderConfig = Pick<
-  ReminderConfig,
-  'reminderEnabled' | 'warnPercent' | 'nearPercent' | 'duePercent' | 'overdueIntervalMinutes'
-> & Partial<Pick<ReminderConfig, 'warnEnabled' | 'nearEnabled' | 'dueEnabled' | 'overdueEnabled'>>
+type VisualReminderConfig = Pick<ReminderConfig, 'reminderEnabled' | 'warnPercent' | 'nearPercent' | 'duePercent'>
+  & Partial<Pick<ReminderConfig, 'warnEnabled' | 'nearEnabled' | 'dueEnabled' | 'overdueEnabled'>>
 
 export function reminderLevel(
   netSeconds: number,
@@ -21,29 +29,36 @@ export function reminderLevel(
   if (!config.reminderEnabled || estSeconds <= 0) return 'none'
 
   const elapsed = Math.max(0, netSeconds)
-  const threshold = (percent: number) => estSeconds * percent / 100
-  const dueAt = threshold(config.duePercent)
-
-  if (config.overdueEnabled !== false && elapsed > dueAt) return 'overdue'
-  if (config.dueEnabled !== false && elapsed >= dueAt) return 'due'
-  if (config.nearEnabled !== false && elapsed >= threshold(config.nearPercent)) return 'near'
-  if (config.warnEnabled !== false && elapsed >= threshold(config.warnPercent)) return 'warn'
+  const phase = reminderCountdown(elapsed, estSeconds, config.duePercent).phase
+  if (phase === 'overdue' && config.overdueEnabled !== false) return 'overdue'
+  if (phase !== 'remaining' && config.dueEnabled !== false) return 'due'
+  if (config.nearEnabled !== false && elapsed >= thresholdSeconds(estSeconds, config.nearPercent)) return 'near'
+  if (config.warnEnabled !== false && elapsed >= thresholdSeconds(estSeconds, config.warnPercent)) return 'warn'
   return 'none'
 }
 
-export function reminderPulse(activeLevel: ReminderLevel): ReminderPulse {
-  if (activeLevel === 'warn') return 'gentle'
-  if (activeLevel === 'near' || activeLevel === 'due') return 'strong'
-  return 'none'
-}
+export function createReminderPulseQueue(show: (pulse: ReminderPulse | null) => void) {
+  const pending: ReminderPulse[] = []
+  let timer: ReturnType<typeof setTimeout> | undefined
 
-export function reminderPulseEvent(
-  taskId: string,
-  node: string,
-  level: ReminderLevel,
-  receivedAt: number = Date.now(),
-): ReminderPulseState {
-  return { level, until: receivedAt + 3000, key: `${taskId}:${node}` }
+  function showNext() {
+    const pulse = pending.shift() ?? null
+    timer = pulse ? setTimeout(showNext, PULSE_MS) : undefined
+    show(pulse)
+  }
+
+  return {
+    enqueue(pulse: ReminderPulse) {
+      pending.push(pulse)
+      if (timer === undefined) showNext()
+    },
+    clear() {
+      clearTimeout(timer)
+      timer = undefined
+      pending.length = 0
+      show(null)
+    },
+  }
 }
 
 let audioContext: AudioContext | null = null

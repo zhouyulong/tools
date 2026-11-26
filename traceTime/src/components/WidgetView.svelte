@@ -11,7 +11,7 @@
     type ReminderConfig,
     type Task,
   } from '../lib/api'
-  import { playReminderChime, reminderPulseEvent, type ReminderPulseState } from '../lib/reminder'
+  import { createReminderPulseQueue, playReminderChime, type ReminderPulse } from '../lib/reminder'
   import { createWidgetHeightObserver } from '../lib/widgetHeight'
   import LongPauseBanner from './LongPauseBanner.svelte'
   import TaskForm from './TaskForm.svelte'
@@ -27,15 +27,15 @@
   let measureNow: () => void = () => {}
   let widgetHeight = 0
   let reminderConfig: ReminderConfig | null = null
-  let pulse: ReminderPulseState = { level: 'none', until: 0, key: '' }
+  let pulse: ReminderPulse | null = null
+  const pulses = createReminderPulseQueue(next => { pulse = next })
   let reminderTaskId: string | null = null
   let processedReminderKeys = new Set<string>()
 
   function resetReminderState(nextTaskId: string | null) {
     if (reminderTaskId === nextTaskId) return
     reminderTaskId = nextTaskId
-    reminderConfig = null
-    pulse = { level: 'none', until: 0, key: '' }
+    pulses.clear()
     processedReminderKeys = new Set<string>()
   }
 
@@ -44,16 +44,20 @@
       const result = await checkReminders(current.id)
       if (task?.id !== current.id || reminderTaskId !== current.id) return
       reminderConfig = result.config
+      // Use the exact elapsed-second snapshot that produced the reminder candidates.
+      if (task === current && task.net_seconds !== result.netSeconds) {
+        task = { ...task, net_seconds: result.netSeconds }
+      }
       for (const reminder of result.reminders) {
         const key = `${current.id}:${reminder.node}`
         if (processedReminderKeys.has(key)) continue
         processedReminderKeys.add(key)
-        pulse = reminderPulseEvent(current.id, reminder.node, reminder.level)
+        pulses.enqueue(reminder)
         if (reminder.sound) {
           void playReminderChime(reminder.level === 'warn' ? 'soft' : 'urgent')
         }
         if (reminder.notify) {
-          void sendReminderNotification(reminder.title, reminder.body).catch(() => {})
+          void sendReminderNotification(current.id, reminder.node, reminder.level, reminder.title, reminder.body).catch(() => {})
         }
       }
     } catch (error) {
@@ -70,7 +74,7 @@
     if (currentResult.status === 'fulfilled') {
       task = currentResult.value
       resetReminderState(task?.id ?? null)
-      if (task?.status === 'running') await refreshReminders(task)
+      if (task) await refreshReminders(task)
     }
     if (pausedResult.status === 'fulfilled') paused = pausedResult.value
   }
@@ -112,6 +116,8 @@
   })
   onDestroy(() => {
     if (interval !== undefined) clearInterval(interval)
+    reminderTaskId = null
+    pulses.clear()
   })
 </script>
 

@@ -1,5 +1,6 @@
 use crate::reminder::{
-    ReminderCheckDto, ReminderConfig, ReminderConfigDto, ReminderLevel, due_reminders,
+    DueReminder, OVERDUE_INTERVAL_KEY, ReminderCheckDto, ReminderConfig, ReminderConfigDto,
+    ReminderLevel, due_reminders, parse_overdue_interval,
 };
 use rusqlite::{Connection, Error as SqlError};
 use serde::Serialize;
@@ -421,10 +422,21 @@ impl Tracker {
         ReminderConfig::from_settings(|key| Self::get_setting_from_conn(conn, key))
     }
 
-    pub fn reminder_config(&self) -> Result<ReminderConfigDto, String> {
-        let conn = self.conn.lock().map_err(|_| "lock poisoned")?;
-        let config = Self::reminder_config_from_conn(&conn)?;
-        Ok(ReminderConfigDto::from(&config))
+    fn reminder_candidates(
+        conn: &Connection,
+        task: &TaskDto,
+        net_seconds: i64,
+        config: ReminderConfig,
+    ) -> Result<Vec<DueReminder>, String> {
+        let interval_changed_at_net = conn
+            .query_row(
+                "SELECT overdue_interval_changed_at_net FROM tasks WHERE id=?1",
+                [&task.id],
+                |row| row.get(0),
+            )
+            .map_err(|e| e.to_string())?;
+        let task_config = config.for_task(task.est_seconds, interval_changed_at_net);
+        Ok(due_reminders(net_seconds, &task_config))
     }
 
     pub fn check_reminders(&self, expected_task_id: &str) -> Result<ReminderCheckDto, String> {
@@ -436,16 +448,16 @@ impl Tracker {
         if task.id != expected_task_id {
             return Err("task changed, please refresh".into());
         }
+        let net_seconds = Self::net_seconds(&tx, &task)?;
         if task.status != "running" {
             return Ok(ReminderCheckDto {
+                net_seconds,
                 config: config_dto,
                 reminders: Vec::new(),
             });
         }
 
-        let net_seconds = Self::net_seconds(&tx, &task)?;
-        let task_config = config.clone().for_estimate(task.est_seconds);
-        let candidates = due_reminders(net_seconds, &task_config);
+        let candidates = Self::reminder_candidates(&tx, &task, net_seconds, config)?;
         let fired_at = now();
         let mut reminders = Vec::new();
         for mut candidate in candidates {
@@ -459,18 +471,56 @@ impl Tracker {
             if inserted == 0 {
                 continue;
             }
-            candidate.notify = match candidate.level {
-                ReminderLevel::Due => config.due_notify && !task.reminder_muted,
-                ReminderLevel::Overdue => config.overdue_notify && !task.reminder_muted,
-                ReminderLevel::Warn | ReminderLevel::Near => false,
-            };
+            let detail = serde_json::json!({ "node": candidate.node, "level": candidate.level });
+            Self::add_event(&tx, &task.id, "reminder_fired", Some(&detail.to_string()))?;
+            candidate.notify = candidate.notification_allowed(task.reminder_muted);
             reminders.push(candidate);
         }
         tx.commit().map_err(|e| e.to_string())?;
         Ok(ReminderCheckDto {
+            net_seconds,
             config: config_dto,
             reminders,
         })
+    }
+
+    pub fn with_reminder_notification(
+        &self,
+        task_id: &str,
+        node: &str,
+        level: ReminderLevel,
+        send: impl FnOnce() -> Result<(), String>,
+    ) -> Result<(), String> {
+        match level {
+            ReminderLevel::Due if node == "due" => (),
+            ReminderLevel::Overdue if node.starts_with("overdue:at:") => (),
+            _ => return Err("invalid notification reminder level or node".into()),
+        }
+        let conn = self.conn.lock().map_err(|_| "lock poisoned")?;
+        let task = Self::require_active(&conn)?;
+        if task.id != task_id || task.status != "running" {
+            return Err("task changed, please refresh".into());
+        }
+        let fired: bool = conn
+            .query_row(
+                "SELECT EXISTS (SELECT 1 FROM reminder_fired WHERE task_id=?1 AND node=?2)",
+                [task_id, node],
+                |row| row.get(0),
+            )
+            .map_err(|e| e.to_string())?;
+        if !fired {
+            return Err("reminder has not fired for this task".into());
+        }
+        let config = Self::reminder_config_from_conn(&conn)?;
+        let net_seconds = Self::net_seconds(&conn, &task)?;
+        let candidates = Self::reminder_candidates(&conn, &task, net_seconds, config)?;
+        if candidates.iter().any(|r| {
+            r.node == node && r.level == level && r.notification_allowed(task.reminder_muted)
+        }) {
+            // Serialize the final decision and dispatch with task, settings and mute writes.
+            send()?;
+        }
+        Ok(())
     }
 
     pub fn set_reminder_muted(
@@ -502,14 +552,7 @@ impl Tracker {
     }
 
     pub fn set_setting(&self, key: &str, value: &str) -> Result<(), String> {
-        let conn = self.conn.lock().map_err(|_| "lock poisoned")?;
-        conn.execute(
-            "INSERT INTO settings (key, value) VALUES (?1, ?2)
-             ON CONFLICT(key) DO UPDATE SET value=excluded.value",
-            [key, value],
-        )
-        .map_err(|e| e.to_string())?;
-        Ok(())
+        self.set_settings(&[(key.to_owned(), value.to_owned())].into())
     }
 
     pub fn set_settings(
@@ -518,6 +561,13 @@ impl Tracker {
     ) -> Result<(), String> {
         let mut conn = self.conn.lock().map_err(|_| "lock poisoned")?;
         let tx = conn.transaction().map_err(|e| e.to_string())?;
+        let interval_changed = if let Some(value) = values.get(OVERDUE_INTERVAL_KEY) {
+            let previous = Self::get_setting_from_conn(&tx, OVERDUE_INTERVAL_KEY)?;
+            parse_overdue_interval(previous.as_deref()).ok()
+                != Some(parse_overdue_interval(Some(value))?)
+        } else {
+            false
+        };
         for (key, value) in values {
             tx.execute(
                 "INSERT INTO settings (key, value) VALUES (?1, ?2)
@@ -526,7 +576,32 @@ impl Tracker {
             )
             .map_err(|e| e.to_string())?;
         }
+        if interval_changed {
+            Self::snapshot_overdue_interval_change(&tx)?;
+        }
         tx.commit().map_err(|e| e.to_string())
+    }
+
+    fn snapshot_overdue_interval_change(conn: &Connection) -> Result<(), String> {
+        let mut stmt = conn
+            .prepare(&format!(
+                "SELECT {TASK_COLUMNS} FROM tasks WHERE status IN ('running', 'paused')"
+            ))
+            .map_err(|e| e.to_string())?;
+        let tasks = stmt
+            .query_map([], row_to_task)
+            .map_err(|e| e.to_string())?
+            .collect::<Result<Vec<_>, _>>()
+            .map_err(|e| e.to_string())?;
+        for task in tasks {
+            let net = Self::net_seconds(conn, &task)?;
+            conn.execute(
+                "UPDATE tasks SET overdue_interval_changed_at_net=?2 WHERE id=?1",
+                rusqlite::params![task.id, net],
+            )
+            .map_err(|e| e.to_string())?;
+        }
+        Ok(())
     }
 
     pub fn task_detail(&self, task_id: &str) -> Result<TaskDetailDto, String> {
@@ -627,62 +702,221 @@ mod tests {
         Tracker::new(store::open_in_memory().unwrap())
     }
 
+    fn advance_running_task(tr: &Tracker, task_id: &str, elapsed: i64) {
+        let conn = tr.conn.lock().unwrap();
+        let past = (chrono::Utc::now() - chrono::Duration::seconds(elapsed)).to_rfc3339();
+        conn.execute(
+            "UPDATE events SET at=?1 WHERE task_id=?2 AND kind='started'",
+            [&past, task_id],
+        )
+        .unwrap();
+    }
+
+    fn fired_nodes(tr: &Tracker, task_id: &str) -> Vec<String> {
+        tr.check_reminders(task_id)
+            .unwrap()
+            .reminders
+            .into_iter()
+            .map(|r| r.node)
+            .collect()
+    }
+
     #[test]
-    fn check_reminders_persists_once_and_repeats_overdue_by_bucket() {
+    fn check_reminders_uses_absolute_milestones_and_does_not_backfill_on_interval_edits() {
         let tr = t();
         let task = tr.create_task("A", 60, None, None).unwrap();
-        {
-            let conn = tr.conn.lock().unwrap();
-            let past = (chrono::Utc::now() - chrono::Duration::seconds(80)).to_rfc3339();
-            conn.execute(
-                "UPDATE events SET at=?1 WHERE task_id=?2 AND kind='started'",
-                [&past, &task.id],
-            )
-            .unwrap();
-        }
-        let first = tr.check_reminders(&task.id).unwrap();
+        advance_running_task(&tr, &task.id, 662);
         assert_eq!(
-            first
-                .reminders
-                .iter()
-                .map(|x| x.node.as_str())
-                .collect::<Vec<_>>(),
-            vec!["warn", "near", "due"]
+            fired_nodes(&tr, &task.id),
+            ["warn", "near", "due", "overdue:at:600"]
         );
-        let second = tr.check_reminders(&task.id).unwrap();
-        assert!(second.reminders.is_empty());
+        assert!(fired_nodes(&tr, &task.id).is_empty());
 
-        {
-            let conn = tr.conn.lock().unwrap();
-            let past = (chrono::Utc::now() - chrono::Duration::seconds(1300)).to_rfc3339();
-            conn.execute(
-                "UPDATE events SET at=?1 WHERE task_id=?2 AND kind='started'",
-                [&past, &task.id],
-            )
+        // Switch from 10m to 12m after the 600s milestone. The new first milestone
+        // has the same ordinal but a different absolute time; the poll may run late.
+        tr.set_settings(&[("reminder_overdue_interval_minutes".into(), "12".into())].into())
             .unwrap();
-        }
-        let third = tr.check_reminders(&task.id).unwrap();
-        assert_eq!(
-            third
-                .reminders
+        assert!(fired_nodes(&tr, &task.id).is_empty());
+        advance_running_task(&tr, &task.id, 785);
+        assert_eq!(fired_nodes(&tr, &task.id), ["overdue:at:720"]);
+
+        // 660s is already past when switching to 11m, so do not fire it.
+        tr.set_setting("reminder_overdue_interval_minutes", "11")
+            .unwrap();
+        assert!(fired_nodes(&tr, &task.id).is_empty());
+        advance_running_task(&tr, &task.id, 1382);
+        assert_eq!(fired_nodes(&tr, &task.id), ["overdue:at:1320"]);
+        assert!(fired_nodes(&tr, &task.id).is_empty());
+    }
+
+    #[test]
+    fn task_mute_suppresses_overdue_but_not_due_notification() {
+        let tr = t();
+        let task = tr.create_task("A", 60, None, None).unwrap();
+        tr.set_reminder_muted(&task.id, true).unwrap();
+        advance_running_task(&tr, &task.id, 662);
+        let reminders = tr.check_reminders(&task.id).unwrap().reminders;
+        assert!(
+            reminders
                 .iter()
-                .map(|x| x.node.as_str())
-                .collect::<Vec<_>>(),
-            vec!["overdue:2"]
+                .find(|r| r.level == ReminderLevel::Due)
+                .unwrap()
+                .notify
+        );
+        assert!(
+            !reminders
+                .iter()
+                .find(|r| r.level == ReminderLevel::Overdue)
+                .unwrap()
+                .notify
         );
     }
 
     #[test]
-    fn reminder_mute_blocks_only_notifications_and_preserves_visual_config() {
+    fn new_reminders_append_history_once_in_firing_order() {
         let tr = t();
-        let config = tr.reminder_config().unwrap();
-        assert!(config.reminder_enabled);
-        let task = tr.create_task("A", 3600, None, None).unwrap();
-        let muted = tr.set_reminder_muted(&task.id, true).unwrap();
-        assert!(muted.reminder_muted);
+        let task = tr.create_task("A", 60, None, None).unwrap();
+        advance_running_task(&tr, &task.id, 662);
+        for _ in 0..2 {
+            tr.check_reminders(&task.id).unwrap();
+        }
+        let detail = tr.task_detail(&task.id).unwrap();
+        let reminders: Vec<_> = detail
+            .events
+            .iter()
+            .filter(|event| event.kind == "reminder_fired")
+            .map(|event| {
+                serde_json::from_str::<serde_json::Value>(event.detail.as_deref().unwrap()).unwrap()
+            })
+            .collect();
+        assert_eq!(
+            reminders,
+            [
+                serde_json::json!({"node": "warn", "level": "warn"}),
+                serde_json::json!({"node": "near", "level": "near"}),
+                serde_json::json!({"node": "due", "level": "due"}),
+                serde_json::json!({"node": "overdue:at:600", "level": "overdue"}),
+            ]
+        );
+    }
+
+    #[test]
+    fn failed_history_append_rolls_back_reminders_so_they_can_retry() {
+        let tr = t();
+        let task = tr.create_task("A", 60, None, None).unwrap();
+        advance_running_task(&tr, &task.id, 80);
+        tr.conn
+            .lock()
+            .unwrap()
+            .execute_batch(
+                "CREATE TRIGGER reject_due BEFORE INSERT ON events
+             WHEN NEW.kind = 'reminder_fired' AND json_extract(NEW.detail, '$.node') = 'due'
+             BEGIN SELECT RAISE(ABORT, 'injected event failure'); END;",
+            )
+            .unwrap();
+        assert!(tr.check_reminders(&task.id).is_err());
+        assert!(
+            tr.task_detail(&task.id)
+                .unwrap()
+                .events
+                .iter()
+                .all(|e| e.kind != "reminder_fired")
+        );
+        tr.conn
+            .lock()
+            .unwrap()
+            .execute_batch("DROP TRIGGER reject_due;")
+            .unwrap();
+        assert_eq!(fired_nodes(&tr, &task.id), ["warn", "near", "due"]);
+    }
+
+    #[test]
+    fn paused_checks_return_current_config_without_firing() {
+        let tr = t();
+        let task = tr.create_task("A", 60, None, None).unwrap();
+        advance_running_task(&tr, &task.id, 662);
+        let paused = tr.pause("rest").unwrap();
+        tr.set_setting("reminder_due_percent", "150").unwrap();
         let checked = tr.check_reminders(&task.id).unwrap();
-        assert_eq!(checked.config.reminder_enabled, true);
-        assert!(checked.reminders.iter().all(|item| !item.notify));
+        assert_eq!(checked.config.due_percent, 150);
+        assert_eq!(checked.net_seconds, paused.net_seconds);
+        assert!(checked.reminders.is_empty());
+        assert!(
+            tr.task_detail(&task.id)
+                .unwrap()
+                .events
+                .iter()
+                .all(|e| e.kind != "reminder_fired")
+        );
+    }
+
+    #[test]
+    fn notification_gate_rejects_non_notification_levels_and_wrong_context() {
+        let tr = t();
+        let task = tr.create_task("A", 60, None, None).unwrap();
+        advance_running_task(&tr, &task.id, 662);
+        let never_send = || panic!("invalid reminder must not reach notification delivery");
+        assert!(
+            tr.with_reminder_notification(&task.id, "due", ReminderLevel::Due, never_send)
+                .is_err()
+        );
+        tr.check_reminders(&task.id).unwrap();
+        for (id, node, level) in [
+            (task.id.as_str(), "warn", ReminderLevel::Warn),
+            (task.id.as_str(), "near", ReminderLevel::Near),
+            (task.id.as_str(), "near", ReminderLevel::Due),
+            (task.id.as_str(), "overdue:at:600", ReminderLevel::Due),
+            (task.id.as_str(), "overdue:at:1200", ReminderLevel::Overdue),
+            ("another-task", "due", ReminderLevel::Due),
+        ] {
+            assert!(
+                tr.with_reminder_notification(id, node, level, never_send)
+                    .is_err()
+            );
+        }
+        tr.pause("rest").unwrap();
+        assert!(
+            tr.with_reminder_notification(&task.id, "due", ReminderLevel::Due, never_send)
+                .is_err()
+        );
+        tr.finish(&task.id).unwrap();
+        assert!(
+            tr.with_reminder_notification(&task.id, "due", ReminderLevel::Due, never_send)
+                .is_err()
+        );
+    }
+
+    #[test]
+    fn notification_gate_rechecks_current_settings_and_task_mute_before_delivering() {
+        let tr = t();
+        let task = tr.create_task("A", 60, None, None).unwrap();
+        advance_running_task(&tr, &task.id, 662);
+        tr.check_reminders(&task.id).unwrap();
+        let sent = std::cell::Cell::new(0);
+        let send = || {
+            sent.set(sent.get() + 1);
+            Ok(())
+        };
+
+        tr.with_reminder_notification(&task.id, "overdue:at:600", ReminderLevel::Overdue, send)
+            .unwrap();
+        assert_eq!(sent.get(), 1);
+        tr.set_reminder_muted(&task.id, true).unwrap();
+        tr.with_reminder_notification(&task.id, "overdue:at:600", ReminderLevel::Overdue, send)
+            .unwrap();
+        assert_eq!(sent.get(), 1);
+        tr.with_reminder_notification(&task.id, "due", ReminderLevel::Due, send)
+            .unwrap();
+        assert_eq!(sent.get(), 2);
+
+        tr.set_setting("reminder_due_notify", "false").unwrap();
+        tr.set_setting("reminder_overdue_notify", "false").unwrap();
+        tr.set_reminder_muted(&task.id, false).unwrap();
+        tr.with_reminder_notification(&task.id, "due", ReminderLevel::Due, send)
+            .unwrap();
+        tr.with_reminder_notification(&task.id, "overdue:at:600", ReminderLevel::Overdue, send)
+            .unwrap();
+        assert_eq!(sent.get(), 2);
     }
 
     #[test]

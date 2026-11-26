@@ -39,6 +39,7 @@ export interface Reminder {
 }
 
 export interface ReminderCheck {
+  netSeconds: number
   config: ReminderConfig
   reminders: Reminder[]
 }
@@ -105,5 +106,5 @@ export const checkReminders = (expectedTaskId: string) =>
   invoke<ReminderCheck>('check_reminders', { expectedTaskId })
 export const setReminderMuted = (expectedTaskId: string, muted: boolean) =>
   invoke<Task>('set_reminder_muted', { expectedTaskId, muted })
-export const sendReminderNotification = (title: string, body: string) =>
-  invoke<void>('send_reminder_notification', { title, body })
+export const sendReminderNotification = (taskId: string, node: string, level: Reminder['level'], title: string, body: string) =>
+  invoke<void>('send_reminder_notification', { taskId, node, level, title, body })

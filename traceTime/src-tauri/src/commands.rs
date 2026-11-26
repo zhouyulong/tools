@@ -1,4 +1,4 @@
-use crate::reminder::ReminderCheckDto;
+use crate::reminder::{ReminderCheckDto, ReminderLevel};
 use crate::tracker::{TaskDetailDto, TaskDto, Tracker};
 use tauri::{Manager, State, WebviewUrl, WebviewWindowBuilder};
 use tauri_plugin_dialog::DialogExt;
@@ -95,13 +95,23 @@ pub fn set_reminder_muted(
 }
 
 #[tauri::command]
-pub fn send_reminder_notification(app: tauri::AppHandle, title: String, body: String) -> R<()> {
-    app.notification()
-        .builder()
-        .title(title)
-        .body(body)
-        .show()
-        .map_err(|e| e.to_string())
+pub fn send_reminder_notification(
+    app: tauri::AppHandle,
+    state: State<'_, Tracker>,
+    task_id: String,
+    node: String,
+    level: ReminderLevel,
+    title: String,
+    body: String,
+) -> R<()> {
+    state.with_reminder_notification(&task_id, &node, level, || {
+        app.notification()
+            .builder()
+            .title(title)
+            .body(body)
+            .show()
+            .map_err(|e| e.to_string())
+    })
 }
 
 #[tauri::command]

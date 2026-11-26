@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import { afterEach, test } from 'node:test'
 import { clearMocks, mockIPC } from '@tauri-apps/api/mocks'
-import { finishTask, abandonTask, resume, deleteTask, deleteTasks, saveSettings, setWidgetHeight } from '../src/lib/api.ts'
+import { finishTask, abandonTask, resume, deleteTask, deleteTasks, saveSettings, sendReminderNotification, setWidgetHeight } from '../src/lib/api.ts'
 
 globalThis.window = {} as Window & typeof globalThis
 afterEach(clearMocks)
@@ -40,4 +40,14 @@ test('batch settings save uses one IPC command with the complete values map', as
   const values = { reminder_enabled: 'true', reminder_warn_percent: '75' }
   await saveSettings(values)
   assert.deepEqual(calls, [['set_settings', { values }]])
+})
+
+
+test('reminder notification IPC includes its task, persisted node and level', async () => {
+  const calls: unknown[] = []
+  mockIPC((command, payload) => { calls.push([command, payload]) })
+  await sendReminderNotification('task-B', 'overdue:at:600', 'overdue', 'Title', 'Body')
+  assert.deepEqual(calls, [['send_reminder_notification', {
+    taskId: 'task-B', node: 'overdue:at:600', level: 'overdue', title: 'Title', body: 'Body',
+  }]])
 })

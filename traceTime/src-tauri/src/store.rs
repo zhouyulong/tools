@@ -47,6 +47,8 @@ const MIGRATIONS: &[&str] = &[
     "ALTER TABLE tasks ADD COLUMN hidden INTEGER NOT NULL DEFAULT 0;",
     // v3: task-level reminder notification mute.
     "ALTER TABLE tasks ADD COLUMN reminder_muted INTEGER NOT NULL DEFAULT 0;",
+    // v4: do not backfill past milestones when a task's repeat interval changes.
+    "ALTER TABLE tasks ADD COLUMN overdue_interval_changed_at_net INTEGER;",
 ];
 
 pub fn open(path: &Path) -> rusqlite::Result<Connection> {
@@ -115,7 +117,7 @@ mod tests {
             conn.query_row("SELECT MAX(version) FROM schema_migrations", [], |r| r
                 .get::<_, i64>(0))
                 .unwrap(),
-            3
+            4
         );
         assert_eq!(
             conn.query_row("SELECT name FROM tasks WHERE id='existing'", [], |r| r
@@ -176,7 +178,7 @@ mod tests {
             conn.query_row("SELECT MAX(version) FROM schema_migrations", [], |r| r
                 .get::<_, i64>(0))
                 .unwrap(),
-            3
+            4
         );
     }
 
@@ -200,7 +202,7 @@ mod tests {
             conn.query_row("SELECT MAX(version) FROM schema_migrations", [], |r| r
                 .get::<_, i64>(0))
                 .unwrap(),
-            3
+            4
         );
     }
 

@@ -4,7 +4,7 @@
   import { pause, resume, finishTask, abandonTask, openSettings, PAUSE_REASONS } from '../lib/api'
   import { pausedChipLayout } from '../lib/pausedChips'
   import { fmtHMS } from '../lib/format'
-  import { reminderLevel, reminderPulse, type ReminderPulseState } from '../lib/reminder'
+  import { reminderCountdown, reminderLevel, type ReminderPulse } from '../lib/reminder'
   import SwitchTaskForm from './SwitchTaskForm.svelte'
 
   export let task: Task
@@ -12,7 +12,7 @@
   export let nowTick = Date.now()
   export let widgetHeight = 0
   export let reminderConfig: ReminderConfig | null = null
-  export let pulse: ReminderPulseState = { level: 'none', until: 0, key: '' }
+  export let pulse: ReminderPulse | null = null
   export let onMuteReminder: (expectedTaskId: string) => Promise<Task> = async () => task
 
   const dispatch = createEventDispatcher<{ switching: boolean; switched: void; layout: void }>()
@@ -28,14 +28,10 @@
 
   $: layoutSignature = [mode, chips.rows, chips.hiddenCount, Boolean(error), task.id, task.status].join('|')
   $: if (typeof layoutSignature === 'string') dispatch('layout')
-  $: remaining = task.est_seconds - task.net_seconds
-  $: pct = task.est_seconds > 0
-    ? Math.min(100, Math.round((task.net_seconds / task.est_seconds) * 100)) : 0
-  $: overdue = remaining < 0
+  $: countdown = reminderCountdown(task.net_seconds, task.est_seconds, reminderConfig?.duePercent)
   $: visualLevel = reminderConfig
     ? reminderLevel(task.net_seconds, task.est_seconds, reminderConfig)
-    : overdue ? 'overdue' : 'none'
-  $: pulseStrength = pulse.until > nowTick ? reminderPulse(pulse.level) : 'none'
+    : countdown.phase === 'remaining' ? 'none' : countdown.phase
   $: dueState = visualLevel === 'due' || visualLevel === 'overdue'
 
   $: if (mode === 'switch-form' &&
@@ -121,89 +117,96 @@
   onDestroy(() => dispatch('switching', false))
 </script>
 
-<div class="widget" class:due-state={dueState}>
-  {#if pulseStrength !== 'none'}
-    {#key pulse.key}
-      <span
-        class="pulse-overlay"
-        class:pulse-gentle={pulseStrength === 'gentle'}
-        class:pulse-strong={pulseStrength === 'strong'}
-        aria-hidden="true"
-      ></span>
+<div class="widget" class:due-state={dueState} class:near-state={visualLevel === 'near'} class:due-pulse={pulse?.level === 'due'}>
+  {#if pulse}
+    {#key `${task.id}:${pulse.node}`}
+      <span class="pulse-overlay" data-level={pulse.level} aria-hidden="true"></span>
     {/key}
   {/if}
-  <div class="head">
-    <span class="name">{task.name}</span>
-    <span class="head-actions">
-      <span class="tag">{task.tag ?? ''}</span>
-      <button class="settings-button" type="button" title="提醒设置" aria-label="提醒设置" on:click={openSettings}>⚙</button>
-    </span>
-  </div>
-  <div
-    class="time"
-    class:warn={visualLevel === 'warn'}
-    class:near={visualLevel === 'near'}
-    class:due={visualLevel === 'due'}
-    class:overdue={visualLevel === 'overdue'}
-  >{fmtHMS(task.net_seconds)}</div>
+  <div class="widget-content">
+    <div class="head">
+      <span class="name">{task.name}</span>
+      <span class="head-actions">
+        <span class="tag">{task.tag ?? ''}</span>
+        <button class="settings-button" type="button" title="提醒设置" aria-label="提醒设置" on:click={openSettings}>⚙</button>
+      </span>
+    </div>
+    <div
+      class="time"
+      class:warn={visualLevel === 'warn'}
+      class:near={visualLevel === 'near'}
+      class:due={visualLevel === 'due'}
+      class:overdue={visualLevel === 'overdue'}
+    >{fmtHMS(task.net_seconds)}</div>
 
-  {#if mode === 'switch-form' && switchParentId !== null}
-    <SwitchTaskForm
-      parentTaskId={switchParentId}
-      on:success={completeSwitch}
-      on:cancel={cancelSwitch}
-    />
-  {:else if mode === 'pause-menu'}
-    <div class="pause-menu">
-      {#each PAUSE_REASONS as reason}
-        <button disabled={busy} on:click={() => doPause(reason.value)}>{reason.label}</button>
-      {/each}
-      <button disabled={busy} class="cancel" on:click={() => (mode = 'normal')}>取消</button>
-    </div>
-  {:else if task.status === 'running'}
-    <div class="foot">
-      {#if overdue}
-        <span class="rem">超时 +{fmtHMS(-remaining)} · {pct}%</span>
-      {:else}
-        <span class="rem">剩余 {fmtHMS(remaining)} · {pct}%</span>
-      {/if}
-      <span class="actions">
-        {#if overdue}
-          <button class="mute" disabled={busy || task.reminder_muted} on:click={doMuteReminder}>
-            [{task.reminder_muted ? '已静音' : '静音'}]
-          </button>
-        {/if}
-        <button disabled={busy} title="暂停" on:click={() => (mode = 'pause-menu')}>⏸</button>
-        <button disabled={busy} title="完成" on:click={doFinish}>✔</button>
-        <button disabled={busy} title="放弃" on:click={doAbandon}>{confirmAbandon ? '确认放弃?' : '✕'}</button>
-      </span>
-    </div>
-  {:else}
-    <div class="foot">
-      <span class="rem paused">已暂停</span>
-      <span class="actions">
-        <button disabled={busy} title="继续" on:click={doResume}>▶</button>
-        <button disabled={busy} title="完成" on:click={doFinish}>✔</button>
-        <button disabled={busy} title="放弃" on:click={doAbandon}>{confirmAbandon ? '确认放弃?' : '✕'}</button>
-      </span>
-    </div>
-    {#if chips.rows > 0}
-      <div class="chips" aria-label="其他暂停任务">
-        {#each chips.visible as item (item.id)}
-          <span class="chip" title={`${item.name} · 已暂停 ${fmtHMS(pausedFor(item))}`}>{item.name} · 已暂停 {fmtHMS(pausedFor(item))}</span>
+    {#if mode === 'switch-form' && switchParentId !== null}
+      <SwitchTaskForm
+        parentTaskId={switchParentId}
+        on:success={completeSwitch}
+        on:cancel={cancelSwitch}
+      />
+    {:else if mode === 'pause-menu'}
+      <div class="pause-menu">
+        {#each PAUSE_REASONS as reason}
+          <button disabled={busy} on:click={() => doPause(reason.value)}>{reason.label}</button>
         {/each}
-        {#if chips.hiddenCount > 0}
-          <span class="chip collapsed" title={chips.allNames} aria-label={`另有 ${chips.hiddenCount} 个暂停任务；全部任务：${chips.allNames}`}>+{chips.hiddenCount}</span>
-        {/if}
+        <button disabled={busy} class="cancel" on:click={() => (mode = 'normal')}>取消</button>
       </div>
+    {:else if task.status === 'running'}
+      <div class="foot">
+        {#if countdown.phase === 'overdue'}
+          <span class="rem">超时 +{fmtHMS(countdown.seconds)} · {countdown.percent}%</span>
+        {:else if countdown.phase === 'due'}
+          <span class="rem">已到期 · {countdown.percent}%</span>
+        {:else}
+          <span class="rem">剩余 {fmtHMS(countdown.seconds)} · {countdown.percent}%</span>
+        {/if}
+        <span class="actions">
+          {#if countdown.phase !== 'remaining'}
+            <button class="mute" disabled={busy || task.reminder_muted} on:click={doMuteReminder}
+              title={task.reminder_muted ? '已静音超时通知' : '静音超时通知'}
+              aria-label={task.reminder_muted ? '已静音超时通知' : '静音超时通知'}>
+              [{task.reminder_muted ? '超时已静音' : '静音超时'}]
+            </button>
+          {/if}
+          <button disabled={busy} title="暂停" on:click={() => (mode = 'pause-menu')}>⏸</button>
+          <button disabled={busy} title="完成" on:click={doFinish}>✔</button>
+          <button disabled={busy} title="放弃" on:click={doAbandon}>{confirmAbandon ? '确认放弃?' : '✕'}</button>
+        </span>
+      </div>
+    {:else}
+      <div class="foot">
+        <span class="rem paused">已暂停</span>
+        <span class="actions">
+          <button disabled={busy} title="继续" on:click={doResume}>▶</button>
+          <button disabled={busy} title="完成" on:click={doFinish}>✔</button>
+          <button disabled={busy} title="放弃" on:click={doAbandon}>{confirmAbandon ? '确认放弃?' : '✕'}</button>
+        </span>
+      </div>
+      {#if chips.rows > 0}
+        <div class="chips" aria-label="其他暂停任务">
+          {#each chips.visible as item (item.id)}
+            <span class="chip" title={`${item.name} · 已暂停 ${fmtHMS(pausedFor(item))}`}>{item.name} · 已暂停 {fmtHMS(pausedFor(item))}</span>
+          {/each}
+          {#if chips.hiddenCount > 0}
+            <span class="chip collapsed" title={chips.allNames} aria-label={`另有 ${chips.hiddenCount} 个暂停任务；全部任务：${chips.allNames}`}>+{chips.hiddenCount}</span>
+          {/if}
+        </div>
+      {/if}
     {/if}
-  {/if}
 
-  {#if error}<p class="error" title={error}>{error}</p>{/if}
+    {#if error}<p class="error" title={error}>{error}</p>{/if}
+  </div>
 </div>
 
 <style>
-  .widget { position: relative; isolation: isolate; flex: none; min-width: 0; min-height: 126px; padding: 3px 6px; overflow: hidden; }
+  .widget { position: relative; isolation: isolate; flex: none; min-width: 0; min-height: 126px; overflow: clip; }
+  .widget-content { padding: 3px 6px; }
+  .widget::after { content: ''; position: absolute; inset: 0; pointer-events: none; }
+  .widget.near-state::after { box-shadow: inset 0 0 0 2px #e67e22; }
+  .widget.due-state::after { box-shadow: inset 0 0 0 2px #c0392b; }
+  /* Scale within the shell without changing its measured height. */
+  .widget.due-pulse .widget-content { transform-origin: top center; animation: pulse-scale 3s ease-out; }
   .head { display: flex; height: 14px; line-height: 14px; justify-content: space-between; align-items: baseline; gap: 4px; overflow: hidden; }
   .name { min-width: 0; font-size: 11px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .head-actions { display: flex; flex: none; height: 14px; align-items: center; gap: 2px; overflow: hidden; }
@@ -211,12 +214,12 @@
   .head .settings-button { flex: none; width: 15px; height: 14px; min-height: 0; padding: 0; border: 0; line-height: 14px; background: none; color: #c8c9cc; cursor: pointer; font-size: 10px; }
   .time { height: 28px; line-height: 28px; font-size: 26px; font-variant-numeric: tabular-nums; text-align: center; }
   .time.warn { color: #f1c40f; }
-  .time.near { color: #e67e22; }
+  .time.near { color: #e67e22; font-size: 28px; }
   .time.due, .time.overdue, .widget.due-state .rem { color: #e74c3c; }
-  .widget.due-state { box-shadow: inset 0 0 0 2px #c0392b; }
   .pulse-overlay { position: absolute; z-index: -1; inset: 0; pointer-events: none; }
-  .pulse-overlay.pulse-gentle { animation: pulse-gentle 3s ease-out; }
-  .pulse-overlay.pulse-strong { animation: pulse-strong 3s ease-out; }
+  .pulse-overlay { --pulse-color: rgba(231, 76, 60, 0.24); animation: pulse-glow 3s ease-out; }
+  .pulse-overlay[data-level='warn'] { --pulse-color: rgba(241, 196, 15, 0.18); }
+  .pulse-overlay[data-level='near'] { --pulse-color: rgba(230, 126, 34, 0.22); }
   .foot { display: flex; height: 20px; justify-content: space-between; align-items: center; gap: 2px; font-size: 10px; }
   .rem { min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .paused { opacity: 0.6; }
@@ -232,12 +235,12 @@
   .collapsed { text-align: center; font-weight: 600; }
   .error { height: 12px; line-height: 12px; margin: 2px 0 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: #c0392b; font-size: 10px; }
 
-  @keyframes pulse-gentle {
-    0%, 35% { background: rgba(241, 196, 15, 0.18); }
+  @keyframes pulse-glow {
+    0%, 35% { background: var(--pulse-color); }
     100% { background: transparent; }
   }
-  @keyframes pulse-strong {
-    0%, 18%, 36% { background: rgba(231, 76, 60, 0.28); box-shadow: inset 0 0 0 2px #e74c3c; }
-    9%, 27%, 100% { background: transparent; box-shadow: inset 0 0 0 2px rgba(192, 57, 43, 0.35); }
+  @keyframes pulse-scale {
+    0%, 75%, 100% { transform: scale(1); padding-inline: 6px; }
+    16% { transform: scale(1.15); padding-inline: 23px; }
   }
 </style>

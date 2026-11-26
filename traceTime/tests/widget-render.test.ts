@@ -27,7 +27,7 @@ const TimelineBar = (await import('../src/components/TimelineBar.svelte')).defau
 const nowTick = Date.UTC(2026, 10, 26, 2)
 const task: Task = { id: 'B', name: 'Current', est_seconds: 60, status: 'paused', tag: null,
   net_seconds: 0, created_at: new Date(nowTick - 60_000).toISOString(), finished_at: null,
-  paused_since: new Date(nowTick - 60_000).toISOString() }
+  paused_since: new Date(nowTick - 60_000).toISOString(), reminder_muted: false }
 const parent: Task = { ...task, id: 'A', name: 'Parent', paused_since: new Date(nowTick - 3_600_000).toISOString() }
 
 test('paused view exposes only other paused task chips and their elapsed pause', () => {
@@ -78,4 +78,34 @@ test('timeline tooltips show duration and integer lifetime percentage', () => {
     { kind: 'work', started_at: '2026-11-26T00:00:10Z', ended_at: '2026-11-26T00:00:40Z' },
   ] } })
   assert.match(body, /00:00:30（占 30%）/)
+})
+
+
+const reminderConfig = {
+  reminderEnabled: true, warnEnabled: true, warnPercent: 75, nearEnabled: true, nearPercent: 90,
+  dueEnabled: true, duePercent: 95, overdueEnabled: true, overdueNotify: true,
+  overdueIntervalMinutes: 10, warnSound: false, nearSound: false, dueNotify: true,
+}
+
+test('running view changes countdown, border, and mute availability at the configured due second', () => {
+  const at = (net_seconds: number) => render(WidgetRunning, { props: {
+    task: { ...task, status: 'running', est_seconds: 61, net_seconds }, reminderConfig,
+  } }).body
+  assert.match(at(56), /剩余 00:00:01/)
+  assert.match(at(56), /class="widget [^"]*near-state/)
+  assert.doesNotMatch(at(56), /class="mute/)
+  assert.match(at(57), /已到期/)
+  assert.match(at(57), /class="widget [^"]*due-state/)
+  assert.match(at(57), /静音超时通知/)
+  assert.match(at(58), /超时 \+00:00:01/)
+  assert.match(at(58), /class="widget [^"]*due-state/)
+})
+
+test('paused view recomputes steady levels from current config with no new pulse', () => {
+  const props = { task: { ...task, est_seconds: 61, net_seconds: 58 }, reminderConfig }
+  const overdue = render(WidgetRunning, { props }).body
+  const near = render(WidgetRunning, { props: { ...props, reminderConfig: { ...reminderConfig, duePercent: 110 } } }).body
+  assert.match(overdue, /class="widget [^"]*due-state/)
+  assert.match(near, /class="widget [^"]*near-state/)
+  assert.doesNotMatch(overdue + near, /pulse-overlay/)
 })
