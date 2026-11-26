@@ -1,5 +1,5 @@
 use crate::store;
-use rusqlite::Connection;
+use rusqlite::{Connection, Error as SqlError};
 use serde::Serialize;
 use std::sync::Mutex;
 
@@ -61,72 +61,114 @@ impl Tracker {
         .map_err(|e| e.to_string())
     }
 
-    fn net_seconds(conn: &Connection, task_id: &str) -> i64 {
+    fn closed_net_seconds(conn: &Connection, task_id: &str) -> Result<i64, String> {
         conn.query_row(
             "SELECT COALESCE(SUM(
-                CAST(strftime('%s', COALESCE(ended_at, ?2)) AS INTEGER)
+                CAST(strftime('%s', ended_at) AS INTEGER)
               - CAST(strftime('%s', started_at) AS INTEGER)
              ), 0)
              FROM segments WHERE task_id = ?1 AND kind = 'work'",
-            rusqlite::params![task_id, now()],
+            [task_id],
             |r| r.get(0),
         )
-        .unwrap_or(0)
+        .map_err(|e| e.to_string())
     }
 
-    fn gross_seconds(conn: &Connection, task_id: &str) -> i64 {
+    fn latest_start_at(conn: &Connection, task_id: &str) -> Result<Option<String>, String> {
+        match conn.query_row(
+            "SELECT at FROM events
+             WHERE task_id = ?1 AND kind IN ('started', 'resumed')
+             ORDER BY at DESC, id DESC LIMIT 1",
+            [task_id],
+            |r| r.get(0),
+        ) {
+            Ok(at) => Ok(Some(at)),
+            Err(SqlError::QueryReturnedNoRows) => Ok(None),
+            Err(e) => Err(e.to_string()),
+        }
+    }
+
+    fn net_seconds(conn: &Connection, task: &TaskDto) -> Result<i64, String> {
+        let closed = Self::closed_net_seconds(conn, &task.id)?;
+        if task.status != "running" {
+            return Ok(closed);
+        }
+        let started_at = Self::latest_start_at(conn, &task.id)?
+            .ok_or_else(|| "running task has no start event".to_string())?;
+        let live: i64 = conn
+            .query_row(
+                "SELECT CAST(strftime('%s', ?2) AS INTEGER)
+                      - CAST(strftime('%s', ?1) AS INTEGER)",
+                rusqlite::params![started_at, now()],
+                |r| r.get(0),
+            )
+            .map_err(|e| e.to_string())?;
+        Ok(closed + live.max(0))
+    }
+
+    fn gross_seconds(conn: &Connection, task_id: &str, ended_at: &str) -> Result<i64, String> {
         conn.query_row(
             "SELECT CAST(strftime('%s', ?2) AS INTEGER)
                    - CAST(strftime('%s', created_at) AS INTEGER)
              FROM tasks WHERE id = ?1",
-            rusqlite::params![task_id, now()],
+            rusqlite::params![task_id, ended_at],
             |r| r.get(0),
         )
-        .unwrap_or(0)
+        .map_err(|e| e.to_string())
     }
 
-    fn get_task(conn: &Connection, task_id: &str) -> Option<TaskDto> {
-        conn.query_row(
+    fn get_task(conn: &Connection, task_id: &str) -> Result<Option<TaskDto>, String> {
+        match conn.query_row(
             &format!("SELECT {TASK_COLUMNS} FROM tasks WHERE id = ?1"),
             [task_id],
             row_to_task,
-        )
-        .ok()
+        ) {
+            Ok(task) => Ok(Some(task)),
+            Err(SqlError::QueryReturnedNoRows) => Ok(None),
+            Err(e) => Err(e.to_string()),
+        }
     }
 
-    fn active_task(conn: &Connection) -> Option<TaskDto> {
-        let id: String = conn
-            .query_row(
-                "SELECT id FROM tasks WHERE status IN ('pending','running','paused') LIMIT 1",
-                [],
-                |r| r.get(0),
-            )
-            .ok()?;
-        Self::get_task(conn, &id)
+    fn active_task(conn: &Connection) -> Result<Option<TaskDto>, String> {
+        let id: Option<String> = match conn.query_row(
+            "SELECT id FROM tasks WHERE status IN ('pending','running','paused') LIMIT 1",
+            [],
+            |r| r.get(0),
+        ) {
+            Ok(id) => Some(id),
+            Err(SqlError::QueryReturnedNoRows) => None,
+            Err(e) => return Err(e.to_string()),
+        };
+        match id {
+            Some(id) => Self::get_task(conn, &id),
+            None => Ok(None),
+        }
     }
 
     fn require_active(conn: &Connection) -> Result<TaskDto, String> {
-        Self::active_task(conn).ok_or_else(|| "no active task".into())
+        Self::active_task(conn)?.ok_or_else(|| "no active task".into())
     }
 
-    fn close_open_segment(conn: &Connection, task_id: &str) -> Result<(), String> {
-        let n = conn
-            .execute(
-                "UPDATE segments SET ended_at = ?2
-                 WHERE task_id = ?1 AND ended_at IS NULL",
-                rusqlite::params![task_id, now()],
-            )
-            .map_err(|e| e.to_string())?;
-        if n > 1 {
-            return Err("more than one open segment".into());
-        }
-        Ok(())
+    fn append_closed_segment(
+        conn: &Connection,
+        task_id: &str,
+        ended_at: &str,
+    ) -> Result<(), String> {
+        let started_at = Self::latest_start_at(conn, task_id)?
+            .ok_or_else(|| "running task has no start event".to_string())?;
+        conn.execute(
+            "INSERT INTO segments (task_id, started_at, ended_at, kind)
+             VALUES (?1, ?2, ?3, 'work')",
+            rusqlite::params![task_id, started_at, ended_at],
+        )
+        .map(|_| ())
+        .map_err(|e| e.to_string())
     }
 
-    /// 补齐 net_seconds / gross_seconds 的实时计算，返回给前端
-    fn with_live_net(conn: &Connection, mut task: TaskDto) -> TaskDto {
-        task.net_seconds = Self::net_seconds(conn, &task.id);
-        task
+    /// 补齐 net_seconds 的实时计算，返回给前端
+    fn with_live_net(conn: &Connection, mut task: TaskDto) -> Result<TaskDto, String> {
+        task.net_seconds = Self::net_seconds(conn, &task)?;
+        Ok(task)
     }
 
     pub fn create_task(
@@ -141,83 +183,88 @@ impl Tracker {
         if est_seconds <= 0 {
             return Err("est_seconds must be positive".into());
         }
-        let conn = self.conn.lock().map_err(|_| "lock poisoned")?;
-        if Self::active_task(&conn).is_some() {
+        let mut conn = self.conn.lock().map_err(|_| "lock poisoned")?;
+        let tx = conn.transaction().map_err(|e| e.to_string())?;
+        if Self::active_task(&tx)?.is_some() {
             return Err("another task is active".into());
         }
         let id = uuid::Uuid::new_v4().to_string();
         let ts = now();
-        conn.execute(
+        tx.execute(
             "INSERT INTO tasks (id, name, est_seconds, status, created_at, tag)
              VALUES (?1, ?2, ?3, 'running', ?4, ?5)",
             rusqlite::params![id, name.trim(), est_seconds, ts, tag],
         )
         .map_err(|e| e.to_string())?;
-        conn.execute(
-            "INSERT INTO segments (task_id, started_at, ended_at, kind)
-             VALUES (?1, ?2, NULL, 'work')",
-            rusqlite::params![id, ts],
-        )
-        .map_err(|e| e.to_string())?;
-        Self::add_event(&conn, &id, "created", None)?;
-        Self::add_event(&conn, &id, "started", None)?;
-        let task = Self::get_task(&conn, &id).ok_or_else(|| "created task not found".to_string())?;
-        Ok(Self::with_live_net(&conn, task))
+        Self::add_event(&tx, &id, "created", None)?;
+        Self::add_event(&tx, &id, "started", None)?;
+        let task = Self::get_task(&tx, &id)?
+            .ok_or_else(|| "created task not found".to_string())?;
+        let task = Self::with_live_net(&tx, task)?;
+        tx.commit().map_err(|e| e.to_string())?;
+        Ok(task)
     }
 
     pub fn pause(&self, reason: &str) -> Result<TaskDto, String> {
+        let mut conn = self.conn.lock().map_err(|_| "lock poisoned")?;
+        let tx = conn.transaction().map_err(|e| e.to_string())?;
+        let task = Self::require_active(&tx)?;
         if !PAUSE_REASONS.contains(&reason) {
             return Err(format!("invalid pause reason: {reason}"));
         }
-        let conn = self.conn.lock().map_err(|_| "lock poisoned")?;
-        let task = Self::require_active(&conn)?;
         if task.status != "running" {
             return Err(format!("cannot pause task in status {}", task.status));
         }
-        Self::close_open_segment(&conn, &task.id)?;
+        let ended_at = now();
+        Self::append_closed_segment(&tx, &task.id, &ended_at)?;
         let detail = serde_json::json!({ "reason": reason }).to_string();
-        Self::add_event(&conn, &task.id, "paused", Some(&detail))?;
-        conn.execute("UPDATE tasks SET status='paused' WHERE id=?1", [&task.id])
+        Self::add_event(&tx, &task.id, "paused", Some(&detail))?;
+        tx.execute("UPDATE tasks SET status='paused' WHERE id=?1", [&task.id])
             .map_err(|e| e.to_string())?;
-        let task = Self::get_task(&conn, &task.id).ok_or_else(|| "paused task not found".to_string())?;
-        Ok(Self::with_live_net(&conn, task))
+        let task = Self::get_task(&tx, &task.id)?
+            .ok_or_else(|| "paused task not found".to_string())?;
+        let task = Self::with_live_net(&tx, task)?;
+        tx.commit().map_err(|e| e.to_string())?;
+        Ok(task)
     }
 
     pub fn resume(&self) -> Result<TaskDto, String> {
-        let conn = self.conn.lock().map_err(|_| "lock poisoned")?;
-        let task = Self::require_active(&conn)?;
+        let mut conn = self.conn.lock().map_err(|_| "lock poisoned")?;
+        let tx = conn.transaction().map_err(|e| e.to_string())?;
+        let task = Self::require_active(&tx)?;
         if task.status != "paused" {
             return Err(format!("cannot resume task in status {}", task.status));
         }
-        conn.execute(
-            "INSERT INTO segments (task_id, started_at, ended_at, kind)
-             VALUES (?1, ?2, NULL, 'work')",
-            rusqlite::params![task.id, now()],
-        )
-        .map_err(|e| e.to_string())?;
-        Self::add_event(&conn, &task.id, "resumed", None)?;
-        conn.execute("UPDATE tasks SET status='running' WHERE id=?1", [&task.id])
+        Self::add_event(&tx, &task.id, "resumed", None)?;
+        tx.execute("UPDATE tasks SET status='running' WHERE id=?1", [&task.id])
             .map_err(|e| e.to_string())?;
-        let task = Self::get_task(&conn, &task.id).ok_or_else(|| "resumed task not found".to_string())?;
-        Ok(Self::with_live_net(&conn, task))
+        let task = Self::get_task(&tx, &task.id)?
+            .ok_or_else(|| "resumed task not found".to_string())?;
+        let task = Self::with_live_net(&tx, task)?;
+        tx.commit().map_err(|e| e.to_string())?;
+        Ok(task)
     }
 
     fn terminate(&self, status: &str, kind: &str) -> Result<TaskDto, String> {
-        let conn = self.conn.lock().map_err(|_| "lock poisoned")?;
-        let task = Self::require_active(&conn)?;
-        if task.status == "running" {
-            Self::close_open_segment(&conn, &task.id)?;
-        }
-        let net = Self::net_seconds(&conn, &task.id);
-        let gross = Self::gross_seconds(&conn, &task.id);
+        let mut conn = self.conn.lock().map_err(|_| "lock poisoned")?;
+        let tx = conn.transaction().map_err(|e| e.to_string())?;
+        let task = Self::require_active(&tx)?;
         let finished_at = now();
-        conn.execute(
+        if task.status == "running" {
+            Self::append_closed_segment(&tx, &task.id, &finished_at)?;
+        }
+        let net = Self::closed_net_seconds(&tx, &task.id)?;
+        let gross = Self::gross_seconds(&tx, &task.id, &finished_at)?;
+        tx.execute(
             "UPDATE tasks SET status=?2, finished_at=?3, net_seconds=?4, gross_seconds=?5 WHERE id=?1",
             rusqlite::params![task.id, status, finished_at, net, gross],
         )
         .map_err(|e| e.to_string())?;
-        Self::add_event(&conn, &task.id, kind, None)?;
-        Self::get_task(&conn, &task.id).ok_or_else(|| "finished task not found".to_string())
+        Self::add_event(&tx, &task.id, kind, None)?;
+        let task = Self::get_task(&tx, &task.id)?
+            .ok_or_else(|| "finished task not found".to_string())?;
+        tx.commit().map_err(|e| e.to_string())?;
+        Ok(task)
     }
 
     pub fn finish(&self) -> Result<TaskDto, String> {
@@ -230,7 +277,10 @@ impl Tracker {
 
     pub fn current(&self) -> Result<Option<TaskDto>, String> {
         let conn = self.conn.lock().map_err(|_| "lock poisoned")?;
-        Ok(Self::active_task(&conn).map(|t| Self::with_live_net(&conn, t)))
+        match Self::active_task(&conn)? {
+            Some(task) => Ok(Some(Self::with_live_net(&conn, task)?)),
+            None => Ok(None),
+        }
     }
 
     pub fn list_finished(&self) -> Result<Vec<TaskDto>, String> {
@@ -266,6 +316,44 @@ mod tests {
     }
 
     #[test]
+    fn running_time_is_computed_from_latest_start_event() {
+        let tr = t();
+        tr.create_task("A", 60, None).unwrap();
+        std::thread::sleep(std::time::Duration::from_millis(1200));
+        let running = tr.current().unwrap().unwrap();
+        assert!(running.net_seconds >= 1, "net {}", running.net_seconds);
+    }
+
+    #[test]
+    fn pause_appends_one_closed_segment() {
+        let tr = t();
+        let task = tr.create_task("A", 60, None).unwrap();
+        {
+            let conn = tr.conn.lock().unwrap();
+            let count: i64 = conn
+                .query_row(
+                    "SELECT COUNT(*) FROM segments WHERE task_id=?1",
+                    [&task.id],
+                    |r| r.get(0),
+                )
+                .unwrap();
+            assert_eq!(count, 0, "running segments must not be stored");
+        }
+
+        tr.pause("rest").unwrap();
+        let conn = tr.conn.lock().unwrap();
+        let (count, closed): (i64, i64) = conn
+            .query_row(
+                "SELECT COUNT(*), COUNT(ended_at) FROM segments WHERE task_id=?1",
+                [&task.id],
+                |r| Ok((r.get(0)?, r.get(1)?)),
+            )
+            .unwrap();
+        assert_eq!(count, 1);
+        assert_eq!(closed, 1);
+    }
+
+    #[test]
     fn single_task_model_rejects_second_task() {
         let tr = t();
         tr.create_task("A", 60, None).unwrap();
@@ -294,6 +382,13 @@ mod tests {
             "net {}",
             running.net_seconds
         );
+    }
+
+    #[test]
+    fn pause_without_active_task_precedes_reason_validation() {
+        let tr = t();
+        let err = tr.pause("bogus").unwrap_err();
+        assert_eq!(err, "no active task");
     }
 
     #[test]
