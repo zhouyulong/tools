@@ -2,6 +2,11 @@ import type { ReminderConfig } from './api'
 
 export type ReminderLevel = 'none' | 'warn' | 'near' | 'due' | 'overdue'
 export type ReminderPulse = 'none' | 'gentle' | 'strong'
+export interface ReminderPulseState {
+  level: ReminderLevel
+  until: number
+  key: string
+}
 
 type VisualReminderConfig = Pick<
   ReminderConfig,
@@ -30,6 +35,15 @@ export function reminderPulse(activeLevel: ReminderLevel): ReminderPulse {
   if (activeLevel === 'warn') return 'gentle'
   if (activeLevel === 'near' || activeLevel === 'due') return 'strong'
   return 'none'
+}
+
+export function reminderPulseEvent(
+  taskId: string,
+  node: string,
+  level: ReminderLevel,
+  receivedAt: number = Date.now(),
+): ReminderPulseState {
+  return { level, until: receivedAt + 3000, key: `${taskId}:${node}` }
 }
 
 let audioContext: AudioContext | null = null

@@ -4,7 +4,7 @@
   import { pause, resume, finishTask, abandonTask, PAUSE_REASONS } from '../lib/api'
   import { pausedChipLayout } from '../lib/pausedChips'
   import { fmtHMS } from '../lib/format'
-  import { reminderLevel, reminderPulse, type ReminderLevel } from '../lib/reminder'
+  import { reminderLevel, reminderPulse, type ReminderPulseState } from '../lib/reminder'
   import SwitchTaskForm from './SwitchTaskForm.svelte'
 
   export let task: Task
@@ -12,7 +12,7 @@
   export let nowTick = Date.now()
   export let widgetHeight = 0
   export let reminderConfig: ReminderConfig | null = null
-  export let pulse: { level: ReminderLevel; until: number } = { level: 'none', until: 0 }
+  export let pulse: ReminderPulseState = { level: 'none', until: 0, key: '' }
   export let onMuteReminder: (expectedTaskId: string) => Promise<Task> = async () => task
 
   const dispatch = createEventDispatcher<{ switching: boolean; switched: void; layout: void }>()
@@ -121,12 +121,17 @@
   onDestroy(() => dispatch('switching', false))
 </script>
 
-<div
-  class="widget"
-  class:due-state={dueState}
-  class:pulse-gentle={pulseStrength === 'gentle'}
-  class:pulse-strong={pulseStrength === 'strong'}
->
+<div class="widget" class:due-state={dueState}>
+  {#if pulseStrength !== 'none'}
+    {#key pulse.key}
+      <span
+        class="pulse-overlay"
+        class:pulse-gentle={pulseStrength === 'gentle'}
+        class:pulse-strong={pulseStrength === 'strong'}
+        aria-hidden="true"
+      ></span>
+    {/key}
+  {/if}
   <div class="head">
     <span class="name">{task.name}</span>
     <span class="tag">{task.tag ?? ''}</span>
@@ -195,7 +200,7 @@
 </div>
 
 <style>
-  .widget { flex: none; min-width: 0; min-height: 126px; padding: 3px 6px; overflow: hidden; }
+  .widget { position: relative; isolation: isolate; flex: none; min-width: 0; min-height: 126px; padding: 3px 6px; overflow: hidden; }
   .head { display: flex; height: 14px; line-height: 14px; justify-content: space-between; align-items: baseline; gap: 4px; overflow: hidden; }
   .name { min-width: 0; font-size: 11px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .tag { flex: none; max-width: 60px; overflow: hidden; text-overflow: ellipsis; font-size: 10px; opacity: 0.6; }
@@ -204,8 +209,9 @@
   .time.near { color: #e67e22; }
   .time.due, .time.overdue, .widget.due-state .rem { color: #e74c3c; }
   .widget.due-state { box-shadow: inset 0 0 0 2px #c0392b; }
-  .widget.pulse-gentle { animation: pulse-gentle 3s ease-out; }
-  .widget.pulse-strong { animation: pulse-strong 3s ease-out; }
+  .pulse-overlay { position: absolute; z-index: -1; inset: 0; pointer-events: none; }
+  .pulse-overlay.pulse-gentle { animation: pulse-gentle 3s ease-out; }
+  .pulse-overlay.pulse-strong { animation: pulse-strong 3s ease-out; }
   .foot { display: flex; height: 20px; justify-content: space-between; align-items: center; gap: 2px; font-size: 10px; }
   .rem { min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .paused { opacity: 0.6; }

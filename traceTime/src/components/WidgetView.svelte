@@ -11,7 +11,7 @@
     type ReminderConfig,
     type Task,
   } from '../lib/api'
-  import { playReminderChime, type ReminderLevel } from '../lib/reminder'
+  import { playReminderChime, reminderPulseEvent, type ReminderPulseState } from '../lib/reminder'
   import { createWidgetHeightObserver } from '../lib/widgetHeight'
   import LongPauseBanner from './LongPauseBanner.svelte'
   import TaskForm from './TaskForm.svelte'
@@ -27,7 +27,7 @@
   let measureNow: () => void = () => {}
   let widgetHeight = 0
   let reminderConfig: ReminderConfig | null = null
-  let pulse: { level: ReminderLevel; until: number } = { level: 'none', until: 0 }
+  let pulse: ReminderPulseState = { level: 'none', until: 0, key: '' }
   let reminderTaskId: string | null = null
   let processedReminderKeys = new Set<string>()
 
@@ -35,7 +35,7 @@
     if (reminderTaskId === nextTaskId) return
     reminderTaskId = nextTaskId
     reminderConfig = null
-    pulse = { level: 'none', until: 0 }
+    pulse = { level: 'none', until: 0, key: '' }
     processedReminderKeys = new Set<string>()
   }
 
@@ -48,7 +48,7 @@
         const key = `${current.id}:${reminder.node}`
         if (processedReminderKeys.has(key)) continue
         processedReminderKeys.add(key)
-        pulse = { level: reminder.level, until: Date.now() + 3000 }
+        pulse = reminderPulseEvent(current.id, reminder.node, reminder.level)
         if (reminder.sound) {
           void playReminderChime(reminder.level === 'warn' ? 'soft' : 'urgent')
         }
