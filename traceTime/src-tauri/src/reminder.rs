@@ -30,7 +30,8 @@ pub struct ReminderConfig {
     pub near_sound: bool,
     pub due_notify: bool,
     est_seconds: i64,
-    overdue_from_net: Option<i64>,
+    overdue_interval_from_net: Option<i64>,
+    overdue_upgrade_cutoff_net: Option<i64>,
 }
 
 impl Default for ReminderConfig {
@@ -50,7 +51,8 @@ impl Default for ReminderConfig {
             near_sound: false,
             due_notify: true,
             est_seconds: DEFAULT_EST_SECONDS,
-            overdue_from_net: None,
+            overdue_interval_from_net: None,
+            overdue_upgrade_cutoff_net: None,
         }
     }
 }
@@ -131,9 +133,15 @@ impl ReminderConfig {
         })
     }
 
-    pub(crate) fn for_task(mut self, est_seconds: i64, overdue_from_net: Option<i64>) -> Self {
+    pub(crate) fn for_task(
+        mut self,
+        est_seconds: i64,
+        overdue_interval_from_net: Option<i64>,
+        overdue_upgrade_cutoff_net: Option<i64>,
+    ) -> Self {
         self.est_seconds = est_seconds;
-        self.overdue_from_net = overdue_from_net;
+        self.overdue_interval_from_net = overdue_interval_from_net;
+        self.overdue_upgrade_cutoff_net = overdue_upgrade_cutoff_net;
         self
     }
 }
@@ -260,16 +268,23 @@ pub fn due_reminders(net_seconds: i64, config: &ReminderConfig) -> Vec<DueRemind
             sound: false,
         });
     }
-    // Round the schedule's lower bound (upgrade or interval change) up to a
-    // repeat boundary. A late poll emits only the newest reached boundary.
+    // Overdue tasks at upgrade start a fresh interval at the saved net time.
+    // Otherwise the due deadline is the anchor. A late poll considers only the
+    // newest reached milestone, and interval edits never backfill past nodes.
     let interval = i128::from(config.overdue_interval_minutes) * 60;
-    let overtime = |net: i64| (i128::from(net) - i128::from(due_at)).max(0);
-    let current_overtime = overtime(net_seconds);
-    let first_milestone = config.overdue_from_net.map_or(interval, |from_net| {
-        ((overtime(from_net) + interval - 1) / interval * interval).max(interval)
-    });
-    let reached_milestone = current_overtime / interval * interval;
-    if config.overdue_enabled && reached_milestone >= first_milestone {
+    let due_at = i128::from(due_at);
+    let anchor = i128::from(config.overdue_upgrade_cutoff_net.unwrap_or(0)).max(due_at);
+    let net = i128::from(net_seconds);
+    let repeats = (net - anchor).max(0) / interval;
+    let reached = anchor + repeats * interval;
+    if config.overdue_enabled
+        && repeats > 0
+        && config
+            .overdue_interval_from_net
+            .is_none_or(|from| reached >= i128::from(from))
+    {
+        let reached_milestone = reached - due_at;
+        let current_overtime = net - due_at;
         reminders.push(DueReminder {
             node: format!("overdue:at:{reached_milestone}"),
             level: ReminderLevel::Overdue,
@@ -344,7 +359,7 @@ mod tests {
             ..ReminderConfig::default()
         };
         let overdue_at = |edit, elapsed| {
-            due_reminders(elapsed, &config.clone().for_task(60, Some(edit)))
+            due_reminders(elapsed, &config.clone().for_task(60, Some(edit), None))
                 .into_iter()
                 .find(|r| r.level == ReminderLevel::Overdue)
                 .map(|r| r.node)
@@ -352,6 +367,30 @@ mod tests {
         assert_eq!(overdue_at(180, 182).as_deref(), Some("overdue:at:120"));
         assert_eq!(overdue_at(181, 182), None);
         assert_eq!(overdue_at(181, 245).as_deref(), Some("overdue:at:180"));
+    }
+
+    #[test]
+    fn upgrade_starts_a_full_interval_and_keeps_due_relative_node_ids() {
+        let config = ReminderConfig {
+            overdue_interval_minutes: 1,
+            ..ReminderConfig::default()
+        };
+        let overdue_at = |reset, edit, elapsed| {
+            due_reminders(elapsed, &config.clone().for_task(60, edit, Some(reset)))
+                .into_iter()
+                .find(|r| r.level == ReminderLevel::Overdue)
+                .map(|r| r.node)
+        };
+        assert_eq!(overdue_at(95, None, 154), None);
+        assert_eq!(overdue_at(95, None, 155).as_deref(), Some("overdue:at:95"));
+        assert_eq!(overdue_at(95, None, 277).as_deref(), Some("overdue:at:215"));
+        assert_eq!(overdue_at(95, Some(156), 157), None);
+        assert_eq!(
+            overdue_at(95, Some(155), 155).as_deref(),
+            Some("overdue:at:95")
+        );
+        assert_eq!(overdue_at(45, None, 119), None);
+        assert_eq!(overdue_at(45, None, 120).as_deref(), Some("overdue:at:60"));
     }
 
     #[test]

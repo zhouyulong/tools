@@ -99,11 +99,7 @@ impl Tracker {
         (end - start).max(TimeDelta::zero())
     }
 
-    fn visit_closed_work(
-        conn: &Connection,
-        task_id: &str,
-        mut visit: impl FnMut(DateTime<FixedOffset>, DateTime<FixedOffset>),
-    ) -> Result<(), String> {
+    fn closed_work_duration(conn: &Connection, task_id: &str) -> Result<TimeDelta, String> {
         let mut stmt = conn
             .prepare(
                 "SELECT started_at, ended_at FROM segments
@@ -115,18 +111,11 @@ impl Tracker {
                 Ok((r.get::<_, String>(0)?, r.get::<_, String>(1)?))
             })
             .map_err(|e| e.to_string())?;
+        let mut total = TimeDelta::zero();
         for row in rows {
             let (start, end) = row.map_err(|e| e.to_string())?;
-            visit(Self::parse_timestamp(&start)?, Self::parse_timestamp(&end)?);
+            total += Self::elapsed(Self::parse_timestamp(&start)?, Self::parse_timestamp(&end)?);
         }
-        Ok(())
-    }
-
-    fn closed_work_duration(conn: &Connection, task_id: &str) -> Result<TimeDelta, String> {
-        let mut total = TimeDelta::zero();
-        Self::visit_closed_work(conn, task_id, |start, end| {
-            total += Self::elapsed(start, end)
-        })?;
         Ok(total)
     }
 
@@ -441,104 +430,27 @@ impl Tracker {
         }
     }
 
-    fn net_seconds_at(
-        conn: &Connection,
-        task_id: &str,
-        at: DateTime<FixedOffset>,
-        fired_while_running: bool,
-    ) -> Result<i64, String> {
-        let mut events = conn
-            .prepare(
-                "SELECT at, kind FROM events WHERE task_id=?1
-             AND kind IN ('started', 'resumed', 'paused', 'finished', 'abandoned')
-             ORDER BY id DESC",
-            )
+    fn active_tasks(conn: &Connection) -> Result<Vec<TaskDto>, String> {
+        let mut stmt = conn
+            .prepare(&format!(
+                "SELECT {TASK_COLUMNS} FROM tasks WHERE status IN ('running', 'paused')"
+            ))
             .map_err(|e| e.to_string())?;
-        let events = events
-            .query_map([task_id], |row| {
-                Ok((row.get::<_, String>(0)?, row.get::<_, String>(1)?))
-            })
-            .map_err(|e| e.to_string())?;
-        // Compare instants for the cutoff, but use append order for state transitions.
-        let mut live_start = None;
-        for event in events {
-            let (event_at, kind) = event.map_err(|e| e.to_string())?;
-            let event_at = Self::parse_timestamp(&event_at)?;
-            if event_at > at {
-                continue;
-            }
-            if matches!(kind.as_str(), "started" | "resumed") {
-                live_start = Some(event_at);
-                break;
-            }
-            // A legacy fire was written only while running. If it appears in
-            // a paused interval, treat the stop as a later, rolled-back write.
-            // Use that run's start, not any of the preceding closed runs.
-            if !fired_while_running {
-                break;
-            }
-        }
-
-        let mut work = conn
-            .prepare("SELECT started_at, ended_at FROM segments WHERE task_id=?1 AND kind='work'")
-            .map_err(|e| e.to_string())?;
-        let work = work
-            .query_map([task_id], |row| {
-                Ok((row.get::<_, String>(0)?, row.get::<_, Option<String>>(1)?))
-            })
-            .map_err(|e| e.to_string())?;
-        let mut total = TimeDelta::zero();
-        let mut live_covered_until = live_start;
-        for row in work {
-            let (start, end) = row.map_err(|e| e.to_string())?;
-            let start = Self::parse_timestamp(&start)?;
-            let end = end.as_deref().map(Self::parse_timestamp).transpose()?;
-            let end = end.unwrap_or(at).min(at);
-            total += Self::elapsed(start, end);
-            // A matching stored segment may already cover part or all of the live work.
-            if Some(start) == live_start {
-                live_covered_until = live_covered_until.max(Some(end));
-            }
-        }
-        if let Some(start) = live_covered_until {
-            total += Self::elapsed(start, at);
-        }
-        Ok(total.num_seconds())
+        let rows = stmt.query_map([], row_to_task).map_err(|e| e.to_string())?;
+        rows.collect::<Result<Vec<_>, _>>()
+            .map_err(|e| e.to_string())
     }
 
-    pub(crate) fn snapshot_overdue_upgrade(conn: &Connection) -> Result<(), String> {
-        let mut stmt = conn
-            .prepare(
-                "SELECT id, overdue_schedule_started_at FROM tasks
-             WHERE status IN ('running', 'paused') AND overdue_schedule_started_at IS NOT NULL",
-            )
-            .map_err(|e| e.to_string())?;
-        let tasks = stmt
-            .query_map([], |row| {
-                Ok((row.get::<_, String>(0)?, row.get::<_, String>(1)?))
-            })
-            .map_err(|e| e.to_string())?
-            .collect::<Result<Vec<_>, _>>()
-            .map_err(|e| e.to_string())?;
-        let mut legacy_fires = conn.prepare(
-            "SELECT fired_at FROM reminder_fired WHERE task_id=?1 AND node GLOB 'overdue:[0-9]*'
-             AND substr(node, 9) NOT GLOB '*[^0-9]*'",
-        ).map_err(|e| e.to_string())?;
-        for (task_id, upgrade_at) in tasks {
-            let net_at_upgrade =
-                Self::net_seconds_at(conn, &task_id, Self::parse_timestamp(&upgrade_at)?, false)?;
-            let mut legacy_peak = 0;
-            let fired_times = legacy_fires
-                .query_map([&task_id], |row| row.get::<_, String>(0))
-                .map_err(|e| e.to_string())?;
-            for fired_at in fired_times {
-                let fired_at = Self::parse_timestamp(&fired_at.map_err(|e| e.to_string())?)?;
-                legacy_peak =
-                    legacy_peak.max(Self::net_seconds_at(conn, &task_id, fired_at, true)?);
-            }
+    pub(crate) fn reset_overdue_schedule_on_upgrade(conn: &Connection) -> Result<(), String> {
+        for task in Self::active_tasks(conn)? {
+            // Wall-clock rollback makes historical firing times ambiguous. Start
+            // a fresh schedule at the net time the task uses now. Interval edits
+            // from the old schedule must not constrain the reset schedule.
+            let net = Self::net_seconds(conn, &task)?;
             conn.execute(
-                "UPDATE tasks SET overdue_upgrade_cutoff_net=?2 WHERE id=?1",
-                rusqlite::params![task_id, net_at_upgrade.max(legacy_peak)],
+                "UPDATE tasks SET overdue_upgrade_cutoff_net=?2,
+                     overdue_interval_changed_at_net=NULL WHERE id=?1",
+                rusqlite::params![task.id, net],
             )
             .map_err(|e| e.to_string())?;
         }
@@ -562,11 +474,11 @@ impl Tracker {
                 |row| Ok((row.get(0)?, row.get(1)?)),
             )
             .map_err(|e| e.to_string())?;
-        let overdue_from_net = interval_changed_at_net
-            .into_iter()
-            .chain(upgrade_cutoff_net.map(|net| net + 1))
-            .max();
-        let task_config = config.for_task(task.est_seconds, overdue_from_net);
+        let task_config = config.for_task(
+            task.est_seconds,
+            interval_changed_at_net,
+            upgrade_cutoff_net,
+        );
         Ok(due_reminders(net_seconds, &task_config))
     }
 
@@ -717,17 +629,7 @@ impl Tracker {
     }
 
     fn snapshot_overdue_interval_change(conn: &Connection) -> Result<(), String> {
-        let mut stmt = conn
-            .prepare(&format!(
-                "SELECT {TASK_COLUMNS} FROM tasks WHERE status IN ('running', 'paused')"
-            ))
-            .map_err(|e| e.to_string())?;
-        let tasks = stmt
-            .query_map([], row_to_task)
-            .map_err(|e| e.to_string())?
-            .collect::<Result<Vec<_>, _>>()
-            .map_err(|e| e.to_string())?;
-        for task in tasks {
+        for task in Self::active_tasks(conn)? {
             let net = Self::net_seconds(conn, &task)?;
             conn.execute(
                 "UPDATE tasks SET overdue_interval_changed_at_net=?2 WHERE id=?1",
