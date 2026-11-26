@@ -48,18 +48,20 @@
 </script>
 
 <main>
-  {#if task?.status === 'paused'}
+  {#if task?.status === 'paused' && !switchingTask}
     <LongPauseBanner {task} {thresholdHours} {nowTick} {refreshAll} />
   {/if}
 
   {#if task}
     <WidgetRunning
       {task}
+      {paused}
+      {nowTick}
       on:switching={(event) => (switchingTask = event.detail)}
       on:switched={handleSwitched}
     />
   {:else}
-    <TaskForm {paused} {nowTick} {refreshAll} />
+    <TaskForm {refreshAll} />
   {/if}
 </main>
 

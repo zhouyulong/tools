@@ -337,10 +337,20 @@ impl Tracker {
     }
 
     // A single supplied instant makes finalization consistent and deterministic in tests.
-    fn terminate(&self, status: &str, kind: &str, finished_at: &str) -> Result<TaskDto, String> {
+    fn terminate(
+        &self,
+        expected_task_id: &str,
+        status: &str,
+        kind: &str,
+        finished_at: &str,
+    ) -> Result<TaskDto, String> {
         let mut conn = self.conn.lock().map_err(|_| "lock poisoned")?;
         let tx = conn.transaction().map_err(|e| e.to_string())?;
         let task = Self::require_active(&tx)?;
+        if task.id != expected_task_id {
+            // Dropping this uncommitted transaction rolls it back without any writes.
+            return Err("task changed, please refresh".into());
+        }
         if task.status == "running" {
             Self::append_closed_segment(&tx, &task.id, finished_at)?;
         }
@@ -358,12 +368,12 @@ impl Tracker {
         Ok(task)
     }
 
-    pub fn finish(&self) -> Result<TaskDto, String> {
-        self.terminate("done", "finished", &now())
+    pub fn finish(&self, expected_task_id: &str) -> Result<TaskDto, String> {
+        self.terminate(expected_task_id, "done", "finished", &now())
     }
 
-    pub fn abandon(&self) -> Result<TaskDto, String> {
-        self.terminate("abandoned", "abandoned", &now())
+    pub fn abandon(&self, expected_task_id: &str) -> Result<TaskDto, String> {
+        self.terminate(expected_task_id, "abandoned", "abandoned", &now())
     }
 
     pub fn current(&self) -> Result<Option<TaskDto>, String> {
@@ -481,6 +491,46 @@ mod tests {
     }
 
     #[test]
+    fn repeated_finish_of_child_does_not_finish_paused_parent() {
+        let tr = t();
+        let parent = tr.create_task("A", 60, None, None).unwrap();
+        tr.pause("switch").unwrap();
+        let child = tr.create_task("B", 60, None, Some(&parent.id)).unwrap();
+        assert_eq!(tr.finish(&child.id).unwrap().id, child.id);
+        assert_eq!(
+            tr.finish(&child.id).unwrap_err(),
+            "task changed, please refresh"
+        );
+        let detail = tr.task_detail(&parent.id).unwrap();
+        assert_eq!(detail.task.status, "paused");
+        assert!(detail.task.finished_at.is_none());
+        assert!(!detail.events.iter().any(|e|
+            e.kind == "finished" || e.kind == "abandoned"
+        ));
+        assert_eq!(tr.list_finished().unwrap().len(), 1);
+    }
+
+    #[test]
+    fn repeated_abandon_of_child_does_not_abandon_paused_parent() {
+        let tr = t();
+        let parent = tr.create_task("A", 60, None, None).unwrap();
+        tr.pause("switch").unwrap();
+        let child = tr.create_task("B", 60, None, Some(&parent.id)).unwrap();
+        assert_eq!(tr.abandon(&child.id).unwrap().id, child.id);
+        assert_eq!(
+            tr.abandon(&child.id).unwrap_err(),
+            "task changed, please refresh"
+        );
+        let detail = tr.task_detail(&parent.id).unwrap();
+        assert_eq!(detail.task.status, "paused");
+        assert!(detail.task.finished_at.is_none());
+        assert!(!detail.events.iter().any(|e|
+            e.kind == "finished" || e.kind == "abandoned"
+        ));
+        assert_eq!(tr.list_finished().unwrap().len(), 1);
+    }
+
+    #[test]
     fn subsecond_segments_are_summed_before_rounding_and_persisted() {
         let tr = t();
         let task = tr.create_task("fractional", 60, None, None).unwrap();
@@ -505,7 +555,7 @@ mod tests {
         }
         assert_eq!(tr.current().unwrap().unwrap().net_seconds, 0);
         let done = tr
-            .terminate("done", "finished", "2026-11-26T00:00:05.100Z")
+            .terminate(&task.id, "done", "finished", "2026-11-26T00:00:05.100Z")
             .unwrap();
         assert_eq!(done.net_seconds, 0);
         let conn = tr.conn.lock().unwrap();
@@ -613,7 +663,7 @@ mod tests {
             conn.execute("INSERT INTO events (task_id, at, kind) VALUES (?1, '2026-11-26T00:00:11Z', 'resumed')", [&task.id]).unwrap();
         }
         let done = tr
-            .terminate("done", "finished", "2026-11-26T00:00:05Z")
+            .terminate(&task.id, "done", "finished", "2026-11-26T00:00:05Z")
             .unwrap();
         assert_eq!(done.net_seconds, 0);
         let conn = tr.conn.lock().unwrap();
@@ -729,7 +779,7 @@ mod tests {
         let tr = t();
         let task = tr.create_task("A", 60, None, None).unwrap();
         std::thread::sleep(std::time::Duration::from_millis(300));
-        let done = tr.finish().unwrap();
+        let done = tr.finish(&task.id).unwrap();
         assert_eq!(done.status, "done");
         assert!(done.finished_at.is_some());
         assert!(done.net_seconds <= 1, "net {}", done.net_seconds);
@@ -751,8 +801,8 @@ mod tests {
     #[test]
     fn abandon_records_trajectory() {
         let tr = t();
-        tr.create_task("A", 60, None, None).unwrap();
-        let t2 = tr.abandon().unwrap();
+        let task = tr.create_task("A", 60, None, None).unwrap();
+        let t2 = tr.abandon(&task.id).unwrap();
         assert_eq!(t2.status, "abandoned");
         assert!(t2.finished_at.is_some());
     }
@@ -762,10 +812,10 @@ mod tests {
         let tr = t();
         let a = tr.create_task("A", 60, None, None).unwrap();
         std::thread::sleep(std::time::Duration::from_millis(20));
-        tr.finish().unwrap();
+        tr.finish(&a.id).unwrap();
         let b = tr.create_task("B", 60, None, None).unwrap();
         std::thread::sleep(std::time::Duration::from_millis(20));
-        tr.finish().unwrap();
+        tr.finish(&b.id).unwrap();
         let list = tr.list_finished().unwrap();
         assert_eq!(list.len(), 2);
         assert_eq!(list[0].id, b.id);
@@ -806,7 +856,7 @@ mod tests {
         drop(conn);
         // current 显示子任务；子任务结束后回到父任务（paused，含 paused_since）
         assert_eq!(tr.current().unwrap().unwrap().id, child.id);
-        tr.finish().unwrap();
+        tr.finish(&child.id).unwrap();
         let cur = tr.current().unwrap().unwrap();
         assert_eq!(cur.id, parent.id);
         assert_eq!(cur.status, "paused");
@@ -827,8 +877,8 @@ mod tests {
         let tr = t();
         let a = tr.create_task("A", 60, None, None).unwrap();
         tr.pause("switch").unwrap();
-        let _b = tr.create_task("B", 60, None, Some(&a.id)).unwrap();
-        tr.finish().unwrap();
+        let b = tr.create_task("B", 60, None, Some(&a.id)).unwrap();
+        tr.finish(&b.id).unwrap();
         let paused = tr.list_paused().unwrap();
         assert_eq!(paused.len(), 1);
         assert_eq!(paused[0].id, a.id);
@@ -858,7 +908,7 @@ mod tests {
         std::thread::sleep(std::time::Duration::from_millis(1100));
         tr.resume().unwrap();
         std::thread::sleep(std::time::Duration::from_millis(1100));
-        tr.finish().unwrap();
+        tr.finish(&task.id).unwrap();
         let d = tr.task_detail(&task.id).unwrap();
         assert_eq!(d.task.id, task.id);
         assert_eq!(d.segments.len(), 2);
@@ -917,14 +967,14 @@ mod tests {
         assert_eq!(err, "parent task not found or terminal");
 
         let done_parent = tr.create_task("done parent", 60, None, None).unwrap();
-        tr.finish().unwrap();
+        tr.finish(&done_parent.id).unwrap();
         let err = tr
             .create_task("done child", 60, None, Some(&done_parent.id))
             .unwrap_err();
         assert_eq!(err, "parent task not found or terminal");
 
         let abandoned_parent = tr.create_task("abandoned parent", 60, None, None).unwrap();
-        tr.abandon().unwrap();
+        tr.abandon(&abandoned_parent.id).unwrap();
         let err = tr
             .create_task("abandoned child", 60, None, Some(&abandoned_parent.id))
             .unwrap_err();

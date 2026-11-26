@@ -30,12 +30,19 @@
     }
   }
 
+  function doFinish() {
+    const expectedTaskId = task.id
+    void act(() => finishTask(expectedTaskId))
+  }
+
   function doAbandon() {
+    if (busy) return
     if (!confirmAbandon) {
       confirmAbandon = true
       return
     }
-    void act(abandonTask)
+    const expectedTaskId = task.id
+    void act(() => abandonTask(expectedTaskId))
   }
 </script>
 
@@ -44,7 +51,7 @@
     <div class="message">任务 {task.name} 已暂停 {fmtHMS(pausedFor)}——继续 / 完成 / 放弃？</div>
     <div class="actions">
       <button disabled={busy} on:click={() => act(resume)}>继续</button>
-      <button disabled={busy} on:click={() => act(finishTask)}>完成</button>
+      <button disabled={busy} on:click={doFinish}>完成</button>
       <button disabled={busy} class:confirm={confirmAbandon} on:click={doAbandon}>
         {confirmAbandon ? '确认放弃?' : '放弃'}
       </button>

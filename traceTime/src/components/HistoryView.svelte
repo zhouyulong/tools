@@ -1,6 +1,7 @@
 <script lang="ts">
   import { onMount } from 'svelte'
   import { listFinished, taskDetail, type Task, type TaskDetail } from '../lib/api'
+  import { historyTimeline } from '../lib/history'
   import { fmtHMS } from '../lib/format'
   import TimelineBar from './TimelineBar.svelte'
 
@@ -11,6 +12,10 @@
   let detailLoading = false
   let error = ''
   let selectSeq = 0
+  let listSeq = 0
+  let selectedId: string | null = null
+
+  $: timeline = historyTimeline(selected)
 
   function dayOf(task: Task): string {
     return new Date(task.finished_at!).toLocaleDateString('zh-CN')
@@ -61,6 +66,7 @@
   }
 
   async function select(task: Task) {
+    selectedId = task.id
     const seq = ++selectSeq
     detailLoading = true
     error = ''
@@ -76,14 +82,35 @@
     }
   }
 
-  onMount(async () => {
+  async function reload() {
+    const seq = ++listSeq
+    error = ''
     try {
-      tasks = await listFinished()
+      const result = await listFinished()
+      if (seq !== listSeq) return
+      tasks = result
       regroup()
+      if (selectedId && !tasks.some(task => task.id === selectedId)) {
+        selectedId = null
+        selected = null
+        ++selectSeq // Invalidate an outstanding detail request as well.
+        detailLoading = false
+      }
     } catch (e) {
-      error = String(e)
+      if (seq === listSeq) error = String(e)
     } finally {
-      loading = false
+      if (seq === listSeq) loading = false
+    }
+  }
+
+  onMount(() => {
+    const onFocus = () => { void reload() }
+    window.addEventListener('focus', onFocus)
+    void reload()
+    return () => {
+      window.removeEventListener('focus', onFocus)
+      ++listSeq
+      ++selectSeq
     }
   })
 </script>
@@ -103,7 +130,7 @@
               {#if task.status === 'abandoned'}<span class="badge">已放弃</span>{/if}
             </span>
             <span class="task-meta">
-              净 {fmtHMS(task.net_seconds)}
+              <span>净 {fmtHMS(task.net_seconds)} · 预计 {fmtHMS(task.est_seconds)}</span>
               <em class:over={deviation(task) > 0}>{deviationText(task)}</em>
             </span>
           </button>
@@ -131,9 +158,10 @@
           <small>偏差</small>{deviationText(selected.task)}
         </span>
       </div>
-      <TimelineBar segments={selected.segments} />
+      <p class="pause-stats">暂停 {timeline.pauseCount} 次 / 共 {fmtHMS(timeline.pauseSeconds)}</p>
+      <TimelineBar segments={timeline.segments} />
       <div class="segments">
-        {#each selected.segments as segment}
+        {#each timeline.segments as segment}
           <p class="seg">
             <span class="kind {segment.kind === 'work' ? 'work' : segment.kind === 'pause' ? 'pause' : 'other'}">
               {kindLabel(segment.kind)}
@@ -184,7 +212,7 @@
   aside button.on { background: rgba(75, 142, 100, 0.25); }
   .task-line, .heading { display: flex; min-width: 0; align-items: center; gap: 6px; }
   .task-line strong { overflow: hidden; font-size: 12px; text-overflow: ellipsis; white-space: nowrap; }
-  .task-meta { display: flex; width: 100%; justify-content: space-between; color: #aeb2b8; font-size: 10px; }
+  .task-meta { display: flex; flex-wrap: wrap; gap: 3px; width: 100%; justify-content: space-between; color: #aeb2b8; font-size: 10px; }
   em { color: #7fc89a; font-style: normal; }
   .over { color: #ef7b70 !important; }
   .badge { flex: none; padding: 2px 5px; border-radius: 999px; color: #f0aaa4; background: rgba(207, 87, 77, 0.2); font-size: 9px; }
@@ -193,6 +221,7 @@
   .stats { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin-top: 14px; }
   .stats span { padding: 8px; border-radius: 6px; background: rgba(255, 255, 255, 0.055); font-size: 12px; }
   .stats small { display: block; margin-bottom: 3px; color: #969ba3; font-size: 9px; }
+  .pause-stats { color: #aeb2b8; font-size: 11px; }
   .segments { margin-top: 14px; }
   .seg { display: flex; align-items: center; gap: 8px; margin: 0; padding: 7px 0; border-bottom: 1px solid rgba(255, 255, 255, 0.07); color: #b8bcc2; font-size: 10px; }
   .kind { min-width: 34px; padding: 2px 4px; border-radius: 3px; color: #fff; text-align: center; }

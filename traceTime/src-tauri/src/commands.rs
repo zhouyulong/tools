@@ -30,13 +30,13 @@ pub fn resume(state: State<'_, Tracker>) -> R<TaskDto> {
 }
 
 #[tauri::command]
-pub fn finish_task(state: State<'_, Tracker>) -> R<TaskDto> {
-    state.finish()
+pub fn finish_task(state: State<'_, Tracker>, expected_task_id: String) -> R<TaskDto> {
+    state.finish(&expected_task_id)
 }
 
 #[tauri::command]
-pub fn abandon_task(state: State<'_, Tracker>) -> R<TaskDto> {
-    state.abandon()
+pub fn abandon_task(state: State<'_, Tracker>, expected_task_id: String) -> R<TaskDto> {
+    state.abandon(&expected_task_id)
 }
 
 #[tauri::command]
@@ -70,7 +70,7 @@ pub fn set_setting(state: State<'_, Tracker>, key: String, value: String) -> R<(
 }
 
 #[tauri::command]
-pub fn open_history(app: tauri::AppHandle) -> R<()> {
+pub async fn open_history(app: tauri::AppHandle) -> R<()> {
     if let Some(window) = app.get_webview_window("history") {
         window.show().map_err(|e| e.to_string())?;
         window.set_focus().map_err(|e| e.to_string())?;
