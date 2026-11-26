@@ -1,7 +1,10 @@
 <script lang="ts">
   import type { Segment } from '../lib/api'
+  import { segmentSeconds, durationPercent } from '../lib/history'
+  import { fmtHMS } from '../lib/format'
 
   export let segments: Segment[] = []
+  export let wallSeconds = 0
 
   $: positioned = segments
     .map((segment) => ({
@@ -31,8 +34,8 @@
         class="segment {kindClass(item.segment.kind)}"
         style:left={`${((item.start - first) / span) * 100}%`}
         style:width={`${Math.max(0.8, ((item.end - item.start) / span) * 100)}%`}
-        title={`${item.segment.kind}: ${item.segment.started_at} → ${item.segment.ended_at}`}
-      ></span>
+        title={`${item.segment.kind}: ${item.segment.started_at} → ${item.segment.ended_at} · ${fmtHMS(segmentSeconds(item.segment))}（占 ${durationPercent(segmentSeconds(item.segment), wallSeconds)}%）`}
+      >{fmtHMS(segmentSeconds(item.segment))}（{durationPercent(segmentSeconds(item.segment), wallSeconds)}%）</span>
     {/each}
   </div>
   <div class="legend" aria-hidden="true">
@@ -53,7 +56,7 @@
     border-radius: 5px;
     background: rgba(255, 255, 255, 0.08);
   }
-  .segment { position: absolute; top: 0; bottom: 0; min-width: 2px; }
+  .segment { position: absolute; top: 0; bottom: 0; min-width: 2px; overflow: hidden; white-space: nowrap; color: #fff; font-size: 9px; line-height: 18px; }
   .work { background: #39a96b; }
   .pause { background: #7f8790; }
   .other { background: #cf574d; }

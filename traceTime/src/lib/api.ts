@@ -61,3 +61,6 @@ export const taskDetail = (id: string) => invoke<TaskDetail>('task_detail', { ta
 export const getSetting = (key: string) => invoke<string | null>('get_setting', { key })
 export const setSetting = (key: string, value: string) =>
   invoke<void>('set_setting', { key, value })
+
+export const setWidgetHeight = (height: number) => invoke<void>('set_widget_height', { height })
+export const deleteTask = (taskId: string) => invoke<void>('delete_task', { taskId })

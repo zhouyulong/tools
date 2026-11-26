@@ -1,7 +1,7 @@
 <script lang="ts">
   import { onMount } from 'svelte'
-  import { listFinished, taskDetail, type Task, type TaskDetail } from '../lib/api'
-  import { historyTimeline } from '../lib/history'
+  import { listFinished, taskDetail, deleteTask, type Task, type TaskDetail } from '../lib/api'
+  import { historyTimeline, wallClockSeconds, segmentSeconds, durationPercent } from '../lib/history'
   import { fmtHMS } from '../lib/format'
   import TimelineBar from './TimelineBar.svelte'
 
@@ -14,8 +14,12 @@
   let selectSeq = 0
   let listSeq = 0
   let selectedId: string | null = null
+  let confirmDeleteId: string | null = null
+  let deleting = false
+  const deletedIds = new Set<string>()
 
   $: timeline = historyTimeline(selected)
+  $: wallSeconds = selected ? wallClockSeconds(selected.task, timeline.segments) : 0
 
   function dayOf(task: Task): string {
     return new Date(task.finished_at!).toLocaleDateString('zh-CN')
@@ -29,12 +33,6 @@
       map.get(day)!.push(task)
     }
     groups = [...map.entries()].map(([day, items]) => ({ day, items }))
-  }
-
-  function gross(detail: TaskDetail): number {
-    const start = new Date(detail.task.created_at).getTime()
-    const end = new Date(detail.task.finished_at!).getTime()
-    return Number.isFinite(start) && Number.isFinite(end) ? Math.max(0, (end - start) / 1000) : 0
   }
 
   function deviation(task: Task): number {
@@ -66,6 +64,9 @@
   }
 
   async function select(task: Task) {
+    if (deleting) return
+    confirmDeleteId = null
+    selected = null
     selectedId = task.id
     const seq = ++selectSeq
     detailLoading = true
@@ -88,11 +89,12 @@
     try {
       const result = await listFinished()
       if (seq !== listSeq) return
-      tasks = result
+      tasks = result.filter(task => !deletedIds.has(task.id))
       regroup()
       if (selectedId && !tasks.some(task => task.id === selectedId)) {
         selectedId = null
         selected = null
+        confirmDeleteId = null
         ++selectSeq // Invalidate an outstanding detail request as well.
         detailLoading = false
       }
@@ -100,6 +102,32 @@
       if (seq === listSeq) error = String(e)
     } finally {
       if (seq === listSeq) loading = false
+    }
+  }
+
+  async function removeSelected() {
+    if (!selected || deleting || detailLoading) return
+    const id = selected.task.id
+    if (confirmDeleteId !== id) {
+      confirmDeleteId = id
+      return
+    }
+    deleting = true
+    error = ''
+    try {
+      await deleteTask(id)
+      deletedIds.add(id) // A focus refresh already in flight cannot resurrect this row.
+      tasks = tasks.filter(task => task.id !== id)
+      regroup()
+      ++selectSeq
+      selectedId = null
+      selected = null
+      detailLoading = false
+      confirmDeleteId = null
+    } catch (e) {
+      error = String(e)
+    } finally {
+      deleting = false
     }
   }
 
@@ -124,7 +152,7 @@
       {#each groups as group}
         <p class="day">{group.day}</p>
         {#each group.items as task}
-          <button class:on={selected?.task.id === task.id} on:click={() => select(task)}>
+          <button disabled={deleting} class:on={selected?.task.id === task.id} on:click={() => select(task)}>
             <span class="task-line">
               <strong>{task.name}</strong>
               {#if task.status === 'abandoned'}<span class="badge">已放弃</span>{/if}
@@ -150,23 +178,30 @@
         <h3>{selected.task.name}</h3>
         {#if selected.task.status === 'abandoned'}<span class="badge">已放弃</span>{/if}
       </div>
+      <div class="delete-actions">
+        <button disabled={deleting} on:click={removeSelected}>{deleting ? '正在删除…' : confirmDeleteId === selected.task.id ? '确认删除' : '删除'}</button>
+        {#if confirmDeleteId === selected.task.id}
+          <span>仅从历史列表隐藏，轨迹保留。</span>
+          <button disabled={deleting} on:click={() => (confirmDeleteId = null)}>取消</button>
+        {/if}
+      </div>
       <div class="stats">
         <span><small>净时长</small>{fmtHMS(selected.task.net_seconds)}</span>
-        <span><small>墙钟</small>{fmtHMS(gross(selected))}</span>
+        <span><small>墙钟</small>{fmtHMS(wallSeconds)}</span>
         <span><small>预计</small>{fmtHMS(selected.task.est_seconds)}</span>
         <span class:over={deviation(selected.task) > 0}>
           <small>偏差</small>{deviationText(selected.task)}
         </span>
       </div>
-      <p class="pause-stats">暂停 {timeline.pauseCount} 次 / 共 {fmtHMS(timeline.pauseSeconds)}</p>
-      <TimelineBar segments={timeline.segments} />
+      <p class="pause-stats">暂停 {timeline.pauseCount} 次 / 共 {fmtHMS(timeline.pauseSeconds)}（占 {durationPercent(timeline.pauseSeconds, wallSeconds)}%）</p>
+      <TimelineBar segments={timeline.segments} {wallSeconds} />
       <div class="segments">
         {#each timeline.segments as segment}
           <p class="seg">
             <span class="kind {segment.kind === 'work' ? 'work' : segment.kind === 'pause' ? 'pause' : 'other'}">
               {kindLabel(segment.kind)}
             </span>
-            <span>{localTime(segment.started_at)} → {localTime(segment.ended_at)}</span>
+            <span>{localTime(segment.started_at)} → {localTime(segment.ended_at)}<br />{fmtHMS(segmentSeconds(segment))}（占 {durationPercent(segmentSeconds(segment), wallSeconds)}%）</span>
           </p>
         {:else}
           <p class="empty">暂无时间段记录</p>
@@ -221,6 +256,8 @@
   .badge { flex: none; padding: 2px 5px; border-radius: 999px; color: #f0aaa4; background: rgba(207, 87, 77, 0.2); font-size: 9px; }
   section { min-width: 0; min-height: 0; padding: 18px; overflow-y: auto; }
   h3 { margin: 0; font-size: 18px; }
+  .delete-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-top: 10px; color: #aeb2b8; font-size: 10px; }
+  .delete-actions button { cursor: pointer; }
   .stats { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin-top: 14px; }
   .stats span { padding: 8px; border-radius: 6px; background: rgba(255, 255, 255, 0.055); font-size: 12px; }
   .stats small { display: block; margin-bottom: 3px; color: #969ba3; font-size: 9px; }

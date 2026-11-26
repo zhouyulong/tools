@@ -29,6 +29,8 @@ fn main() {
             commands::get_setting,
             commands::set_setting,
             commands::open_history,
+            commands::set_widget_height,
+            commands::delete_task,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

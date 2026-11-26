@@ -70,7 +70,7 @@
 </div>
 
 <style>
-  .task-form { height: 100%; min-width: 0; overflow: hidden; padding: 4px 6px; }
+  .task-form { height: auto; min-width: 0; overflow: hidden; padding: 4px 6px; }
   .form-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px; color: #aaaeb5; font-size: 11px; }
   .ghost { padding: 1px 5px; border: 1px solid rgba(255, 255, 255, 0.16); border-radius: 4px; color: #d8d8da; background: transparent; cursor: pointer; }
   .ghost:hover { background: rgba(255, 255, 255, 0.08); }

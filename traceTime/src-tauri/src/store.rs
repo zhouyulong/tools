@@ -43,6 +43,8 @@ const MIGRATIONS: &[&str] = &[
     CREATE INDEX IF NOT EXISTS idx_events_task_time ON events(task_id, at);
     CREATE INDEX IF NOT EXISTS idx_segments_task ON segments(task_id, started_at);
     "#,
+    // v2: visibility only; preserve all trajectory records.
+    "ALTER TABLE tasks ADD COLUMN hidden INTEGER NOT NULL DEFAULT 0;",
 ];
 
 pub fn open(path: &Path) -> rusqlite::Result<Connection> {
@@ -111,7 +113,7 @@ mod tests {
             conn.query_row("SELECT MAX(version) FROM schema_migrations", [], |r| r
                 .get::<_, i64>(0))
                 .unwrap(),
-            1
+            2
         );
         assert_eq!(
             conn.query_row("SELECT name FROM tasks WHERE id='existing'", [], |r| r
@@ -151,6 +153,29 @@ mod tests {
         assert_eq!(tables, 0, "failed migration must not commit its schema");
         conn.execute_batch("DROP TRIGGER reject_version;").unwrap();
         migrate(&conn).unwrap();
+    }
+
+    #[test]
+    fn migration_v2_upgrades_v1_and_defaults_existing_tasks_to_visible() {
+        let conn = Connection::open_in_memory().unwrap();
+        conn.execute_batch(MIGRATIONS[0]).unwrap();
+        conn.execute_batch("CREATE TABLE schema_migrations (version INTEGER PRIMARY KEY);
+          INSERT INTO schema_migrations VALUES (1);
+          INSERT INTO tasks (id,name,est_seconds,status,created_at) VALUES ('old','old',60,'done','2026-11-26T00:00:00Z');").unwrap();
+        migrate(&conn).unwrap();
+        assert_eq!(
+            conn.query_row("SELECT hidden FROM tasks WHERE id='old'", [], |r| r
+                .get::<_, i64>(0))
+                .unwrap(),
+            0
+        );
+        migrate(&conn).unwrap();
+        assert_eq!(
+            conn.query_row("SELECT MAX(version) FROM schema_migrations", [], |r| r
+                .get::<_, i64>(0))
+                .unwrap(),
+            2
+        );
     }
 
     #[test]

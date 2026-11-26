@@ -155,7 +155,7 @@
 </div>
 
 <style>
-  .widget { flex: 1; min-width: 0; min-height: 0; padding: 3px 6px; overflow: hidden; }
+  .widget { flex: none; min-width: 0; min-height: 126px; padding: 3px 6px; overflow: hidden; }
   .head { display: flex; height: 14px; line-height: 14px; justify-content: space-between; align-items: baseline; gap: 4px; overflow: hidden; }
   .name { min-width: 0; font-size: 11px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .tag { flex: none; max-width: 60px; overflow: hidden; text-overflow: ellipsis; font-size: 10px; opacity: 0.6; }

@@ -72,3 +72,10 @@ test('paused chips expose omitted tasks through a visible +N marker with all nam
   assert.doesNotMatch(body, /Other[2-5] · 已暂停/)
   assert.doesNotMatch(body, /title="Current\n/)
 })
+
+test('timeline tooltips show duration and integer lifetime percentage', () => {
+  const { body } = render(TimelineBar, { props: { wallSeconds: 100, segments: [
+    { kind: 'work', started_at: '2026-11-26T00:00:10Z', ended_at: '2026-11-26T00:00:40Z' },
+  ] } })
+  assert.match(body, /00:00:30（占 30%）/)
+})

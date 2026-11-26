@@ -468,10 +468,24 @@ impl Tracker {
         })
     }
 
+    /// Soft deletion changes visibility only. No trajectory rows or events are changed.
+    pub fn delete_task(&self, task_id: &str) -> Result<(), String> {
+        let mut conn = self.conn.lock().map_err(|_| "lock poisoned")?;
+        let tx = conn.transaction().map_err(|e| e.to_string())?;
+        let task = Self::get_task(&tx, task_id)?.ok_or("task not found")?;
+        if task.status != "done" && task.status != "abandoned" {
+            return Err("only finished tasks can be deleted".into());
+        }
+        // Repeating a deletion is intentionally idempotent.
+        tx.execute("UPDATE tasks SET hidden=1 WHERE id=?1", [task_id])
+            .map_err(|e| e.to_string())?;
+        tx.commit().map_err(|e| e.to_string())
+    }
+
     pub fn list_finished(&self) -> Result<Vec<TaskDto>, String> {
         let conn = self.conn.lock().map_err(|_| "lock poisoned")?;
         let sql = format!(
-            "SELECT {TASK_COLUMNS} FROM tasks WHERE status IN ('done','abandoned') ORDER BY finished_at DESC"
+            "SELECT {TASK_COLUMNS} FROM tasks WHERE hidden=0 AND status IN ('done','abandoned') ORDER BY finished_at DESC"
         );
         let mut stmt = conn.prepare(&sql).map_err(|e| e.to_string())?;
         let rows = stmt.query_map([], row_to_task).map_err(|e| e.to_string())?;
@@ -490,13 +504,62 @@ mod tests {
     }
 
     #[test]
+    fn soft_delete_preserves_trajectory_is_idempotent_and_filters_history() {
+        let tr = t();
+        for abandoned in [false, true] {
+            let task = tr.create_task("delete", 60, None, None).unwrap();
+            if abandoned {
+                tr.abandon(&task.id).unwrap();
+            } else {
+                tr.finish(&task.id).unwrap();
+            }
+            let before = serde_json::to_value(tr.task_detail(&task.id).unwrap()).unwrap();
+            assert!(tr.list_finished().unwrap().iter().any(|t| t.id == task.id));
+            tr.delete_task(&task.id).unwrap();
+            tr.delete_task(&task.id).unwrap();
+            assert!(!tr.list_finished().unwrap().iter().any(|t| t.id == task.id));
+            assert_eq!(
+                serde_json::to_value(tr.task_detail(&task.id).unwrap()).unwrap(),
+                before
+            );
+            let conn = tr.conn.lock().unwrap();
+            assert_eq!(
+                conn.query_row("SELECT hidden FROM tasks WHERE id=?1", [&task.id], |r| r
+                    .get::<_, i64>(0))
+                    .unwrap(),
+                1
+            );
+        }
+    }
+
+    #[test]
+    fn soft_delete_rejects_running_paused_and_missing_tasks() {
+        let tr = t();
+        let task = tr.create_task("keep", 60, None, None).unwrap();
+        assert_eq!(
+            tr.delete_task(&task.id).unwrap_err(),
+            "only finished tasks can be deleted"
+        );
+        tr.pause("rest").unwrap();
+        assert_eq!(
+            tr.delete_task(&task.id).unwrap_err(),
+            "only finished tasks can be deleted"
+        );
+        assert_eq!(tr.task_detail(&task.id).unwrap().task.status, "paused");
+        assert_eq!(tr.delete_task("missing").unwrap_err(), "task not found");
+    }
+
+    #[test]
     fn stale_resume_does_not_resume_a_different_paused_task() {
         let tr = t();
         let a = tr.create_task("A", 60, None, None).unwrap();
         tr.pause("switch").unwrap();
         let b = tr.create_task("B", 60, None, Some(&a.id)).unwrap();
         tr.pause("rest").unwrap();
-        assert_eq!(tr.resume(&a.id).unwrap_err(), "task changed, please refresh");
+        assert_eq!(
+            tr.resume(&a.id).unwrap_err(),
+            "task changed, please refresh"
+        );
         assert_eq!(tr.task_detail(&a.id).unwrap().task.status, "paused");
         assert_eq!(tr.task_detail(&b.id).unwrap().task.status, "paused");
     }
@@ -504,10 +567,13 @@ mod tests {
     #[test]
     fn task_detail_preserves_event_append_order_when_clock_rolls_back() {
         let tr = t();
-        let task = tr.create_task("clock rollback history", 60, None, None).unwrap();
+        let task = tr
+            .create_task("clock rollback history", 60, None, None)
+            .unwrap();
         {
             let conn = tr.conn.lock().unwrap();
-            conn.execute("DELETE FROM events WHERE task_id=?1", [&task.id]).unwrap();
+            conn.execute("DELETE FROM events WHERE task_id=?1", [&task.id])
+                .unwrap();
             for (at, kind) in [
                 ("2026-11-26T00:00:20Z", "paused"),
                 ("2026-11-26T00:00:10Z", "resumed"),
@@ -516,12 +582,19 @@ mod tests {
                 conn.execute(
                     "INSERT INTO events (task_id, at, kind) VALUES (?1, ?2, ?3)",
                     rusqlite::params![task.id, at, kind],
-                ).unwrap();
+                )
+                .unwrap();
             }
         }
         let detail = tr.task_detail(&task.id).unwrap();
-        assert_eq!(detail.events.iter().map(|e| e.kind.as_str()).collect::<Vec<_>>(),
-            vec!["paused", "resumed", "finished"]);
+        assert_eq!(
+            detail
+                .events
+                .iter()
+                .map(|e| e.kind.as_str())
+                .collect::<Vec<_>>(),
+            vec!["paused", "resumed", "finished"]
+        );
         assert!(detail.events.windows(2).all(|pair| pair[0].id < pair[1].id));
         assert!(detail.events[0].id > 0);
     }
@@ -540,9 +613,12 @@ mod tests {
         let detail = tr.task_detail(&parent.id).unwrap();
         assert_eq!(detail.task.status, "paused");
         assert!(detail.task.finished_at.is_none());
-        assert!(!detail.events.iter().any(|e|
-            e.kind == "finished" || e.kind == "abandoned"
-        ));
+        assert!(
+            !detail
+                .events
+                .iter()
+                .any(|e| e.kind == "finished" || e.kind == "abandoned")
+        );
         assert_eq!(tr.list_finished().unwrap().len(), 1);
     }
 
@@ -560,9 +636,12 @@ mod tests {
         let detail = tr.task_detail(&parent.id).unwrap();
         assert_eq!(detail.task.status, "paused");
         assert!(detail.task.finished_at.is_none());
-        assert!(!detail.events.iter().any(|e|
-            e.kind == "finished" || e.kind == "abandoned"
-        ));
+        assert!(
+            !detail
+                .events
+                .iter()
+                .any(|e| e.kind == "finished" || e.kind == "abandoned")
+        );
         assert_eq!(tr.list_finished().unwrap().len(), 1);
     }
 
@@ -931,7 +1010,10 @@ mod tests {
         let tr = t();
         assert_eq!(tr.get_setting("long_pause_hours").unwrap(), None);
         tr.set_setting("long_pause_hours", "1").unwrap();
-        assert_eq!(tr.get_setting("long_pause_hours").unwrap().as_deref(), Some("1"));
+        assert_eq!(
+            tr.get_setting("long_pause_hours").unwrap().as_deref(),
+            Some("1")
+        );
     }
 
     #[test]

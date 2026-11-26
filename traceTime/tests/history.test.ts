@@ -67,3 +67,27 @@ test('append order pairs pause @20 with resume @10, not finish @40 after clock r
   assert.deepEqual(pauses, [{ kind: 'pause', started_at: at(20), ended_at: at(20) }])
   assert.deepEqual(input, before)
 })
+
+test('wall-clock and interval percentages use the task lifetime, not the painted span', async () => {
+  const { wallClockSeconds, segmentSeconds, durationPercent } = await import('../src/lib/history.ts')
+  const input = detail([])
+  assert.equal(wallClockSeconds(input.task, input.segments), 50)
+  assert.equal(segmentSeconds(input.segments[0]), 10)
+  assert.equal(durationPercent(10, 50), 20)
+  assert.equal(durationPercent(1, 3), 33)
+  input.task.finished_at = null
+  input.segments.push({ kind: 'work', started_at: at(30), ended_at: at(40) })
+  assert.equal(wallClockSeconds(input.task, input.segments), 40)
+  assert.equal(wallClockSeconds(input.task, []), 0)
+})
+
+test('zero, invalid and rollback wall-clock/interval durations have zero percentages', async () => {
+  const { wallClockSeconds, segmentSeconds, durationPercent } = await import('../src/lib/history.ts')
+  const input = detail([], 'done', at(0))
+  assert.equal(durationPercent(10, wallClockSeconds(input.task, input.segments)), 0)
+  input.task.finished_at = at(-10)
+  assert.equal(wallClockSeconds(input.task, input.segments), 0)
+  assert.equal(segmentSeconds({ kind: 'pause', started_at: at(20), ended_at: at(10) }), 0)
+  assert.equal(durationPercent(-1, 10), 0)
+  assert.equal(durationPercent(10, NaN), 0)
+})

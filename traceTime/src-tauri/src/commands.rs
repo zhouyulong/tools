@@ -90,3 +90,21 @@ pub async fn open_history(app: tauri::AppHandle) -> R<()> {
     .map(|_| ())
     .map_err(|e| e.to_string())
 }
+
+#[tauri::command]
+pub fn delete_task(state: State<'_, Tracker>, task_id: String) -> R<()> {
+    state.delete_task(&task_id)
+}
+
+#[tauri::command]
+pub fn set_widget_height(app: tauri::AppHandle, height: f64) -> R<()> {
+    if !height.is_finite() {
+        return Err("invalid widget height".into());
+    }
+    let window = app
+        .get_webview_window("main")
+        .ok_or("main window not found")?;
+    window
+        .set_size(tauri::LogicalSize::new(260.0, height.clamp(140.0, 220.0)))
+        .map_err(|e| e.to_string())
+}
