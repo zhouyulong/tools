@@ -436,8 +436,8 @@ impl Tracker {
                 })
             })
             .map_err(|e| e.to_string())?
-            .filter_map(|r| r.ok())
-            .collect();
+            .collect::<Result<Vec<_>, _>>()
+            .map_err(|e| e.to_string())?;
         let mut stmt = conn
             .prepare("SELECT at, kind, detail FROM events WHERE task_id=?1 ORDER BY at, id")
             .map_err(|e| e.to_string())?;
@@ -450,8 +450,8 @@ impl Tracker {
                 })
             })
             .map_err(|e| e.to_string())?
-            .filter_map(|r| r.ok())
-            .collect();
+            .collect::<Result<Vec<_>, _>>()
+            .map_err(|e| e.to_string())?;
         Ok(TaskDetailDto {
             task,
             segments,
@@ -870,6 +870,41 @@ mod tests {
         );
         let err = tr.task_detail("nope").unwrap_err();
         assert_eq!(err, "task not found");
+    }
+
+    #[test]
+    fn task_detail_propagates_segment_and_event_row_errors() {
+        let tr = t();
+        let task = tr.create_task("bad segment", 60, None, None).unwrap();
+        {
+            let conn = tr.conn.lock().unwrap();
+            conn.execute(
+                "INSERT INTO segments (task_id, started_at, ended_at, kind) VALUES (?1, ?2, NULL, 'work')",
+                rusqlite::params![task.id, "2026-11-26T00:00:00Z"],
+            )
+            .unwrap();
+        }
+        assert!(
+            tr.task_detail(&task.id)
+                .unwrap_err()
+                .contains("Invalid column type")
+        );
+
+        let tr = t();
+        let task = tr.create_task("bad event", 60, None, None).unwrap();
+        {
+            let conn = tr.conn.lock().unwrap();
+            conn.execute(
+                "INSERT INTO events (task_id, at, kind, detail) VALUES (?1, ?2, 'bad', ?3)",
+                rusqlite::params![task.id, "2026-11-26T00:00:00Z", vec![0xff_u8]],
+            )
+            .unwrap();
+        }
+        assert!(
+            tr.task_detail(&task.id)
+                .unwrap_err()
+                .contains("Invalid column type")
+        );
     }
 
     #[test]
