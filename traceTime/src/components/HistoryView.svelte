@@ -10,6 +10,7 @@
   let loading = true
   let detailLoading = false
   let error = ''
+  let selectSeq = 0
 
   function dayOf(task: Task): string {
     return new Date(task.finished_at!).toLocaleDateString('zh-CN')
@@ -60,14 +61,18 @@
   }
 
   async function select(task: Task) {
+    const seq = ++selectSeq
     detailLoading = true
     error = ''
     try {
-      selected = await taskDetail(task.id)
+      const detail = await taskDetail(task.id)
+      if (seq !== selectSeq) return
+      selected = detail
     } catch (e) {
+      if (seq !== selectSeq) return
       error = String(e)
     } finally {
-      detailLoading = false
+      if (seq === selectSeq) detailLoading = false
     }
   }
 
