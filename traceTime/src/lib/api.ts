@@ -24,8 +24,8 @@ export const TAG_PRESETS = ['科研', '行政', '杂务']
 export const createTask = (name: string, estSeconds: number, tag?: string) =>
   invoke<Task>('create_task', { name, estSeconds: Math.round(estSeconds), tag: tag ?? null })
 export const pause = (reason: string) => invoke<Task>('pause', { reason })
-export const resume = () => invoke<Task>('resume')
-export const finishTask = () => invoke<Task>('finish_task')
-export const abandonTask = () => invoke<Task>('abandon_task')
+export const resume = (): Promise<Task> => invoke<Task>('resume')
+export const finishTask = (): Promise<Task> => invoke<Task>('finish_task')
+export const abandonTask = (): Promise<Task> => invoke<Task>('abandon_task')
 export const currentTask = () => invoke<Task | null>('current_task')
 export const listFinished = () => invoke<Task[]>('list_finished')
