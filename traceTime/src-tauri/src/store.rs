@@ -59,6 +59,8 @@ const MIGRATIONS: &[&str] = &[
     "ALTER TABLE tasks ADD COLUMN overdue_upgrade_cutoff_net INTEGER;",
     // v7: data-only reset of cutoffs saved by older v6 builds.
     "",
+    // v8: repeat the data-only reset for databases that ran the earlier v7.
+    "",
 ];
 
 pub fn open(path: &Path) -> rusqlite::Result<Connection> {
@@ -99,7 +101,7 @@ fn migrate(conn: &Connection) -> rusqlite::Result<()> {
                     [OVERDUE_UPGRADE_CUTOFF_KEY],
                 )?;
             }
-            if matches!(version, 6 | 7) {
+            if matches!(version, 6..=8) {
                 crate::tracker::Tracker::reset_overdue_schedule_on_upgrade(&tx).map_err(|e| {
                     rusqlite::Error::ToSqlConversionFailure(std::io::Error::other(e).into())
                 })?;
@@ -140,7 +142,7 @@ mod tests {
             conn.query_row("SELECT MAX(version) FROM schema_migrations", [], |r| r
                 .get::<_, i64>(0))
                 .unwrap(),
-            7
+            8
         );
         assert_eq!(
             conn.query_row("SELECT name FROM tasks WHERE id='existing'", [], |r| r
@@ -201,7 +203,7 @@ mod tests {
             conn.query_row("SELECT MAX(version) FROM schema_migrations", [], |r| r
                 .get::<_, i64>(0))
                 .unwrap(),
-            7
+            8
         );
     }
 
@@ -225,7 +227,7 @@ mod tests {
             conn.query_row("SELECT MAX(version) FROM schema_migrations", [], |r| r
                 .get::<_, i64>(0))
                 .unwrap(),
-            7
+            8
         );
     }
 
@@ -425,7 +427,7 @@ mod tests {
     }
 
     #[test]
-    fn v7_resets_inflated_v6_cutoff_once_after_a_clock_correction() {
+    fn v7_and_v8_reset_inflated_v6_cutoff_after_a_clock_correction() {
         let conn = legacy_overdue_db_with_long_pause();
         conn.execute_batch(MIGRATIONS[5]).unwrap();
         conn.execute_batch(
@@ -500,15 +502,73 @@ mod tests {
                 0
             ))
             .unwrap(),
-            7
+            8
         );
         conn.execute_batch(
             "CREATE TRIGGER reject_cutoff_rewrite BEFORE UPDATE OF overdue_upgrade_cutoff_net ON tasks
-             BEGIN SELECT RAISE(ABORT, 'v7 reapplied'); END;",
+             BEGIN SELECT RAISE(ABORT, 'schedule migration reapplied'); END;",
         ).unwrap();
         migrate(&conn).unwrap();
 
         let tr = crate::tracker::Tracker::new(conn);
+        set_live_work_seconds(&tr, 590);
+        assert_no_reminders(&tr);
+        set_live_work_seconds(&tr, 600);
+        assert_next_overdue_repeats_once(&tr, 1205);
+    }
+
+    #[test]
+    fn v8_resets_a_schedule_saved_by_the_earlier_v7_build() {
+        let conn = legacy_overdue_db_with_long_pause();
+        conn.execute_batch(MIGRATIONS[5]).unwrap();
+        conn.execute_batch(
+            "INSERT INTO schema_migrations VALUES (6), (7);
+             INSERT INTO settings (key, value)
+                 VALUES ('reminder_overdue_upgrade_cutoff', '2026-01-11T00:00:00Z');
+             UPDATE tasks SET overdue_upgrade_cutoff_net = 777660,
+                 overdue_interval_changed_at_net = 432000 WHERE id = 'old';
+             INSERT INTO tasks (id, name, est_seconds, status, created_at,
+                                overdue_upgrade_cutoff_net)
+                 VALUES ('done', 'done', 60, 'done', '2026-01-01T00:00:00Z', 777660);",
+        )
+        .unwrap();
+        let snapshot = || {
+            conn.query_row(
+                "SELECT (SELECT MAX(version) FROM schema_migrations),
+                        (SELECT overdue_upgrade_cutoff_net FROM tasks WHERE id='old'),
+                        (SELECT overdue_upgrade_cutoff_net FROM tasks WHERE id='done'),
+                        (SELECT fired_at FROM reminder_fired WHERE task_id='old' AND node='overdue:1')",
+                [],
+                |row| Ok((row.get::<_, i64>(0)?, row.get::<_, i64>(1)?, row.get::<_, i64>(2)?, row.get::<_, String>(3)?)),
+            ).unwrap()
+        };
+        let before = snapshot();
+        conn.execute_batch(
+            "CREATE TRIGGER reject_v8 BEFORE INSERT ON schema_migrations WHEN NEW.version = 8
+             BEGIN SELECT RAISE(ABORT, 'injected v8 failure'); END;",
+        )
+        .unwrap();
+        assert!(
+            migrate(&conn)
+                .unwrap_err()
+                .to_string()
+                .contains("injected v8 failure")
+        );
+        assert_eq!(snapshot(), before);
+        conn.execute_batch("DROP TRIGGER reject_v8;").unwrap();
+
+        migrate(&conn).unwrap();
+        assert_eq!(snapshot(), (8, 665, before.2, before.3));
+        conn.execute_batch(
+            "CREATE TRIGGER reject_v8_reapply BEFORE UPDATE OF overdue_upgrade_cutoff_net ON tasks
+             BEGIN SELECT RAISE(ABORT, 'v8 reapplied'); END;",
+        )
+        .unwrap();
+        migrate(&conn).unwrap();
+
+        let tr = crate::tracker::Tracker::new(conn);
+        assert_eq!(saved_upgrade_cutoff(&tr), 665);
+        tr.resume("old").unwrap();
         set_live_work_seconds(&tr, 590);
         assert_no_reminders(&tr);
         set_live_work_seconds(&tr, 600);
