@@ -2,6 +2,7 @@
   import { createEventDispatcher, onDestroy } from 'svelte'
   import type { Task } from '../lib/api'
   import { pause, resume, finishTask, abandonTask, PAUSE_REASONS } from '../lib/api'
+  import { pausedChipLayout } from '../lib/pausedChips'
   import { fmtHMS } from '../lib/format'
   import SwitchTaskForm from './SwitchTaskForm.svelte'
 
@@ -17,6 +18,9 @@
   let busy = false
   let switchParentId: string | null = null
   let confirmationTaskId = task.id
+  let widgetHeight = 0 // Conservative one-row layout until clientHeight is measured.
+
+  $: chips = pausedChipLayout(paused.filter(item => item.id !== task.id), widgetHeight, Boolean(error))
 
   $: remaining = task.est_seconds - task.net_seconds
   $: pct = Math.min(100, Math.round((task.net_seconds / task.est_seconds) * 100))
@@ -93,7 +97,7 @@
   onDestroy(() => dispatch('switching', false))
 </script>
 
-<div class="widget" class:overdue>
+<div class="widget" class:overdue bind:clientHeight={widgetHeight}>
   <div class="head">
     <span class="name">{task.name}</span>
     <span class="tag">{task.tag ?? ''}</span>
@@ -135,11 +139,14 @@
         <button disabled={busy} title="放弃" on:click={doAbandon}>{confirmAbandon ? '确认放弃?' : '✕'}</button>
       </span>
     </div>
-    {#if paused.length > 1}
+    {#if chips.rows > 0}
       <div class="chips" aria-label="其他暂停任务">
-        {#each paused.filter(item => item.id !== task.id) as item (item.id)}
+        {#each chips.visible as item (item.id)}
           <span class="chip" title={`${item.name} · 已暂停 ${fmtHMS(pausedFor(item))}`}>{item.name} · 已暂停 {fmtHMS(pausedFor(item))}</span>
         {/each}
+        {#if chips.hiddenCount > 0}
+          <span class="chip collapsed" title={chips.allNames} aria-label={`另有 ${chips.hiddenCount} 个暂停任务；全部任务：${chips.allNames}`}>+{chips.hiddenCount}</span>
+        {/if}
       </div>
     {/if}
   {/if}
@@ -164,7 +171,8 @@
   .pause-menu button { width: 100%; min-width: 0; height: 20px; font-size: 10px; padding: 1px 2px; cursor: pointer; }
   .pause-menu button.cancel { opacity: 0.6; }
   .actions button:disabled, .pause-menu button:disabled { cursor: default; opacity: 0.45; }
-  .chips { display: flex; gap: 4px; height: 18px; margin-top: 4px; overflow: hidden; }
-  .chip { flex: 1; min-width: 0; padding: 2px 4px; line-height: 14px; border-radius: 999px; background: rgba(255, 255, 255, 0.1); font-size: 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .chips { display: flex; flex-wrap: wrap; gap: 4px; max-height: 48px; margin-top: 4px; overflow: hidden; }
+  .chip { flex: 0 0 calc(50% - 2px); min-width: 0; height: 18px; padding: 2px 4px; line-height: 14px; border-radius: 999px; background: rgba(255, 255, 255, 0.1); font-size: 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .collapsed { text-align: center; font-weight: 600; }
   .error { height: 12px; line-height: 12px; margin: 2px 0 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: #c0392b; font-size: 10px; }
 </style>

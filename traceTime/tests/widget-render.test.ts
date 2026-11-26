@@ -61,3 +61,14 @@ test('zero-duration rollback pause is not painted as a positive-width interval o
   assert.doesNotMatch(body, /title="pause:/)
   assert.match(body, /left: 0%; width: 100%/)
 })
+
+test('paused chips expose omitted tasks through a visible +N marker with all names in its title', () => {
+  const others = Array.from({ length: 5 }, (_, i) => ({ ...parent, id: `other-${i}`, name: `Other${i + 1}` }))
+  const { body } = render(WidgetRunning, { props: { task, paused: [task, ...others], nowTick } })
+  // SSR has no measured clientHeight yet: one full row = one task plus the marker.
+  assert.match(body, />\+4<\/span>/)
+  assert.match(body, /title="Other1\nOther2\nOther3\nOther4\nOther5"/)
+  assert.match(body, /Other1 · 已暂停 01:00:00/)
+  assert.doesNotMatch(body, /Other[2-5] · 已暂停/)
+  assert.doesNotMatch(body, /title="Current\n/)
+})
