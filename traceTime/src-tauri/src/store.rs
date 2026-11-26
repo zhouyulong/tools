@@ -97,9 +97,9 @@ fn migrate(conn: &Connection) -> rusqlite::Result<()> {
                      ON CONFLICT(key) DO UPDATE SET value=excluded.value",
                     [OVERDUE_UPGRADE_CUTOFF_KEY],
                 )?;
-                crate::tracker::Tracker::snapshot_overdue_upgrade(&tx, current == 5).map_err(
-                    |e| rusqlite::Error::ToSqlConversionFailure(std::io::Error::other(e).into()),
-                )?;
+                crate::tracker::Tracker::snapshot_overdue_upgrade(&tx).map_err(|e| {
+                    rusqlite::Error::ToSqlConversionFailure(std::io::Error::other(e).into())
+                })?;
             }
             tx.execute(
                 "INSERT INTO schema_migrations (version) VALUES (?1)",
@@ -239,10 +239,15 @@ mod tests {
              INSERT INTO segments (task_id, started_at, ended_at, kind)
                  SELECT id, created_at, strftime('%Y-%m-%dT%H:%M:%fZ', 'now', '-410 seconds'), 'work' FROM tasks;
              INSERT INTO events (task_id, at, kind)
+                 SELECT task_id, started_at, 'started' FROM segments;
+             INSERT INTO events (task_id, at, kind)
+                 SELECT task_id, ended_at, 'paused' FROM segments;
+             INSERT INTO events (task_id, at, kind)
                  VALUES ('old', strftime('%Y-%m-%dT%H:%M:%fZ', 'now', '-95 seconds'), 'resumed');
              INSERT INTO reminder_fired (task_id, node, fired_at)
-                 SELECT 'old', column1, strftime('%Y-%m-%dT%H:%M:%fZ', 'now', '-60 seconds')
-                 FROM (VALUES ('warn'), ('near'), ('due'), ('overdue:1'));",
+                 SELECT 'old', column1, strftime('%Y-%m-%dT%H:%M:%fZ', at, '+35 seconds')
+                 FROM events CROSS JOIN (VALUES ('warn'), ('near'), ('due'), ('overdue:1'))
+                 WHERE kind = 'resumed';",
         )
         .unwrap();
         conn
@@ -252,54 +257,15 @@ mod tests {
     fn upgrade_skips_legacy_overdue_milestones_but_fires_a_new_one() {
         let tr = crate::tracker::Tracker::new(initialize_connection(legacy_overdue_db()).unwrap());
         // Net time at upgrade is 630s closed + ~95s live. The 660s boundary is old.
-        let first = tr.check_reminders("old").unwrap();
-        assert!(first.net_seconds > 660 && first.net_seconds < 1260);
-        assert!(first.reminders.is_empty(), "replayed {:?}", first.reminders);
-        assert!(
-            tr.task_detail("old")
-                .unwrap()
-                .events
-                .iter()
-                .all(|e| e.kind != "reminder_fired")
-        );
+        assert_legacy_milestone_still_suppressed(&tr);
+        let cutoff = saved_upgrade_cutoff(&tr);
 
-        // Simulate 600 more net seconds without sleeping. The saved net cutoff is
-        // unaffected by the wall-clock fixture, and reopening must not reset it.
-        {
-            let conn = tr.conn.lock().unwrap();
-            conn.execute_batch(
-                "UPDATE tasks SET created_at = strftime('%Y-%m-%dT%H:%M:%fZ', created_at, '-600 seconds');
-                 UPDATE segments SET started_at = strftime('%Y-%m-%dT%H:%M:%fZ', started_at, '-600 seconds'),
-                     ended_at = strftime('%Y-%m-%dT%H:%M:%fZ', ended_at, '-600 seconds');
-                 UPDATE events SET at = strftime('%Y-%m-%dT%H:%M:%fZ', at, '-600 seconds');
-                 UPDATE reminder_fired SET fired_at = strftime('%Y-%m-%dT%H:%M:%fZ', fired_at, '-600 seconds');",
-            )
-            .unwrap();
-            migrate(&conn).unwrap();
-        }
-        let later = tr.check_reminders("old").unwrap();
-        assert_eq!(
-            later
-                .reminders
-                .iter()
-                .map(|r| r.node.as_str())
-                .collect::<Vec<_>>(),
-            ["overdue:at:1200"]
-        );
-        assert!(tr.check_reminders("old").unwrap().reminders.is_empty());
-        let detail = tr.task_detail("old").unwrap();
-        let events: Vec<_> = detail
-            .events
-            .iter()
-            .filter(|e| e.kind == "reminder_fired")
-            .map(|e| {
-                serde_json::from_str::<serde_json::Value>(e.detail.as_deref().unwrap()).unwrap()
-            })
-            .collect();
-        assert_eq!(
-            events,
-            [serde_json::json!({"node": "overdue:at:1200", "level": "overdue"})]
-        );
+        // Simulate 600 more net seconds without sleeping. Reopening must not
+        // reconstruct a later cutoff from the updated history.
+        set_live_work_seconds(&tr, 695);
+        migrate(&tr.conn.lock().unwrap()).unwrap();
+        assert_eq!(saved_upgrade_cutoff(&tr), cutoff);
+        assert_next_overdue_repeats_once(&tr);
     }
 
     fn simulate_rollback_pause_and_resume(conn: &Connection) {
@@ -332,7 +298,7 @@ mod tests {
 
     fn assert_legacy_milestone_still_suppressed(tr: &crate::tracker::Tracker) {
         let checked = tr.check_reminders("old").unwrap();
-        assert!(checked.net_seconds > 660 && checked.net_seconds < 1260);
+        assert!((660..1260).contains(&checked.net_seconds));
         assert!(
             checked.reminders.is_empty(),
             "replayed {:?}",
@@ -345,6 +311,106 @@ mod tests {
                 .iter()
                 .all(|e| e.kind != "reminder_fired")
         );
+    }
+
+    fn saved_upgrade_cutoff(tr: &crate::tracker::Tracker) -> i64 {
+        tr.conn
+            .lock()
+            .unwrap()
+            .query_row(
+                "SELECT overdue_upgrade_cutoff_net FROM tasks WHERE id='old'",
+                [],
+                |row| row.get(0),
+            )
+            .unwrap()
+    }
+
+    fn set_live_work_seconds(tr: &crate::tracker::Tracker, seconds: i64) {
+        tr.conn
+            .lock()
+            .unwrap()
+            .execute(
+                "UPDATE events SET at = strftime('%Y-%m-%dT%H:%M:%fZ', 'now', ?1)
+             WHERE id = (SELECT MAX(id) FROM events WHERE task_id='old' AND kind='resumed')",
+                [format!("-{seconds} seconds")],
+            )
+            .unwrap();
+    }
+
+    fn assert_next_overdue_repeats_once(tr: &crate::tracker::Tracker) {
+        let next = tr.check_reminders("old").unwrap();
+        assert_eq!(
+            next.reminders
+                .iter()
+                .map(|r| r.node.as_str())
+                .collect::<Vec<_>>(),
+            ["overdue:at:1200"]
+        );
+        assert!(tr.check_reminders("old").unwrap().reminders.is_empty());
+        let detail = tr.task_detail("old").unwrap();
+        let events = detail
+            .events
+            .iter()
+            .filter(|e| e.kind == "reminder_fired")
+            .map(|e| {
+                serde_json::from_str::<serde_json::Value>(e.detail.as_deref().unwrap()).unwrap()
+            })
+            .collect::<Vec<_>>();
+        assert_eq!(
+            events,
+            [serde_json::json!({"node": "overdue:at:1200", "level": "overdue"})]
+        );
+    }
+
+    #[test]
+    fn direct_v3_upgrade_uses_legacy_fire_before_a_rolled_back_pause() {
+        let conn = legacy_overdue_db();
+        // The fire saw 630 closed + 35 live. Rollback closes that live segment
+        // at only five seconds, leaving the task paused at 635 on upgrade.
+        conn.execute_batch(
+            "INSERT INTO segments (task_id, started_at, ended_at, kind)
+                 SELECT task_id, at, strftime('%Y-%m-%dT%H:%M:%fZ', at, '+5 seconds'), 'work'
+                 FROM events WHERE kind = 'resumed';
+             INSERT INTO events (task_id, at, kind)
+                 SELECT task_id, ended_at, 'paused' FROM segments ORDER BY id DESC LIMIT 1;
+             UPDATE tasks SET status = 'paused' WHERE id = 'old';",
+        )
+        .unwrap();
+        let tr = crate::tracker::Tracker::new(initialize_connection(conn).unwrap());
+        assert_eq!(tr.current().unwrap().unwrap().net_seconds, 635);
+        tr.resume("old").unwrap();
+        set_live_work_seconds(&tr, 25);
+        assert_legacy_milestone_still_suppressed(&tr);
+        assert_eq!(saved_upgrade_cutoff(&tr), 665);
+        set_live_work_seconds(&tr, 625);
+        assert_next_overdue_repeats_once(&tr);
+    }
+
+    #[test]
+    fn v5_backfill_does_not_count_a_long_ordinary_pause_as_work() {
+        let conn = legacy_overdue_db();
+        for sql in &MIGRATIONS[3..5] {
+            conn.execute_batch(sql).unwrap();
+        }
+        // Ten minutes of work, nine days paused, one minute of live work at the
+        // legacy fire and v5 cutover. Mix offsets to exercise instant comparison.
+        conn.execute_batch(
+            "INSERT INTO schema_migrations VALUES (4), (5);
+             UPDATE tasks SET created_at = '2026-01-01T00:00:00Z',
+                 overdue_schedule_started_at = '2026-01-10T00:01:00Z';
+             UPDATE segments SET started_at = '2026-01-01T00:00:00Z', ended_at = '2026-01-01T01:10:00+01:00';
+             UPDATE events SET at = CASE kind
+                 WHEN 'started' THEN '2026-01-01T00:00:00Z'
+                 WHEN 'paused' THEN '2026-01-01T01:10:00+01:00'
+                 WHEN 'resumed' THEN '2026-01-10T02:00:00+02:00' END;
+             UPDATE reminder_fired SET fired_at = '2026-01-09T19:01:00-05:00';",
+        ).unwrap();
+        let tr = crate::tracker::Tracker::new(initialize_connection(conn).unwrap());
+        set_live_work_seconds(&tr, 650);
+        assert_legacy_milestone_still_suppressed(&tr);
+        set_live_work_seconds(&tr, 660);
+        assert_next_overdue_repeats_once(&tr);
+        assert_eq!(saved_upgrade_cutoff(&tr), 660);
     }
 
     #[test]
@@ -383,6 +449,7 @@ mod tests {
         simulate_rollback_pause_and_resume(&conn);
         let tr = crate::tracker::Tracker::new(initialize_connection(conn).unwrap());
         assert!(tr.current().unwrap().unwrap().net_seconds < 660);
+        assert_eq!(saved_upgrade_cutoff(&tr), 665);
         advance_resumed_task(&tr.conn.lock().unwrap());
         assert_legacy_milestone_still_suppressed(&tr);
         assert!(
