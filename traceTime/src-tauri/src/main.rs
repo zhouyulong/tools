@@ -53,8 +53,16 @@ fn main() {
                 eprintln!("cannot restore widget position: {error}");
             }
             let background_mode = tracker.background_mode().unwrap_or(BackgroundMode::Glass);
+            let background_opacity = tracker
+                .background_opacity()
+                .unwrap_or(crate::tracker::DEFAULT_BACKGROUND_OPACITY);
             app.manage(tracker);
-            background::initialize_widget_background(app, &window, background_mode);
+            background::initialize_widget_background(
+                app,
+                &window,
+                background_mode,
+                background_opacity,
+            );
 
             let app_handle = app.handle().clone();
             app.manage(position::PositionWriter::start(move |x, y| {

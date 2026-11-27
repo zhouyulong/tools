@@ -69,7 +69,7 @@
       settingsReadFailed = false
       saved = true
       try {
-        backgroundResult = await applyBackgroundMode(normalized.values.background_mode)
+        backgroundResult = await applyBackgroundMode(normalized.values.background_mode, Number(normalized.values.background_opacity))
       } catch (error) {
         errors = [`设置已保存，但未能应用背景：${String(error)}`]
       }
@@ -121,6 +121,30 @@
       {#if backgroundResult?.requested === 'glass' && backgroundResult.effective === 'translucent'}
         <p class="settings-note" role="status">当前实际：半透明纯色</p>
       {/if}
+      <label class="opacity-row">
+        <span>半透明底色不透明度</span>
+        <span class="opacity-controls">
+          <input
+            aria-label="半透明底色不透明度"
+            type="range"
+            min="40"
+            max="90"
+            step="1"
+            disabled={saving}
+            value={values.background_opacity}
+            on:input={(event) => edit('background_opacity', event.currentTarget.value)}
+          />
+          <output>{values.background_opacity}%</output>
+        </span>
+      </label>
+      <div class="opacity-presets" aria-label="透明度快捷值">
+        {#each [40, 65, 78, 90] as preset}
+          <button type="button" disabled={saving} on:click={() => edit('background_opacity', String(preset))}>
+            {preset}%
+          </button>
+        {/each}
+      </div>
+      <p class="settings-note">用于半透明纯色；毛玻璃降级为半透明时也生效。</p>
     </section>
 
     <section>
@@ -224,6 +248,12 @@
   .choice-group { display: grid; gap: 3px; }
   .choice-row { display: flex; align-items: center; gap: 7px; cursor: pointer; }
   .choice-row input { width: 14px; height: 14px; margin: 0; }
+  .opacity-row { display: grid; gap: 5px; margin-top: 8px; }
+  .opacity-controls { display: flex; align-items: center; gap: 8px; }
+  .opacity-controls input { flex: 1; min-width: 0; }
+  .opacity-controls output { min-width: 34px; text-align: right; font-variant-numeric: tabular-nums; }
+  .opacity-presets { display: flex; gap: 4px; }
+  .opacity-presets button { flex: 1; min-width: 0; height: 20px; padding: 0 2px; font-size: 10px; cursor: pointer; }
   .state { color: #aaaeb5; }
   .settings-note { margin: 6px 0 0; font-size: 12px; color: #b9bbc2; }
   .warning { margin-bottom: 8px; color: #f3c272; }

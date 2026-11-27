@@ -10,6 +10,8 @@ use std::sync::Mutex;
 
 const PAUSE_REASONS: [&str; 4] = ["rest", "disturbance", "switch", "other"];
 pub const BACKGROUND_MODE_KEY: &str = "background_mode";
+pub const BACKGROUND_OPACITY_KEY: &str = "background_opacity";
+pub const DEFAULT_BACKGROUND_OPACITY: u8 = 78;
 const WIDGET_POSITION_X_KEY: &str = "widget_position_x";
 const WIDGET_POSITION_Y_KEY: &str = "widget_position_y";
 const TASK_COLUMNS: &str = "id, name, est_seconds, status, tag, COALESCE(net_seconds, 0) AS net_seconds, created_at, finished_at, reminder_muted";
@@ -66,6 +68,18 @@ impl BackgroundMode {
             "opaque" => Ok(Self::Opaque),
             _ => Err("background mode must be glass, translucent, or opaque".into()),
         }
+    }
+}
+
+pub fn parse_background_opacity(value: &str) -> Result<u8, String> {
+    let opacity = value
+        .trim()
+        .parse::<u8>()
+        .map_err(|_| "background opacity must be 40-90".to_string())?;
+    if (40..=90).contains(&opacity) {
+        Ok(opacity)
+    } else {
+        Err("background opacity must be 40-90".into())
     }
 }
 
@@ -774,6 +788,13 @@ impl Tracker {
         }
     }
 
+    pub fn background_opacity(&self) -> Result<u8, String> {
+        match self.get_setting(BACKGROUND_OPACITY_KEY)? {
+            Some(value) => parse_background_opacity(&value),
+            None => Ok(DEFAULT_BACKGROUND_OPACITY),
+        }
+    }
+
     pub fn get_setting(&self, key: &str) -> Result<Option<String>, String> {
         let conn = self.conn.lock().map_err(|_| "lock poisoned")?;
         Self::get_setting_from_conn(&conn, key)
@@ -792,6 +813,9 @@ impl Tracker {
         }
         if let Some(value) = values.get(BACKGROUND_MODE_KEY) {
             BackgroundMode::parse(value)?;
+        }
+        if let Some(value) = values.get(BACKGROUND_OPACITY_KEY) {
+            parse_background_opacity(value)?;
         }
         let mut conn = self.conn.lock().map_err(|_| "lock poisoned")?;
         let tx = conn.transaction().map_err(|e| e.to_string())?;
@@ -1572,7 +1596,7 @@ mod tests {
         let running = tr.current().unwrap().unwrap();
         // 第二段至少 1 秒；暂停的 1.2 秒不得计入
         assert!(
-            running.net_seconds >= still_paused.net_seconds + 1,
+            running.net_seconds > still_paused.net_seconds,
             "net {}",
             running.net_seconds
         );
@@ -1931,6 +1955,32 @@ mod tests {
             tr.set_setting(BACKGROUND_MODE_KEY, value).unwrap();
             assert_eq!(tr.background_mode().unwrap(), mode);
         }
+    }
+
+    #[test]
+    fn background_opacity_defaults_and_accepts_the_configurable_range() {
+        let tr = t();
+        assert_eq!(tr.background_opacity().unwrap(), 78);
+        for value in [40, 65, 78, 90] {
+            tr.set_setting(BACKGROUND_OPACITY_KEY, &value.to_string())
+                .unwrap();
+            assert_eq!(tr.background_opacity().unwrap(), value);
+        }
+    }
+
+    #[test]
+    fn invalid_background_opacity_rejects_the_settings_batch() {
+        let tr = t();
+        tr.set_setting("reminder_warn_percent", "80").unwrap();
+        let err = tr
+            .set_settings(&[(BACKGROUND_OPACITY_KEY.to_string(), "39".to_string())].into())
+            .unwrap_err();
+        assert_eq!(err, "background opacity must be 40-90");
+        assert_eq!(tr.get_setting(BACKGROUND_OPACITY_KEY).unwrap(), None);
+        assert_eq!(
+            tr.get_setting("reminder_warn_percent").unwrap(),
+            Some("80".into())
+        );
     }
 
     #[test]

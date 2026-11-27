@@ -1,6 +1,7 @@
 <script lang="ts">
   import { onDestroy, onMount } from 'svelte'
   import { listen } from '@tauri-apps/api/event'
+  import { getCurrentWindow } from '@tauri-apps/api/window'
   import {
     checkReminders,
     currentTask,
@@ -18,12 +19,13 @@
   import { createReminderPulseQueue, playReminderChime, type ReminderPulse } from '../lib/reminder'
   import { createIdleFadeController } from '../lib/idleFade'
   import { createWidgetHeightObserver } from '../lib/widgetHeight'
-  import { backgroundClass, type BackgroundMode } from '../lib/settings'
+  import { backgroundClass, DEFAULT_BACKGROUND_OPACITY, type BackgroundMode } from '../lib/settings'
+  import { shouldStartWidgetDrag } from '../lib/widget-drag'
   import LongPauseBanner from './LongPauseBanner.svelte'
   import TaskForm from './TaskForm.svelte'
   import WidgetRunning from './WidgetRunning.svelte'
 
-  let main: HTMLElement
+  let shell: HTMLElement
   let task: Task | null = null
   let paused: Task[] = []
   let thresholdHours = 2
@@ -39,6 +41,7 @@
   let reminderTaskId: string | null = null
   let processedReminderKeys = new Set<string>()
   let effectiveBackground: BackgroundMode = 'translucent'
+  let backgroundOpacity = DEFAULT_BACKGROUND_OPACITY
   let stopBackgroundListener: (() => void) | undefined
   let destroyed = false
 
@@ -89,9 +92,17 @@
     if (pausedResult.status === 'fulfilled') paused = pausedResult.value
   }
 
+  function handleDragPress(event: MouseEvent) {
+    if (!shouldStartWidgetDrag(event)) return
+    event.preventDefault()
+    void getCurrentWindow().startDragging().catch(() => {})
+  }
+
   async function loadBackgroundMode() {
     try {
-      effectiveBackground = (await getWidgetBackgroundMode()).effective
+      const result = await getWidgetBackgroundMode()
+      effectiveBackground = result.effective
+      backgroundOpacity = result.backgroundOpacity
     } catch {
       // Keep the last known result (or the safe startup CSS fallback).
     }
@@ -124,6 +135,7 @@
   onMount(() => {
     void listen<BackgroundModeResult>('background-mode-changed', event => {
       effectiveBackground = event.payload.effective
+      backgroundOpacity = event.payload.backgroundOpacity
     }).then(unlisten => {
       if (destroyed) unlisten()
       else stopBackgroundListener = unlisten
@@ -133,8 +145,8 @@
     void loadLongPauseHours()
     void refreshAll()
     interval = setInterval(refreshAll, 1000)
-    idleFade.bind(main)
-    const observer = createWidgetHeightObserver(main, async height => {
+    idleFade.bind(shell)
+    const observer = createWidgetHeightObserver(shell, async height => {
       widgetHeight = height
       await setWidgetHeight(height)
     })
@@ -153,8 +165,14 @@
   })
 </script>
 
-<main class={`widget-shell ${backgroundClass(effectiveBackground)}`} bind:this={main}>
-  <div class="drag-region" data-tauri-drag-region aria-hidden="true"></div>
+<div
+    class={`widget-shell ${backgroundClass(effectiveBackground)}`}
+    style={`--background-alpha: ${backgroundOpacity / 100}`}
+    role="presentation"
+    bind:this={shell}
+    on:mousedown={handleDragPress}
+  >
+  <div class="drag-region" aria-hidden="true"></div>
   {#if task?.status === 'paused' && !switchingTask}
     {#key task.id}
       <LongPauseBanner {task} {thresholdHours} {nowTick} {refreshAll} getCurrentTask={() => task} />
@@ -177,13 +195,13 @@
   {:else}
     <TaskForm {refreshAll} />
   {/if}
-</main>
+</div>
 
 <style>
-  main { display: flex; flex-direction: column; width: 100%; height: auto; min-height: 140px; overflow: hidden; color: #f0f0f0; }
+  .widget-shell { display: flex; flex-direction: column; width: 100%; height: auto; min-height: 140px; overflow: hidden; color: #f0f0f0; }
   .drag-region { flex: none; width: 100%; height: 8px; cursor: grab; user-select: none; }
   .drag-region:active { cursor: grabbing; }
   .background-glass { background: rgba(24, 24, 28, 0.52); }
-  .background-translucent { background: rgba(24, 24, 28, 0.78); }
+  .background-translucent { background: rgba(24, 24, 28, var(--background-alpha, 0.78)); }
   .background-opaque { background: #18181c; }
 </style>

@@ -4,6 +4,7 @@ export type BackgroundMode = 'glass' | 'translucent' | 'opaque'
 export interface BackgroundModeResult {
   requested: BackgroundMode
   effective: BackgroundMode
+  backgroundOpacity: number
 }
 
 export interface Task {
@@ -102,8 +103,8 @@ export const setSetting = (key: string, value: string) =>
   invoke<void>('set_setting', { key, value })
 export const saveSettings = (values: Record<string, string>) =>
   invoke<void>('set_settings', { values })
-export const applyBackgroundMode = (mode: BackgroundMode) =>
-  invoke<BackgroundModeResult>('apply_background_mode', { mode })
+export const applyBackgroundMode = (mode: BackgroundMode, opacity: number) =>
+  invoke<BackgroundModeResult>('apply_background_mode', { mode, opacity: Number(opacity) })
 export const getWidgetBackgroundMode = () => invoke<BackgroundModeResult>('get_widget_background_mode')
 export const setWidgetIdleFade = (faded: boolean) => invoke<void>('set_widget_idle_fade', { faded })
 

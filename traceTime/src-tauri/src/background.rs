@@ -1,4 +1,6 @@
-use crate::tracker::{BackgroundMode, effective_background_mode};
+use crate::tracker::{
+    BackgroundMode, DEFAULT_BACKGROUND_OPACITY, effective_background_mode, parse_background_opacity,
+};
 use serde::Serialize;
 use std::sync::Mutex;
 use tauri::{Emitter, Manager, WebviewWindow};
@@ -6,9 +8,11 @@ use tauri::{Emitter, Manager, WebviewWindow};
 type Result<T> = std::result::Result<T, String>;
 
 #[derive(Debug, Serialize, Clone, Copy, PartialEq, Eq)]
+#[serde(rename_all = "camelCase")]
 pub struct BackgroundModeResult {
     pub requested: BackgroundMode,
     pub effective: BackgroundMode,
+    pub background_opacity: u8,
 }
 
 // Retain the exact effect so clearing it does not also try unsupported platform APIs.
@@ -88,7 +92,9 @@ impl BackgroundState {
         &mut self,
         window: &WebviewWindow,
         requested: BackgroundMode,
+        background_opacity: u8,
     ) -> Result<BackgroundModeResult> {
+        self.mode.background_opacity = background_opacity;
         if requested == BackgroundMode::Glass {
             self.mode.requested = requested;
             if self.mode.effective != BackgroundMode::Glass {
@@ -104,6 +110,7 @@ impl BackgroundState {
             self.mode = BackgroundModeResult {
                 requested,
                 effective: requested,
+                background_opacity,
             };
         }
         Ok(self.mode)
@@ -128,16 +135,18 @@ pub fn initialize_widget_background(
     app: &tauri::App,
     window: &WebviewWindow,
     requested: BackgroundMode,
+    background_opacity: u8,
 ) {
     let mut state = BackgroundState {
         mode: BackgroundModeResult {
             requested: BackgroundMode::Translucent,
             effective: BackgroundMode::Translucent,
+            background_opacity: DEFAULT_BACKGROUND_OPACITY,
         },
         native: None,
         faded: false,
     };
-    if let Err(error) = state.set_mode(window, requested) {
+    if let Err(error) = state.set_mode(window, requested, background_opacity) {
         eprintln!("cannot apply widget background: {error}");
     }
     app.manage(WidgetBackground(Mutex::new(state)));
@@ -196,9 +205,14 @@ pub fn get_widget_background_mode(app: tauri::AppHandle) -> Result<BackgroundMod
 pub async fn apply_background_mode(
     app: tauri::AppHandle,
     mode: String,
+    opacity: u8,
 ) -> Result<BackgroundModeResult> {
     let requested = BackgroundMode::parse(&mode)?;
-    update_widget_background(app, move |state, window| state.set_mode(window, requested)).await
+    let background_opacity = parse_background_opacity(&opacity.to_string())?;
+    update_widget_background(app, move |state, window| {
+        state.set_mode(window, requested, background_opacity)
+    })
+    .await
 }
 
 #[tauri::command]

@@ -56,14 +56,15 @@ test('background mode IPC returns requested and effective modes', async () => {
   const calls: unknown[] = []
   mockIPC((command, payload) => {
     calls.push([command, payload])
-    return { requested: 'glass', effective: 'translucent' }
+    return { requested: 'glass', effective: 'translucent', backgroundOpacity: 65 }
   })
 
-  assert.deepEqual(await applyBackgroundMode('glass'), {
+  assert.deepEqual(await applyBackgroundMode('glass', 65), {
     requested: 'glass',
     effective: 'translucent',
+    backgroundOpacity: 65,
   })
-  assert.deepEqual(calls, [['apply_background_mode', { mode: 'glass' }]])
+  assert.deepEqual(calls, [['apply_background_mode', { mode: 'glass', opacity: 65 }]])
 })
 
 
@@ -71,9 +72,9 @@ test('background startup reads the actual mode and forwards both idle transition
   const calls: unknown[] = []
   mockIPC((command, payload) => {
     calls.push([command, payload])
-    if (command === 'get_widget_background_mode') return { requested: 'glass', effective: 'translucent' }
+    if (command === 'get_widget_background_mode') return { requested: 'glass', effective: 'translucent', backgroundOpacity: 65 }
   })
-  assert.deepEqual(await getWidgetBackgroundMode(), { requested: 'glass', effective: 'translucent' })
+  assert.deepEqual(await getWidgetBackgroundMode(), { requested: 'glass', effective: 'translucent', backgroundOpacity: 65 })
   await setWidgetIdleFade(true)
   await setWidgetIdleFade(false)
   assert.deepEqual(calls, [

@@ -85,3 +85,30 @@ test('a failed read does not discard unrelated successful reads', async () => {
   assert.equal(values.reminder_warn_percent, '95', 'preserve the stored field on load; sort only on save')
   assert.equal(values.background_mode, 'glass')
 })
+
+test('background opacity defaults, normalizes, and rejects out-of-range values', async () => {
+  const {
+    DEFAULT_BACKGROUND_OPACITY,
+    normalizeSettings,
+  } = await import('../src/lib/settings.ts')
+
+  assert.equal(DEFAULT_BACKGROUND_OPACITY, 78)
+  const valid = normalizeSettings({ background_mode: 'translucent', background_opacity: '65' })
+  assert.equal(valid.values.background_opacity, '65')
+  assert.deepEqual(valid.errors, [])
+
+  const invalid = normalizeSettings({ background_mode: 'translucent', background_opacity: '39' })
+  assert.equal(invalid.values.background_opacity, '78')
+  assert.match(invalid.errors[0], /透明度/)
+})
+
+test('loading preserves a valid opacity and defaults only a malformed opacity', async () => {
+  const { loadStoredSettings } = await import('../src/lib/settings.ts')
+  const first = await loadStoredSettings(async key => key === 'background_opacity' ? '90' : null)
+  assert.equal(first.values.background_opacity, '90')
+  assert.equal(first.hasInvalidValues, false)
+
+  const second = await loadStoredSettings(async key => key === 'background_opacity' ? 'yes' : null)
+  assert.equal(second.values.background_opacity, '78')
+  assert.equal(second.hasInvalidValues, true)
+})

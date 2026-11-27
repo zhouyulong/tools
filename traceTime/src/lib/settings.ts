@@ -17,12 +17,16 @@ export const REMINDER_SETTING_KEYS = [
 export const BACKGROUND_MODES = ['glass', 'translucent', 'opaque'] as const
 export const DEFAULT_BACKGROUND_MODE = 'glass' as const
 export const BACKGROUND_MODE_KEY = 'background_mode' as const
+export const BACKGROUND_OPACITY_KEY = 'background_opacity' as const
+export const DEFAULT_BACKGROUND_OPACITY = 78
+export const BACKGROUND_OPACITY_MIN = 40
+export const BACKGROUND_OPACITY_MAX = 90
 
 export type ReminderSettingKey = typeof REMINDER_SETTING_KEYS[number]
 export type ReminderSettingValues = Record<ReminderSettingKey, string>
 export type BackgroundMode = typeof BACKGROUND_MODES[number]
-export type SettingKey = ReminderSettingKey | typeof BACKGROUND_MODE_KEY
-export type SettingValues = ReminderSettingValues & Record<typeof BACKGROUND_MODE_KEY, BackgroundMode>
+export type SettingKey = ReminderSettingKey | typeof BACKGROUND_MODE_KEY | typeof BACKGROUND_OPACITY_KEY
+export type SettingValues = ReminderSettingValues & Record<typeof BACKGROUND_MODE_KEY, BackgroundMode> & Record<typeof BACKGROUND_OPACITY_KEY, string>
 
 export type SettingSpec = {
   key: ReminderSettingKey
@@ -56,7 +60,11 @@ export function defaultReminderSettings(): ReminderSettingValues {
 }
 
 export function defaultSettings(): SettingValues {
-  return { ...defaultReminderSettings(), background_mode: DEFAULT_BACKGROUND_MODE }
+  return {
+    ...defaultReminderSettings(),
+    background_mode: DEFAULT_BACKGROUND_MODE,
+    background_opacity: String(DEFAULT_BACKGROUND_OPACITY),
+  }
 }
 
 export function normalizeBackgroundMode(value: unknown): BackgroundMode {
@@ -64,6 +72,15 @@ export function normalizeBackgroundMode(value: unknown): BackgroundMode {
   return BACKGROUND_MODES.includes(normalized as BackgroundMode)
     ? normalized as BackgroundMode
     : DEFAULT_BACKGROUND_MODE
+}
+
+export function normalizeBackgroundOpacity(value: unknown): number {
+  const parsed = Number(String(value ?? '').trim())
+  return Number.isInteger(parsed)
+    && parsed >= BACKGROUND_OPACITY_MIN
+    && parsed <= BACKGROUND_OPACITY_MAX
+    ? parsed
+    : DEFAULT_BACKGROUND_OPACITY
 }
 
 export function backgroundClass(mode: BackgroundMode): `background-${BackgroundMode}` {
@@ -86,7 +103,7 @@ export async function loadStoredSettings(get: (key: SettingKey) => Promise<strin
   const values = defaultSettings()
   let hasInvalidValues = false
   let readFailed = false
-  const keys = [...REMINDER_SETTING_KEYS, BACKGROUND_MODE_KEY] as const
+  const keys = [...REMINDER_SETTING_KEYS, BACKGROUND_MODE_KEY, BACKGROUND_OPACITY_KEY] as const
   const results = await Promise.allSettled(keys.map(async key => get(key)))
   keys.forEach((key, index) => {
     const result = results[index]
@@ -104,6 +121,10 @@ export async function loadStoredSettings(get: (key: SettingKey) => Promise<strin
     if (key === BACKGROUND_MODE_KEY) {
       const mode = normalizeBackgroundMode(value)
       if (mode === value) values[key] = mode
+      else hasInvalidValues = true
+    } else if (key === BACKGROUND_OPACITY_KEY) {
+      const opacity = normalizeBackgroundOpacity(value)
+      if (String(opacity) === value) values[key] = String(opacity)
       else hasInvalidValues = true
     } else {
       const normalized = normalizeValue(SPEC_BY_KEY.get(key)!, value, true)
@@ -150,10 +171,22 @@ export function normalizeSettings(
   const reminder = normalizeReminderSettings(input)
   const rawBackground = input.background_mode
   const background = normalizeBackgroundMode(rawBackground)
+  const rawOpacity = input.background_opacity
+  const opacity = normalizeBackgroundOpacity(rawOpacity)
   const errors = [...reminder.errors]
   if (rawBackground !== undefined && String(rawBackground).trim() !== background) {
     errors.push('背景模式必须为 glass、translucent 或 opaque')
   }
+  if (rawOpacity !== undefined && String(opacity) !== String(rawOpacity).trim()) {
+    errors.push(`背景透明度必须是 ${BACKGROUND_OPACITY_MIN}–${BACKGROUND_OPACITY_MAX} 的整数`)
+  }
   if (errors.length > 0) return { values: defaultSettings(), errors }
-  return { values: { ...reminder.values, background_mode: background }, errors }
+  return {
+    values: {
+      ...reminder.values,
+      background_mode: background,
+      background_opacity: String(opacity),
+    },
+    errors,
+  }
 }
