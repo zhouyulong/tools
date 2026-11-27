@@ -1,6 +1,6 @@
 <script lang="ts">
   import { onMount } from 'svelte'
-  import { applyBackgroundMode, getSetting, getWidgetBackgroundMode, saveSettings, type BackgroundModeResult } from '../lib/api'
+  import { applyBackgroundMode, getSetting, getWidgetBackgroundMode, saveSettings, setIdleFadeOpacity, type BackgroundModeResult } from '../lib/api'
   import {
     SETTINGS,
     defaultSettings,
@@ -72,6 +72,14 @@
         backgroundResult = await applyBackgroundMode(normalized.values.background_mode, Number(normalized.values.background_opacity))
       } catch (error) {
         errors = [`设置已保存，但未能应用背景：${String(error)}`]
+      }
+      try {
+        await setIdleFadeOpacity(Number(normalized.values.idle_fade_opacity))
+      } catch (error) {
+        const message = String(error)
+        errors = errors.length > 0
+          ? [...errors, `闲置淡化未生效：${message}`]
+          : [`设置已保存，但闲置淡化未生效：${message}`]
       }
     } catch (error) {
       errors = [`保存失败：${String(error)}`]
@@ -145,6 +153,30 @@
         {/each}
       </div>
       <p class="settings-note">用于半透明纯色；毛玻璃降级为半透明时也生效。</p>
+      <label class="opacity-row">
+        <span>闲置淡化后不透明度</span>
+        <span class="opacity-controls">
+          <input
+            aria-label="闲置淡化后不透明度"
+            type="range"
+            min="10"
+            max="90"
+            step="1"
+            disabled={saving}
+            value={values.idle_fade_opacity}
+            on:input={(event) => edit('idle_fade_opacity', event.currentTarget.value)}
+          />
+          <output>{values.idle_fade_opacity}%</output>
+        </span>
+      </label>
+      <div class="opacity-presets" aria-label="闲置淡化快捷值">
+        {#each [20, 40, 60, 80] as preset}
+          <button type="button" disabled={saving} on:click={() => edit('idle_fade_opacity', String(preset))}>
+            {preset}%
+          </button>
+        {/each}
+      </div>
+      <p class="settings-note">数值越高越清楚；默认 20%。闲置 10 秒后生效。</p>
     </section>
 
     <section>

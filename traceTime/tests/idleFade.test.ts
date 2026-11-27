@@ -208,3 +208,18 @@ test('native transition callbacks run only when faded state changes, even after 
   await new Promise(resolve => setImmediate(resolve))
   assert.deepEqual(states, [true, false])
 })
+
+
+test('live opacity updates apply immediately while faded and to later fades', () => {
+  const { controller, element, scheduler } = setup()
+  scheduler.advance(10_000)
+  assert.equal(element.style.opacity, '0.2')
+
+  controller.setFadeOpacity(0.6)
+  assert.equal(element.style.opacity, '0.6')
+
+  element.dispatch('mousemove')
+  assert.equal(element.style.opacity, '1')
+  scheduler.advance(10_000)
+  assert.equal(element.style.opacity, '0.6')
+})

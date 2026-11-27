@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import { afterEach, test } from 'node:test'
 import { clearMocks, mockIPC } from '@tauri-apps/api/mocks'
-import { applyBackgroundMode, getWidgetBackgroundMode, setWidgetIdleFade, finishTask, abandonTask, resume, deleteTask, deleteTasks, saveSettings, sendReminderNotification, setWidgetHeight } from '../src/lib/api.ts'
+import { applyBackgroundMode, getWidgetBackgroundMode, setWidgetIdleFade, finishTask, abandonTask, resume, deleteTask, deleteTasks, saveSettings, sendReminderNotification, setWidgetHeight, setIdleFadeOpacity } from '../src/lib/api.ts'
 
 globalThis.window = {} as Window & typeof globalThis
 afterEach(clearMocks)
@@ -82,4 +82,12 @@ test('background startup reads the actual mode and forwards both idle transition
     ['set_widget_idle_fade', { faded: true }],
     ['set_widget_idle_fade', { faded: false }],
   ])
+})
+
+
+test('idle fade opacity IPC forwards the configured percentage', async () => {
+  const calls: unknown[] = []
+  mockIPC((command, payload) => { calls.push([command, payload]) })
+  await setIdleFadeOpacity(60)
+  assert.deepEqual(calls, [['set_idle_fade_opacity', { opacity: 60 }]])
 })

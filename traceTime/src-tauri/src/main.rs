@@ -97,6 +97,7 @@ fn main() {
             background::apply_background_mode,
             background::get_widget_background_mode,
             background::set_widget_idle_fade,
+            background::set_idle_fade_opacity,
             commands::check_reminders,
             commands::set_reminder_muted,
             commands::send_reminder_notification,

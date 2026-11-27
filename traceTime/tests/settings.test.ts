@@ -112,3 +112,36 @@ test('loading preserves a valid opacity and defaults only a malformed opacity', 
   assert.equal(second.values.background_opacity, '78')
   assert.equal(second.hasInvalidValues, true)
 })
+
+
+test('idle fade opacity defaults, normalizes, and rejects out-of-range values', async () => {
+  const {
+    DEFAULT_IDLE_FADE_OPACITY,
+    normalizeIdleFadeOpacity,
+    normalizeSettings,
+  } = await import('../src/lib/settings.ts')
+
+  assert.equal(DEFAULT_IDLE_FADE_OPACITY, 20)
+  assert.equal(normalizeIdleFadeOpacity(undefined), 20)
+  assert.equal(normalizeIdleFadeOpacity('60'), 60)
+  assert.equal(normalizeIdleFadeOpacity('91'), 20)
+
+  const valid = normalizeSettings({ idle_fade_opacity: '80' })
+  assert.equal(valid.values.idle_fade_opacity, '80')
+  assert.deepEqual(valid.errors, [])
+
+  const invalid = normalizeSettings({ idle_fade_opacity: '91' })
+  assert.equal(invalid.values.idle_fade_opacity, '20')
+  assert.match(invalid.errors[0], /闲置不透明度/)
+})
+
+test('loading preserves a valid idle fade opacity and defaults only a malformed value', async () => {
+  const { loadStoredSettings } = await import('../src/lib/settings.ts')
+  const first = await loadStoredSettings(async key => key === 'idle_fade_opacity' ? '60' : null)
+  assert.equal(first.values.idle_fade_opacity, '60')
+  assert.equal(first.hasInvalidValues, false)
+
+  const second = await loadStoredSettings(async key => key === 'idle_fade_opacity' ? '91' : null)
+  assert.equal(second.values.idle_fade_opacity, '20')
+  assert.equal(second.hasInvalidValues, true)
+})

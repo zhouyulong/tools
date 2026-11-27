@@ -11,6 +11,7 @@ use std::sync::Mutex;
 const PAUSE_REASONS: [&str; 4] = ["rest", "disturbance", "switch", "other"];
 pub const BACKGROUND_MODE_KEY: &str = "background_mode";
 pub const BACKGROUND_OPACITY_KEY: &str = "background_opacity";
+pub const IDLE_FADE_OPACITY_KEY: &str = "idle_fade_opacity";
 pub const DEFAULT_BACKGROUND_OPACITY: u8 = 78;
 const WIDGET_POSITION_X_KEY: &str = "widget_position_x";
 const WIDGET_POSITION_Y_KEY: &str = "widget_position_y";
@@ -68,6 +69,18 @@ impl BackgroundMode {
             "opaque" => Ok(Self::Opaque),
             _ => Err("background mode must be glass, translucent, or opaque".into()),
         }
+    }
+}
+
+pub fn parse_idle_fade_opacity(value: &str) -> Result<u8, String> {
+    let opacity = value
+        .trim()
+        .parse::<u8>()
+        .map_err(|_| "idle fade opacity must be 10-90".to_string())?;
+    if (10..=90).contains(&opacity) {
+        Ok(opacity)
+    } else {
+        Err("idle fade opacity must be 10-90".into())
     }
 }
 
@@ -816,6 +829,9 @@ impl Tracker {
         }
         if let Some(value) = values.get(BACKGROUND_OPACITY_KEY) {
             parse_background_opacity(value)?;
+        }
+        if let Some(value) = values.get(IDLE_FADE_OPACITY_KEY) {
+            parse_idle_fade_opacity(value)?;
         }
         let mut conn = self.conn.lock().map_err(|_| "lock poisoned")?;
         let tx = conn.transaction().map_err(|e| e.to_string())?;
@@ -1966,6 +1982,35 @@ mod tests {
                 .unwrap();
             assert_eq!(tr.background_opacity().unwrap(), value);
         }
+    }
+
+    #[test]
+    fn idle_fade_opacity_defaults_and_accepts_the_configurable_range() {
+        let tr = t();
+        assert_eq!(tr.get_setting(IDLE_FADE_OPACITY_KEY).unwrap(), None);
+        for value in [10, 20, 40, 60, 80, 90] {
+            tr.set_setting(IDLE_FADE_OPACITY_KEY, &value.to_string())
+                .unwrap();
+            assert_eq!(
+                tr.get_setting(IDLE_FADE_OPACITY_KEY).unwrap(),
+                Some(value.to_string())
+            );
+        }
+    }
+
+    #[test]
+    fn invalid_idle_fade_opacity_rejects_the_settings_batch() {
+        let tr = t();
+        tr.set_setting("reminder_warn_percent", "80").unwrap();
+        let err = tr
+            .set_settings(&[(IDLE_FADE_OPACITY_KEY.to_string(), "91".to_string())].into())
+            .unwrap_err();
+        assert_eq!(err, "idle fade opacity must be 10-90");
+        assert_eq!(tr.get_setting(IDLE_FADE_OPACITY_KEY).unwrap(), None);
+        assert_eq!(
+            tr.get_setting("reminder_warn_percent").unwrap(),
+            Some("80".into())
+        );
     }
 
     #[test]

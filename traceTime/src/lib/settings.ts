@@ -21,12 +21,16 @@ export const BACKGROUND_OPACITY_KEY = 'background_opacity' as const
 export const DEFAULT_BACKGROUND_OPACITY = 78
 export const BACKGROUND_OPACITY_MIN = 40
 export const BACKGROUND_OPACITY_MAX = 90
+export const IDLE_FADE_OPACITY_KEY = 'idle_fade_opacity' as const
+export const DEFAULT_IDLE_FADE_OPACITY = 20
+export const IDLE_FADE_OPACITY_MIN = 10
+export const IDLE_FADE_OPACITY_MAX = 90
 
 export type ReminderSettingKey = typeof REMINDER_SETTING_KEYS[number]
 export type ReminderSettingValues = Record<ReminderSettingKey, string>
 export type BackgroundMode = typeof BACKGROUND_MODES[number]
-export type SettingKey = ReminderSettingKey | typeof BACKGROUND_MODE_KEY | typeof BACKGROUND_OPACITY_KEY
-export type SettingValues = ReminderSettingValues & Record<typeof BACKGROUND_MODE_KEY, BackgroundMode> & Record<typeof BACKGROUND_OPACITY_KEY, string>
+export type SettingKey = ReminderSettingKey | typeof BACKGROUND_MODE_KEY | typeof BACKGROUND_OPACITY_KEY | typeof IDLE_FADE_OPACITY_KEY
+export type SettingValues = ReminderSettingValues & Record<typeof BACKGROUND_MODE_KEY, BackgroundMode> & Record<typeof BACKGROUND_OPACITY_KEY, string> & Record<typeof IDLE_FADE_OPACITY_KEY, string>
 
 export type SettingSpec = {
   key: ReminderSettingKey
@@ -64,6 +68,7 @@ export function defaultSettings(): SettingValues {
     ...defaultReminderSettings(),
     background_mode: DEFAULT_BACKGROUND_MODE,
     background_opacity: String(DEFAULT_BACKGROUND_OPACITY),
+    idle_fade_opacity: String(DEFAULT_IDLE_FADE_OPACITY),
   }
 }
 
@@ -81,6 +86,15 @@ export function normalizeBackgroundOpacity(value: unknown): number {
     && parsed <= BACKGROUND_OPACITY_MAX
     ? parsed
     : DEFAULT_BACKGROUND_OPACITY
+}
+
+export function normalizeIdleFadeOpacity(value: unknown): number {
+  const parsed = Number(String(value ?? '').trim())
+  return Number.isInteger(parsed)
+    && parsed >= IDLE_FADE_OPACITY_MIN
+    && parsed <= IDLE_FADE_OPACITY_MAX
+    ? parsed
+    : DEFAULT_IDLE_FADE_OPACITY
 }
 
 export function backgroundClass(mode: BackgroundMode): `background-${BackgroundMode}` {
@@ -103,7 +117,7 @@ export async function loadStoredSettings(get: (key: SettingKey) => Promise<strin
   const values = defaultSettings()
   let hasInvalidValues = false
   let readFailed = false
-  const keys = [...REMINDER_SETTING_KEYS, BACKGROUND_MODE_KEY, BACKGROUND_OPACITY_KEY] as const
+  const keys = [...REMINDER_SETTING_KEYS, BACKGROUND_MODE_KEY, BACKGROUND_OPACITY_KEY, IDLE_FADE_OPACITY_KEY] as const
   const results = await Promise.allSettled(keys.map(async key => get(key)))
   keys.forEach((key, index) => {
     const result = results[index]
@@ -124,6 +138,10 @@ export async function loadStoredSettings(get: (key: SettingKey) => Promise<strin
       else hasInvalidValues = true
     } else if (key === BACKGROUND_OPACITY_KEY) {
       const opacity = normalizeBackgroundOpacity(value)
+      if (String(opacity) === value) values[key] = String(opacity)
+      else hasInvalidValues = true
+    } else if (key === IDLE_FADE_OPACITY_KEY) {
+      const opacity = normalizeIdleFadeOpacity(value)
       if (String(opacity) === value) values[key] = String(opacity)
       else hasInvalidValues = true
     } else {
@@ -173,6 +191,8 @@ export function normalizeSettings(
   const background = normalizeBackgroundMode(rawBackground)
   const rawOpacity = input.background_opacity
   const opacity = normalizeBackgroundOpacity(rawOpacity)
+  const rawIdleOpacity = input.idle_fade_opacity
+  const idleOpacity = normalizeIdleFadeOpacity(rawIdleOpacity)
   const errors = [...reminder.errors]
   if (rawBackground !== undefined && String(rawBackground).trim() !== background) {
     errors.push('背景模式必须为 glass、translucent 或 opaque')
@@ -180,12 +200,16 @@ export function normalizeSettings(
   if (rawOpacity !== undefined && String(opacity) !== String(rawOpacity).trim()) {
     errors.push(`背景透明度必须是 ${BACKGROUND_OPACITY_MIN}–${BACKGROUND_OPACITY_MAX} 的整数`)
   }
+  if (rawIdleOpacity !== undefined && String(idleOpacity) !== String(rawIdleOpacity).trim()) {
+    errors.push(`闲置不透明度必须是 ${IDLE_FADE_OPACITY_MIN}–${IDLE_FADE_OPACITY_MAX} 的整数`)
+  }
   if (errors.length > 0) return { values: defaultSettings(), errors }
   return {
     values: {
       ...reminder.values,
       background_mode: background,
       background_opacity: String(opacity),
+      idle_fade_opacity: String(idleOpacity),
     },
     errors,
   }

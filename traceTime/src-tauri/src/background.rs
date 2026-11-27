@@ -1,5 +1,6 @@
 use crate::tracker::{
-    BackgroundMode, DEFAULT_BACKGROUND_OPACITY, effective_background_mode, parse_background_opacity,
+    BackgroundMode, DEFAULT_BACKGROUND_OPACITY, effective_background_mode,
+    parse_background_opacity, parse_idle_fade_opacity,
 };
 use serde::Serialize;
 use std::sync::Mutex;
@@ -187,6 +188,13 @@ async fn update_widget_background<T: Send + 'static>(
     tauri::async_runtime::spawn_blocking(move || receiver.recv().map_err(|e| e.to_string())?)
         .await
         .map_err(|e| e.to_string())?
+}
+
+#[tauri::command]
+pub fn set_idle_fade_opacity(app: tauri::AppHandle, opacity: u8) -> Result<()> {
+    let opacity = parse_idle_fade_opacity(&opacity.to_string())?;
+    app.emit_to("main", "idle-fade-opacity-changed", opacity)
+        .map_err(|e| e.to_string())
 }
 
 #[tauri::command]

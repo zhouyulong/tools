@@ -18,6 +18,7 @@ export function createIdleFadeController({
   schedule = (callback, delayMs) => globalThis.setTimeout(callback, delayMs),
   cancel = handle => globalThis.clearTimeout(handle as ReturnType<typeof globalThis.setTimeout>),
 }: IdleFadeOptions = {}) {
+  let currentFadeOpacity = fadeOpacity
   let element: HTMLElement | undefined
   let timer: TimerHandle | undefined
   let destroyed = false
@@ -37,6 +38,11 @@ export function createIdleFadeController({
       .catch(() => {})
   }
 
+  const setFadeOpacity = (value: number) => {
+    currentFadeOpacity = value
+    if (faded && element) element.style.opacity = String(value)
+  }
+
   const clearTimer = () => {
     if (timer === undefined) return
     cancel(timer)
@@ -47,7 +53,7 @@ export function createIdleFadeController({
     timer = undefined
     if (!destroyed && element && !hovered) {
       setFaded(true)
-      element.style.opacity = String(fadeOpacity)
+      element.style.opacity = String(currentFadeOpacity)
     }
   }
 
@@ -108,5 +114,5 @@ export function createIdleFadeController({
     destroyed = true
   }
 
-  return { bind, reset, destroy }
+  return { bind, reset, setFadeOpacity, destroy }
 }

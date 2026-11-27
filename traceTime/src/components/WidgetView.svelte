@@ -19,7 +19,13 @@
   import { createReminderPulseQueue, playReminderChime, type ReminderPulse } from '../lib/reminder'
   import { createIdleFadeController } from '../lib/idleFade'
   import { createWidgetHeightObserver } from '../lib/widgetHeight'
-  import { backgroundClass, DEFAULT_BACKGROUND_OPACITY, type BackgroundMode } from '../lib/settings'
+  import {
+    backgroundClass,
+    DEFAULT_BACKGROUND_OPACITY,
+    DEFAULT_IDLE_FADE_OPACITY,
+    normalizeIdleFadeOpacity,
+    type BackgroundMode,
+  } from '../lib/settings'
   import { shouldStartWidgetDrag } from '../lib/widget-drag'
   import LongPauseBanner from './LongPauseBanner.svelte'
   import TaskForm from './TaskForm.svelte'
@@ -43,6 +49,7 @@
   let effectiveBackground: BackgroundMode = 'translucent'
   let backgroundOpacity = DEFAULT_BACKGROUND_OPACITY
   let stopBackgroundListener: (() => void) | undefined
+  let stopIdleFadeListener: (() => void) | undefined
   let destroyed = false
 
   function resetReminderState(nextTaskId: string | null) {
@@ -98,6 +105,15 @@
     void getCurrentWindow().startDragging().catch(() => {})
   }
 
+  async function loadIdleFadeOpacity() {
+    try {
+      const value = await getSetting('idle_fade_opacity')
+      idleFade.setFadeOpacity(normalizeIdleFadeOpacity(value) / 100)
+    } catch {
+      // Keep the current/default fade level.
+    }
+  }
+
   async function loadBackgroundMode() {
     try {
       const result = await getWidgetBackgroundMode()
@@ -142,8 +158,15 @@
     }).catch(() => {}).then(() => {
       if (!destroyed) void loadBackgroundMode()
     })
+    void loadIdleFadeOpacity()
     void loadLongPauseHours()
     void refreshAll()
+    void listen<number>('idle-fade-opacity-changed', event => {
+      idleFade.setFadeOpacity(event.payload / 100)
+    }).then(unlisten => {
+      if (destroyed) unlisten()
+      else stopIdleFadeListener = unlisten
+    }).catch(() => {})
     interval = setInterval(refreshAll, 1000)
     idleFade.bind(shell)
     const observer = createWidgetHeightObserver(shell, async height => {
@@ -159,6 +182,7 @@
   onDestroy(() => {
     destroyed = true
     stopBackgroundListener?.()
+    stopIdleFadeListener?.()
     if (interval !== undefined) clearInterval(interval)
     reminderTaskId = null
     pulses.clear()

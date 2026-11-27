@@ -107,6 +107,8 @@ export const applyBackgroundMode = (mode: BackgroundMode, opacity: number) =>
   invoke<BackgroundModeResult>('apply_background_mode', { mode, opacity: Number(opacity) })
 export const getWidgetBackgroundMode = () => invoke<BackgroundModeResult>('get_widget_background_mode')
 export const setWidgetIdleFade = (faded: boolean) => invoke<void>('set_widget_idle_fade', { faded })
+export const setIdleFadeOpacity = (opacity: number) =>
+  invoke<void>('set_idle_fade_opacity', { opacity: Number(opacity) })
 
 export const setWidgetHeight = (height: number) => invoke<void>('set_widget_height', { height })
 export const deleteTask = (taskId: string) => invoke<void>('delete_task', { taskId })
