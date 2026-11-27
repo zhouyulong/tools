@@ -28,3 +28,6 @@ skills/get-news/reports/
 
 #env files
 codex-switch-script/providers-real.json
+
+# Obsidian
+.obsidian/
